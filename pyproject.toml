@@ -1,0 +1,17 @@
+[project]
+name = "coinflip-experts"
+version = "0.0.1"
+description = "Measuring, attributing and pricing MoE expert-route flips in production inference; routediff porting bisector"
+requires-python = ">=3.10"
+dependencies = ["numpy", "pandas", "pyarrow"]
+
+[project.optional-dependencies]
+gpu = ["torch", "transformers", "accelerate"]
+analysis = ["matplotlib", "scipy"]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+include = ["coinflip*", "routetrace*", "census*", "attribution*", "routediff*", "budget*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

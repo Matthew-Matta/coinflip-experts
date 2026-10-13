@@ -1,0 +1,44 @@
+__pycache__/
+*.pyc
+.venv/
+build/
+port/build/
+*.egg-info/
+.pytest_cache/
+# large artifacts live in Kaggle Datasets / Modal Volumes, not git
+data/
+traces/
+*.parquet
+*.safetensors
+third_party/
+logs/
+
+# secrets / tokens (HF, Modal, Kaggle) - never commit
+.env
+.env.*
+.envrc
+.aws/
+kaggle.json
+access_token
+*.pem
+*.token
+.hf_token
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# notebooks
+.ipynb_checkpoints/
+
+# experiment outputs and model artifacts (keep in Kaggle Datasets / Modal Volumes)
+results/
+*.provenance.json
+*.npy
+*.npz
+*.pt
+*.pth
+*.bin
+*.log
+cmake-build-*/
