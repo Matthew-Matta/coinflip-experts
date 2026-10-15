@@ -60,13 +60,18 @@ match (on other tokens the difference is already explained by a selection op).
 ## 3. Running a backend with a bug or a patch (producer: `port/`; callers: `routediff/`, `evaluation/`)
 ```
 port/build/moe_run --export DIR --numerics numerics.json --dump OUT_DIR \
-                   [--bug bug.json] [--patch OP=path.npy ...] [--tokens a:b]
+                   [--bug bug.json] [--patch OP=path.npy ...] [--patch-ids topk_ids.npy] [--tokens a:b] [--threads N]
 ```
-- `numerics.json`: the C++ `Numerics` settings (storage / accumulator dtypes, reduction orders, FMA, collective
-  emulation n / topology / wire dtype). Unknown keys are an error.
+- `numerics.json`: `preset` (`hf_bf16` default, `hf_fp32`, `oracle`) followed by flat overrides: `storage`, `rms`,
+  `gate_out`, `softmax`, `weights`, `combine_accum` (dtypes `fp64|fp32|bf16|fp16`); `{oproj,router,expert}_{accum,order,
+  block,fma}` (orders `seq|pairwise|blocked|strided`); `topk_on` (`probs|logits`); `tiebreak` (`lower|higher`);
+  `combine_order` (`expert_asc|expert_desc|slot`); `collective_{n,topology,wire,on}` (`ring|tree`; `none|oproj|down|both`).
+  Unknown keys are an error. The resolved settings are echoed into the manifest.
 - `--patch OP=path.npy`: replace that op's output with the given array, then recompute everything downstream. A patch
-  on a post-selection op is only defined where the top-k sets match; elsewhere the patched values are ignored and the
-  manifest records how many tokens that affected.
+  on a slot-aligned op (`topk_weights` and the expert / combine ops) also needs `--patch-ids` (the patch source's
+  `topk_ids`): values are matched per expert id, and only on tokens whose top-k set equals the source's; elsewhere the
+  patch is skipped and `patch_skipped_token_ops` in the manifest counts it.
+- Bug types and the op each one first changes: `port/src/block.cpp` `bug_registry()` (13 types).
 
 **Bug spec** (`bug.json`, written by `evaluation/`, read only by `moe_run`):
 `bug_id`, `type` (from the registry in `port/`), `params`, `injected_op` (the first op in the table above whose output
@@ -79,3 +84,4 @@ output tolerance, restored true/false, tokens restored / total), `tolerances` (f
 
 ## Changelog
 - 2026-10-15: initial version.
+- 2026-10-15: `moe_run` flags finalised (`--patch-ids`, `--threads`), numerics JSON keys listed, bug registry pointer.
