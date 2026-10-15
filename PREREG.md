@@ -1,0 +1,68 @@
+# Preregistration: Coin-Flip Experts
+
+**Status:** DRAFT [CONFIRM: resolve every [CONFIRM] marker, delete the markers and this line, then commit before any census or routediff evaluation data exists. Later changes go in the dated Amendments section, never as silent edits.]
+
+This file fixes, before data collection, what is measured, how, and what result would count against each hypothesis. Anything not listed here is exploratory and will be labelled as such.
+
+## Scope
+**Core:** (1) a C++ port of one real MoE block checked against PyTorch, (2) `routediff`, a route-aware localiser validated on planted bugs and applied to real backend pairs, (3) collective emulation across chip counts with a communication cost model, (4) a SIMD path in the C++ port, (5) one SGLang prefill census.
+
+**Out of scope (declared in advance):** decode-phase routing with a KV cache; attributing SGLang flips to their source (attribution done in HF would explain HF flips, not SGLang ones, without a separate transfer check); routing replay residual; MoE vs dense divergence; FP8; real multi-GPU tensor parallelism; attention, KV cache and RoPE bugs (not implemented in the C++ block).
+
+**Stretch (only if core is complete):** Qwen3-30B-A3B on A100, SGLang deterministic mode, larger batch sizes. Stretch results follow the same definitions and statistics, are reported separately, and are never pooled with the core census.
+
+## Units and definitions
+- **Route:** the set of top-k expert ids chosen at one (sequence, position, layer).
+- **Flip:** the top-k *sets* differ between two configurations at the same (sequence, position, layer). Also reported: top-1 mismatch, and flip mass = sum of routing weights over the symmetric difference of the two sets.
+- **Normalised margin:** (logit_k - logit_(k+1)) / std(router logits at that position and layer).
+- **ULP error:** |port - reference| in units of the reference value's ULP in the stated dtype.
+
+## 1. C++ block fidelity
+- **Reference:** PyTorch (CPU) with transformers 5.12.1 and `experts_implementation="eager"` pinned (the library default, `grouped_mm`, is a different reduction path), running one OLMoE-1B-7B-0924 MoE block (router + 64 experts, top-8, no top-k renormalisation), with inputs captured from real prompts at layers [CONFIRM: 0, 7, 15].
+- **Before implementation:** the reference's exact numerics (gate output dtype, softmax dtype, top-k input, routing-weight cast, combine order) are read from the installed `transformers` source and recorded with file:line.
+- **H-port:** In fp32, the C++ block selects the same top-k set as PyTorch on every captured token whose normalised margin exceeds [CONFIRM: 1e-4], and every intermediate op (router input after `o_proj` + residual + RMSNorm, router logits, routing weights, expert outputs, combined output) is within [CONFIRM: 8] ULP at the 99th percentile. *Falsified if* either fails; the failing op is then reported, not hidden.
+
+## 2. routediff
+- **Ops compared:** router logits, gate output (after dtype cast), routing probabilities, top-k ids, routing weights, per-expert gate / up / activation / down outputs, combine terms, combined output.
+- **Two kinds of op.** *Selection ops* decide which experts run: router input, router logits, gate output (after dtype cast), routing probabilities, top-k ids. *Post-selection ops* act after the experts are chosen: routing weights, per-expert gate / up / activation / down outputs, combine terms, combined output. A bug in a post-selection op cannot change this block's routes.
+- **Localisation rule:** routediff flags the earliest op whose difference exceeds its calibrated tolerance *and* whose patching (replacing that op's output with the reference value, then recomputing downstream) restores the reference: the reference top-k set for a selection op, or the combined output to within its calibrated tolerance for a post-selection op. Effects of a post-selection bug on *later* layers' routes are only claimed with an explicit subsequent router (chained blocks, stretch).
+- **Tolerances:** calibrated per op on a calibration split of benign pairs, then frozen; evaluation uses a separate split.
+- **Benign pairs:** configurations that differ only in permitted numerics: C++ fp32 vs PyTorch fp32; fp32 sequential vs pairwise reduction; fp32 with vs without fused multiply-add.
+- **Planted bugs (at least 10 types, all in implemented ops):** bf16 router accumulator; gate output left in fp32 or cast to the wrong dtype; softmax in the model dtype instead of fp32; reversed top-k tie-break; top-k renormalisation toggled; routing weights not cast (or cast to fp16) before combine; combine accumulated in bf16; combine order reversed; fp16 expert-matmul accumulator; gate and up projections swapped; expert weights loaded under a permuted expert index.
+- **Blinding:** bugs are picked and injected by a seeded script written and run separately from the localiser; the localiser runs without access to the injection record; scoring happens afterwards.
+- **Ground truth per bug:** each bug spec names its *injected op*, the first op whose output the bug changes (for weight-loading bugs such as permuted experts or swapped gate/up, that is the first expert op that reads the affected weights).
+- **No-effect runs:** a planted bug that leaves every op within its benign tolerance on the evaluation inputs (e.g. a reversed tie-break when no exact tie occurs) is counted as *no effect*, reported separately with its count, and excluded from the detection denominator. This is decided from the injection record after scoring, never by the localiser.
+- **Real backend pairs (descriptive, no planted ground truth):** PyTorch CPU vs Apple GPU (MPS) on the same block and inputs; transformers `eager` vs `grouped_mm` experts. Reported: whether routes differ, and the op routediff localises, with the patch-forward result.
+- **H-routediff:** detection >= [CONFIRM: 90%] of planted-bug runs with an effect, correct localisation (flagged op == injected op) >= [CONFIRM: 80%] of detected runs, false positives <= [CONFIRM: 5%] of benign evaluation pairs. *Falsified if* any threshold is missed.
+
+## 3. Collective emulation (H4)
+- **Where the collectives are.** Under tensor parallelism the router weight is replicated, so the router matmul itself is not reduced across chips. Two all-reduces matter, and they are measured differently:
+  - **Router-input all-reduce (affects routes):** the row-parallel attention output projection (`o_proj`) of the same layer, summed across n chips, then the residual add and the post-attention RMSNorm, whose output is the router input. Emulated in C++ from exported `o_proj` weights, captured `o_proj` inputs, residuals and the RMSNorm weight. Metric: route flips against the fp64 oracle.
+  - **Expert down-projection all-reduce (cannot affect this block's routes):** row-parallel expert down-projection summed across n chips. Metric: combined-output error against the fp64 oracle (relative L2 and ULP), reported separately and never counted as route flips.
+- **Reduction variants:** n in {2, 4, 8, 16, 32, 64}; ring order (sequential over chips) or tree order (pairwise); wire dtype bf16 or fp32. Labelled emulation throughout.
+- **H4:** for the router-input all-reduce, (a) with bf16 on the wire in ring order, the route-flip rate vs the fp64 oracle increases with n (Spearman rho >= 0.5 over the six n values), and (b) with fp32 on the wire, the flip rate at every n stays within 2x of its n = 2 level; if the n = 2 level is zero, (b) instead requires the rate at every n to stay below the rule-of-three 95% upper bound for zero events, 3 / (number of token evaluations). *Falsified if* (a) or (b) fails.
+
+## 3b. Communication cost model (descriptive)
+For each collective configuration, an alpha-beta model gives bytes on the wire and number of sequential steps for ring and tree all-reduce at n chips (parameters stated, not fitted). Reported together with the H4 flip rates as an accuracy vs communication trade-off. It is a model, not a measurement of any interconnect.
+
+## 3c. SIMD path (descriptive)
+A NEON-vectorised dot product / matvec in the C++ port. Reported: median speedup over the scalar path across [CONFIRM: 20] timed runs on the same machine, compared with a memory-bandwidth estimate; and the route-flip rate of its lane reduction order vs the fp64 oracle and vs the scalar order. A speedup is claimed only if measured.
+
+## 4. SGLang prefill census
+- **Setup:** SGLang 0.5.21 (pinned), OLMoE-1B-7B-0924, bf16, one NVIDIA L4, TP=1, `--disable-cuda-graph`, routed experts returned by `--enable-return-routed-experts`.
+- **What is measured:** prefill routing only. Each sequence is prompt + a reference continuation, generated once and stored as token ids, sent as a single prefill with `max_new_tokens=1`, so both configurations see identical tokens. Decode is not measured.
+- **Data:** [CONFIRM: 200] prompts (equal parts GSM8K, HumanEval, ShareGPT, FLORES), seeded selection, reference continuations of [CONFIRM: 256] tokens, total length capped at 512. The token-id file's SHA-256 is committed before the census runs.
+- **Configurations:** R0 = batch size 1, run twice (noise floor). Batch sizes 1, 8 and 32, where the other sequences in a batch are drawn from the same pool with a fixed seed. Realised batch composition, SGLang version, GPU and driver are logged with every run.
+- **H1:** the excess over R0 of the per-(token, layer) flip rate between batch size 1 and 32 is greater than 0 (95% CI excludes 0). Also reported, without a threshold: the fraction of sequences with at least one flip. Flip rate against normalised margin is reported only if router scores are captured; `--enable-return-routed-experts` returns expert ids, not scores, so this analysis is optional. *Falsified if* the CI includes 0.
+- **Kill check:** if the upper bound of the 95% CI of the excess over R0 at batch size 32 is below 0.01% of (token, layer) units, the census is reported as a robustness result ("prefill routing on this setup is batch-invariant to < 0.01%, 95% upper bound"). A point estimate below 0.01% with a wider CI is reported as inconclusive, not as robustness. Sections 1-3 are unaffected.
+
+## Statistics
+- All comparisons are paired on identical units.
+- 95% confidence intervals by cluster bootstrap over sequences (census) or captured prompts (port, routediff), 10,000 resamples, fixed seed.
+- Every number in the write-up traces to a result file with a provenance record (git sha, config hash, hardware, library versions).
+
+## Not claimed
+No new determinism mechanism. No claim of being first. Related work: arXiv 2607.28097, arXiv 2608.11212, R3 (arXiv 2510.11370), Miles (arXiv 2609.08368), Fireworks AI blog (2026-09-30), Thinking Machines batch-invariant ops, SGLang deterministic inference, msprobe / Polygraphy / DeepView.
+
+## Amendments
+None yet. Each amendment is dated, says what changed and why, and states whether any data existed at the time.
