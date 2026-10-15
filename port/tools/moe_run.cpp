@@ -2,6 +2,7 @@
 //
 //   moe_run --export DIR --numerics numerics.json --dump OUT_DIR
 //           [--bug bug.json] [--patch OP=path.npy ...] [--patch-ids topk_ids.npy] [--tokens a:b] [--threads N]
+//   moe_run --list-bugs      (bug registry as JSON: type, injected_op, description)
 #include <chrono>
 #include <cstdio>
 #include <ctime>
@@ -128,6 +129,15 @@ int main(int argc, char** argv) {
         const auto eq = v.find('=');
         if (eq == std::string::npos) throw std::invalid_argument("--patch expects OP=path.npy");
         patch_args.emplace_back(v.substr(0, eq), v.substr(eq + 1));
+      } else if (a == "--list-bugs") {
+        std::cout << "[\n";
+        const auto& reg = bug_registry();
+        for (size_t k = 0; k < reg.size(); ++k)
+          std::cout << "  {\"type\": \"" << reg[k].type << "\", \"injected_op\": \"" << reg[k].injected_op
+                    << "\", \"description\": \"" << json_escape(reg[k].description) << "\"}"
+                    << (k + 1 < reg.size() ? ",\n" : "\n");
+        std::cout << "]\n";
+        return 0;
       } else if (a == "-h" || a == "--help") {
         usage();
         return 0;

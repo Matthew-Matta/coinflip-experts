@@ -77,11 +77,26 @@ port/build/moe_run --export DIR --numerics numerics.json --dump OUT_DIR \
 `bug_id`, `type` (from the registry in `port/`), `params`, `injected_op` (the first op in the table above whose output
 the bug changes), `seed`. routediff never reads bug specs or the directory they live in.
 
+`moe_run --list-bugs` prints the bug registry as JSON (`type`, `injected_op`, `description`), so the evaluator never
+copies it by hand.
+
+**Rerun command (evaluator -> routediff).** To patch-check a candidate, routediff needs to rerun it, but must not see
+how it was produced. The evaluator therefore passes an opaque command template containing `{patch}` and `{out}`, e.g.
+`port/build/moe_run --export E --numerics N --bug B --dump {out} {patch}` or a wrapper script. routediff replaces `{out}`
+with a fresh directory and `{patch}` with `--patch OP=... [--patch-ids ...]` arguments, runs it, and never opens any
+other path in the template.
+
 ## 4. routediff output (producer: `routediff/`; consumer: `evaluation/`, write-up)
 `report.json`: `reference_run`, `candidate_run`, per-op difference summary (max / p99 ULP, relative L2, tokens over
-tolerance, route-set mismatches), `first_flagged_op`, `stage`, `patch_check` (op patched, criterion used: route set or
-output tolerance, restored true/false, tokens restored / total), `tolerances` (file + sha256). Plus `report.md` for people.
+tolerance, route-set mismatches split into explained / unexplained), `flagged_ops`, `first_flagged_op`,
+`localized_op` (first patched site, or null), `sites` (all patched sites), `stage`, `patch_checks` (one per cumulative
+step: ops patched so far, criterion used, restored, routes back, output back, ops still flagged), `verdict`,
+`tolerances` (file + sha256). Plus `report.md` for people.
+
+CLI: `python -m routediff calibrate REF CAND [REF CAND ...] --out tol.json` and
+`python -m routediff compare REF CAND --out DIR [--tolerances tol.json] [--rerun 'CMD ... {patch} ... {out}']`.
 
 ## Changelog
 - 2026-10-15: initial version.
+- 2026-10-15: rerun-command contract, `--list-bugs`, report fields for cumulative patching (`sites`, `patch_checks`).
 - 2026-10-15: `moe_run` flags finalised (`--patch-ids`, `--threads`), numerics JSON keys listed, bug registry pointer.
