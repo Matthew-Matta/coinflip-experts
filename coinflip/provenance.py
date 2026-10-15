@@ -17,7 +17,7 @@ from importlib import metadata
 from pathlib import Path
 from typing import Any
 
-TRACKED_PACKAGES = ("torch", "transformers", "sglang", "sgl-kernel", "triton", "flashinfer-python", "numpy", "pandas")
+TRACKED_PACKAGES = ("torch", "transformers", "sglang", "sglang-kernel", "sgl-kernel", "triton", "flashinfer-python", "numpy", "pandas")
 
 
 def _run(cmd: list[str]) -> str | None:
