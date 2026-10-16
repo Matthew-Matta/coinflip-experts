@@ -1,0 +1,154 @@
+{
+  "hypothesis": "H-port (PREREG section 1)",
+  "thresholds": {
+    "normalised_margin": 0.0001,
+    "p99_elem_ulp": 8.0
+  },
+  "reference": {
+    "path": "data/dumps/layer7-torch-float32",
+    "manifest_sha256": "4acc4518792bece01f17d6a7b588d0e5eec48f6b9f6cf6cd7cb4f2056f749d01",
+    "numerics": {
+      "dtype": "float32",
+      "experts_implementation": "eager",
+      "mirror_equals_module": true,
+      "transformers_source_sha256": "498ab5720463327ab7235f3a3103aefa49d2f93da10c3cfb7ef7002774b05531",
+      "torch_num_threads": 8
+    }
+  },
+  "candidate": {
+    "path": "data/results/m2-postfix-validation/dumps/layer7-cpp-hf_fp32-postfix",
+    "manifest_sha256": "6ab3e3a191fe94e2f26aa69977a6f0a4f6711242637af64d1a0262c201fcdfd9",
+    "numerics": {
+      "preset": "hf_fp32",
+      "storage": "fp32",
+      "oproj": {
+        "accum": "fp32",
+        "order": "seq",
+        "block": 32,
+        "fma": true
+      },
+      "rms": "fp32",
+      "rms_order": "torch_cascade",
+      "rms_block": 4,
+      "router": {
+        "accum": "fp32",
+        "order": "seq",
+        "block": 32,
+        "fma": true
+      },
+      "gate_out": "fp32",
+      "softmax": "fp32",
+      "topk_on": "probs",
+      "tiebreak": "lower",
+      "weights": "fp32",
+      "expert": {
+        "accum": "fp32",
+        "order": "seq",
+        "block": 32,
+        "fma": true
+      },
+      "combine_accum": "fp32",
+      "combine_order": "expert_asc",
+      "collective": {
+        "n": 1,
+        "topology": "ring",
+        "wire": "fp32",
+        "on": "none"
+      }
+    },
+    "provenance": {
+      "timestamp_utc": "2026-10-16T21:10:54Z",
+      "git_sha": "267ddfb103d2ddad8a6540a523bbae0ee36780a3",
+      "git_dirty": true,
+      "compiler": "Apple LLVM 17.0.0 (clang-1700.6.4.2)",
+      "threads": 10,
+      "wall_seconds": 25.0391
+    }
+  },
+  "tokens": 1348,
+  "tokens_above_margin": 1347,
+  "route_mismatch_tokens_above_margin": 0,
+  "route_mismatch_tokens_all": 0,
+  "routes_pass": true,
+  "ops": {
+    "o_proj_out": {
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "resid_sum": {
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "router_input": {
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "router_logits": {
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "router_probs": {
+      "p99_elem_ulp": 5.0,
+      "max_elem_ulp": 10.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "topk_weights": {
+      "p99_elem_ulp": 5.0,
+      "max_elem_ulp": 9.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "expert_gate": {
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "expert_up": {
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "expert_act": {
+      "p99_elem_ulp": 2.0,
+      "max_elem_ulp": 3.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "expert_down": {
+      "p99_elem_ulp": 84.0,
+      "max_elem_ulp": 71115776.0,
+      "dtype": "fp32",
+      "pass": false
+    },
+    "combine_terms": {
+      "p99_elem_ulp": 85.0,
+      "max_elem_ulp": 46038541.0,
+      "dtype": "fp32",
+      "pass": false
+    },
+    "output": {
+      "p99_elem_ulp": 101.0,
+      "max_elem_ulp": 2621440.0,
+      "dtype": "fp32",
+      "pass": false
+    }
+  },
+  "ulp_pass": false,
+  "failing_ops": [
+    "expert_down",
+    "combine_terms",
+    "output"
+  ],
+  "verdict": "FAIL"
+}

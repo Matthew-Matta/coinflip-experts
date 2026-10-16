@@ -1,0 +1,16 @@
+{
+  "label": "POST-FIX VALIDATION (not the preregistered result; that is findings/m2-initial-layer0)",
+  "fixes": [
+    "RMSNorm variance sum in torch CPU 4-lane cascade order (Order::TorchCascade)",
+    "rsqrt as 1/sqrt with two fp32 roundings",
+    "eps rounded to fp32 before the add"
+  ],
+  "intermediate_run": "data/results/m2-postfix-run1-eps-in-double (first post-fix run, eps still added in double; kept as a record)",
+  "head_commit": "267ddfb103d2ddad8a6540a523bbae0ee36780a3",
+  "port_uncommitted_diff_sha256": "d86052973742e02fce04caa5774c8c021b60b177025cf2a4618d2105acf78bbd",
+  "moe_run_sha256": "1b24d9b560ec6257486275eba0a64e5d10bbed5c86c6a22a94f14ebe896f4e70",
+  "configs": {
+    "numerics_hf_bf16.json": "77beefca8d071bbae6ca9fa34bbc19fb8ac0a2f210c4346dd99a700cc76af8e5",
+    "numerics_hf_fp32.json": "d6d1cbca704950796ebda69ee89ed528d446cc893da72a30168c02b861ff51b4"
+  }
+}
