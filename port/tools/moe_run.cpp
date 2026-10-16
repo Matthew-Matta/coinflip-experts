@@ -3,6 +3,8 @@
 //   moe_run --export DIR --numerics numerics.json --dump OUT_DIR
 //           [--bug bug.json] [--patch OP=path.npy ...] [--patch-ids topk_ids.npy] [--tokens a:b] [--threads N]
 //   moe_run --list-bugs      (bug registry as JSON: type, injected_op, description)
+//   --ops a,b,c writes only the listed ops (manifest lists only those); default writes all 13.
+#include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <ctime>
@@ -110,7 +112,7 @@ std::vector<float> slice_rows(const std::vector<float>& v, int width, int a, int
 
 int main(int argc, char** argv) {
   try {
-    std::string export_dir, numerics_path, dump_dir, bug_path, patch_ids_path, token_range;
+    std::string export_dir, numerics_path, dump_dir, bug_path, patch_ids_path, token_range, ops_arg;
     std::vector<std::pair<std::string, std::string>> patch_args;
     int threads = 0;
     for (int i = 1; i < argc; ++i) {
@@ -126,6 +128,7 @@ int main(int argc, char** argv) {
       else if (a == "--patch-ids") patch_ids_path = next();
       else if (a == "--tokens") token_range = next();
       else if (a == "--threads") threads = std::stoi(next());
+      else if (a == "--ops") ops_arg = next();
       else if (a == "--patch") {
         const std::string v = next();
         const auto eq = v.find('=');
@@ -220,7 +223,19 @@ int main(int argc, char** argv) {
     fs::create_directories(dump_dir);
     std::ostringstream ops;
     bool first = true;
+    std::set<std::string> keep;
+    for (std::stringstream ss(ops_arg); ss.good();) {
+      std::string op;
+      std::getline(ss, op, ',');
+      if (op.empty()) continue;
+      if (std::find(op_order().begin(), op_order().end(), op) == op_order().end())
+        throw std::invalid_argument("--ops: unknown op " + op);
+      keep.insert(op);
+    }
+    size_t written = 0;
     for (const auto& op : op_order()) {
+      if (!keep.empty() && !keep.count(op)) continue;
+      ++written;
       std::vector<size_t> shape{static_cast<size_t>(T)};
       for (int d : tr.shape.at(op)) shape.push_back(static_cast<size_t>(d));
       const std::string file = op + ".npy";
@@ -259,7 +274,7 @@ int main(int argc, char** argv) {
       << json_escape(__VERSION__) << "\", \"threads\": "
       << (threads > 0 ? threads : static_cast<int>(std::thread::hardware_concurrency()))
       << ", \"wall_seconds\": " << secs << "}\n}\n";
-    std::cout << "wrote " << op_order().size() << " ops for " << T << " tokens to " << dump_dir << " in " << secs
+    std::cout << "wrote " << written << " ops for " << T << " tokens to " << dump_dir << " in " << secs
               << " s\n";
     return 0;
   } catch (const std::exception& e) {
