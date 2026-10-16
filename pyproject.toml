@@ -13,7 +13,7 @@ reference = ["torch", "transformers==5.12.1", "safetensors", "numpy", "datasets"
 modal = ["modal==1.6.1"]
 
 [tool.setuptools.packages.find]
-include = ["coinflip*", "routetrace*", "census*", "attribution*", "routediff*", "budget*", "reference*", "evaluation*"]
+include = ["coinflip*", "routetrace*", "census*", "attribution*", "routediff*", "budget*", "reference*", "evaluation*", "analysis*"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests", "reference/tests", "modal/tests"]
+testpaths = ["tests", "reference/tests", "modal/tests", "evaluation/tests", "analysis/tests"]

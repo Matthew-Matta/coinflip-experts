@@ -150,3 +150,19 @@ def test_original_flores_archive(tmp_path):
     rows, revision = flores_rows(archive_path)
     assert rows == [{'id': '1', 'sentence': 'First sentence.'}, {'id': '2', 'sentence': 'Second sentence.'}]
     assert revision.startswith('sha256:')
+
+
+def test_grouped_reference_matches_actual_module(tiny_export, tmp_path):
+    from reference.backend_pairs import dump_backend
+    manifest = dump_backend(tiny_export, tmp_path/'grouped', 'float32', 'cpu', 'grouped_mm')
+    assert manifest['numerics']['experts_implementation'] == 'grouped_mm'
+    assert manifest['numerics']['mirror_equals_module']
+    assert manifest['numerics']['grouped_dispatch'] in ('torch.nn.functional.grouped_mm', 'torch._grouped_mm', 'transformers grouped_mm fallback')
+
+
+def test_mps_fallback_is_rejected(tiny_export, monkeypatch):
+    from reference.backend_pairs import compute_backend
+    c,a=load_export(tiny_export)
+    monkeypatch.setenv('PYTORCH_ENABLE_MPS_FALLBACK','1')
+    with pytest.raises(RuntimeError,match='fallback'):
+        compute_backend(c,a,torch.float32,'mps','eager')

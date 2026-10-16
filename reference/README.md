@@ -45,3 +45,9 @@ unless its combined output equals the actual Transformers eager module bit-exact
 It does not claim C++ fidelity: the C++ comparison is a separate validation. The
 export and dump manifests record versions, source SHA-256 and runtime provenance.
 PyTorch exact-tie ordering is retained rather than replaced by a custom tie rule.
+
+## Other real backends
+
+`python -m reference.run_pairs --help` generates CPU grouped_mm and MPS eager
+variants in both dtypes. Each is validated against the actual selected module;
+MPS never silently falls back to CPU. See `analysis/README.md` for comparisons.

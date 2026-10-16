@@ -27,17 +27,17 @@ def require_version() -> None:
         raise RuntimeError(f'requires transformers=={TRANSFORMERS_VERSION}, got {transformers.__version__}')
 
 
-def make_modules(c: dict, arrays: dict, dtype: torch.dtype):
+def make_modules(c: dict, arrays: dict, dtype: torch.dtype, *, implementation='eager', device='cpu'):
     cfg = OlmoeConfig(hidden_size=c['hidden_size'], intermediate_size=c['intermediate_size'],
                       num_experts=c['num_experts'], num_experts_per_tok=c['top_k'],
                       norm_topk_prob=c['norm_topk_prob'], rms_norm_eps=c['rms_norm_eps'],
                       hidden_act='silu')
-    cfg._experts_implementation = 'eager'
+    cfg._experts_implementation = implementation
     # Allocate directly in the model dtype, avoiding a large temporary fp32 block.
     with torch.device('meta'):
         module = OlmoeSparseMoeBlock(cfg)
         norm = OlmoeRMSNorm(c['hidden_size'], eps=c['rms_norm_eps'])
-    tensor = lambda name: torch.from_numpy(arrays[name]).to(dtype=dtype)
+    tensor = lambda name: torch.from_numpy(arrays[name]).to(device=device, dtype=dtype)
     module.load_state_dict({
         'gate.weight': tensor('router'),
         'experts.gate_up_proj': tensor('gate_up_proj'),
