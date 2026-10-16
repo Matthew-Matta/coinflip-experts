@@ -63,6 +63,8 @@ Numerics load_numerics(const Json& j, std::string* preset_out) {
     if (acc(n.oproj, "oproj", k, v) || acc(n.router, "router", k, v) || acc(n.expert, "expert", k, v)) continue;
     if (k == "storage") n.storage = parse_dtype(v.as_string());
     else if (k == "rms") n.rms = parse_dtype(v.as_string());
+    else if (k == "rms_order") n.rms_order = parse_order(v.as_string());
+    else if (k == "rms_block") n.rms_block = std::stoi(v.as_string());
     else if (k == "gate_out") n.gate_out = parse_dtype(v.as_string());
     else if (k == "softmax") n.softmax = parse_dtype(v.as_string());
     else if (k == "topk_on") n.topk_on_logits = v.as_string() == "logits";
@@ -90,7 +92,7 @@ std::string numerics_json(const Numerics& n, const std::string& preset) {
   const char* on[] = {"none", "oproj", "down", "both"};
   std::ostringstream s;
   s << "{\"preset\": \"" << preset << "\", \"storage\": \"" << to_string(n.storage) << "\", \"oproj\": " << describe(n.oproj)
-    << ", \"rms\": \"" << to_string(n.rms) << "\", \"router\": " << describe(n.router) << ", \"gate_out\": \""
+    << ", \"rms\": \"" << to_string(n.rms) << "\", \"rms_order\": \"" << to_string(n.rms_order) << "\", \"rms_block\": " << n.rms_block << ", \"router\": " << describe(n.router) << ", \"gate_out\": \""
     << to_string(n.gate_out) << "\", \"softmax\": \"" << to_string(n.softmax) << "\", \"topk_on\": \""
     << (n.topk_on_logits ? "logits" : "probs") << "\", \"tiebreak\": \"" << (n.tiebreak_lower_index ? "lower" : "higher")
     << "\", \"weights\": \"" << to_string(n.weights) << "\", \"expert\": " << describe(n.expert) << ", \"combine_accum\": \""

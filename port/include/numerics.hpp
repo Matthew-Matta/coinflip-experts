@@ -19,12 +19,16 @@ enum class DType { FP64, FP32, BF16, FP16 };
 //   Blocked:    sequential within blocks of `block`, then sequential over block partials
 //   Strided:    `block` lanes; lane j sums elements j, j+block, ... sequentially, then the lanes are summed
 //               pairwise. This is the order a SIMD loop with `block` accumulator lanes produces.
-enum class Order { Sequential, Pairwise, Blocked, Strided };
+//   TorchCascade: PyTorch's CPU sum over a contiguous row (aten/src/ATen/native/cpu/SumKernel.cpp,
+//               vectorized_inner_sum -> row_sum -> multi_row_sum) with `block`-lane vectors: 4-way ILP over
+//               vectors, 4-level cascade over chunks, then the ILP partials and finally the lanes summed in order.
+//               With 4 lanes it reproduces torch's fp32 RMSNorm variance bit-exactly on OLMoE layer 0 (M2).
+enum class Order { Sequential, Pairwise, Blocked, Strided, TorchCascade };
 
 const char* to_string(DType d);
 const char* to_string(Order o);
 DType parse_dtype(const std::string& s);  // "fp64" "fp32" "bf16" "fp16"
-Order parse_order(const std::string& s);  // "seq" "pairwise" "blocked" "strided"
+Order parse_order(const std::string& s);  // "seq" "pairwise" "blocked" "strided" "torch_cascade"
 
 // Round to the nearest representable value of `d` (RNE; overflow -> inf; gradual underflow).
 double round_to(DType d, double v);

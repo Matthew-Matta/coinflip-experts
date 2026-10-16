@@ -25,6 +25,7 @@ const char* to_string(Order o) {
     case Order::Pairwise: return "pairwise";
     case Order::Blocked: return "blocked";
     case Order::Strided: return "strided";
+    case Order::TorchCascade: return "torch_cascade";
   }
   return "?";
 }
@@ -44,6 +45,7 @@ Order parse_order(const std::string& s) {
   if (s == "pairwise") return Order::Pairwise;
   if (s == "blocked") return Order::Blocked;
   if (s == "strided") return Order::Strided;
+  if (s == "torch_cascade") return Order::TorchCascade;
   throw std::invalid_argument("unknown order: " + s);
 }
 
@@ -138,6 +140,54 @@ double ulp_of(DType d, double v) {
 
 namespace {
 
+int ceil_log2(long long n) {
+  int r = 0;
+  while ((1LL << r) < n) ++r;
+  return r;
+}
+
+// PyTorch CPU sum of a contiguous row (SumKernel.cpp): V-lane vectors, ILP 4 over vectors, 4-level cascade.
+double torch_cascade(const double* v, int n, DType acc, int V) {
+  constexpr int ilp = 4, levels = 4;
+  if (V <= 0) throw std::invalid_argument("torch_cascade needs block (lanes) > 0");
+  const int vec_size = n / V, size_ilp = vec_size / ilp;
+  const int level_power = std::max(4, ceil_log2(size_ilp) / levels);
+  const long long step = 1LL << level_power, mask0 = step - 1;
+  std::vector<double> a(static_cast<size_t>(levels) * ilp * V, 0.0);  // [level][ilp][lane]
+  auto A = [&](int l, int k, int lane) -> double& { return a[(static_cast<size_t>(l) * ilp + k) * V + lane]; };
+  auto add_row = [&](long long i) {
+    for (int k = 0; k < ilp; ++k)
+      for (int lane = 0; lane < V; ++lane) A(0, k, lane) = round_to(acc, A(0, k, lane) + v[(i * ilp + k) * V + lane]);
+  };
+  long long i = 0;
+  while (i + step <= size_ilp) {
+    for (long long j = 0; j < step; ++j, ++i) add_row(i);
+    for (int j = 1; j < levels; ++j) {
+      for (int k = 0; k < ilp; ++k)
+        for (int lane = 0; lane < V; ++lane) {
+          A(j, k, lane) = round_to(acc, A(j, k, lane) + A(j - 1, k, lane));
+          A(j - 1, k, lane) = 0.0;
+        }
+      if ((i & (mask0 << (j * level_power))) != 0) break;
+    }
+  }
+  for (; i < size_ilp; ++i) add_row(i);
+  for (int j = 1; j < levels; ++j)
+    for (int k = 0; k < ilp; ++k)
+      for (int lane = 0; lane < V; ++lane) A(0, k, lane) = round_to(acc, A(0, k, lane) + A(j, k, lane));
+  for (int vi = size_ilp * ilp; vi < vec_size; ++vi)  // leftover whole vectors go to partial 0
+    for (int lane = 0; lane < V; ++lane) A(0, 0, lane) = round_to(acc, A(0, 0, lane) + v[vi * V + lane]);
+  std::vector<double> s(V);
+  for (int lane = 0; lane < V; ++lane) {
+    s[lane] = A(0, 0, lane);
+    for (int k = 1; k < ilp; ++k) s[lane] = round_to(acc, s[lane] + A(0, k, lane));
+  }
+  double out = 0.0;
+  for (int e = vec_size * V; e < n; ++e) out = round_to(acc, out + v[e]);  // scalar tail first, as in torch
+  for (int lane = 0; lane < V; ++lane) out = round_to(acc, out + s[lane]);
+  return out;
+}
+
 double sum_range(const double* v, int lo, int hi, DType acc, Order order, int block) {
   const int n = hi - lo;
   if (n <= 0) return 0.0;
@@ -168,6 +218,8 @@ double sum_range(const double* v, int lo, int hi, DType acc, Order order, int bl
       }
       return sum_range(lanes.data(), 0, static_cast<int>(lanes.size()), acc, Order::Pairwise, block);
     }
+    case Order::TorchCascade:
+      return torch_cascade(v + lo, n, acc, block);
   }
   throw std::logic_error("bad order");
 }
@@ -201,10 +253,11 @@ float dot_f32(const float* w, const float* x, int lo, int hi, const AccSpec& s) 
       for (int j = 0; j < L; ++j) lanes[j] = lf[j];
       return static_cast<float>(sum_range(lanes.data(), 0, L, DType::FP32, Order::Pairwise, L));
     }
-    case Order::Pairwise: {
+    case Order::Pairwise:
+    case Order::TorchCascade: {
       std::vector<double> p(hi - lo);
       for (int i = lo; i < hi; ++i) p[i - lo] = static_cast<float>(w[i] * x[i]);  // rounded product
-      return static_cast<float>(sum_range(p.data(), 0, hi - lo, DType::FP32, Order::Pairwise, s.block));
+      return static_cast<float>(sum_range(p.data(), 0, hi - lo, DType::FP32, s.order, s.block));
     }
   }
   throw std::logic_error("bad order");
@@ -242,10 +295,11 @@ double dot_generic(const float* w, const double* x, int lo, int hi, const AccSpe
       }
       return sum_range(lanes.data(), 0, L, acc, Order::Pairwise, L);
     }
-    case Order::Pairwise: {
+    case Order::Pairwise:
+    case Order::TorchCascade: {
       std::vector<double> p(hi - lo);
       for (int i = lo; i < hi; ++i) p[i - lo] = round_to(acc, static_cast<double>(w[i]) * x[i]);
-      return sum_range(p.data(), 0, hi - lo, acc, Order::Pairwise, s.block);
+      return sum_range(p.data(), 0, hi - lo, acc, s.order, s.block);
     }
   }
   throw std::logic_error("bad order");

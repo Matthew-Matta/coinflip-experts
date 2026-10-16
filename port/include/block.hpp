@@ -48,6 +48,8 @@ struct Numerics {
   DType storage = DType::BF16;         // model dtype: activations, matmul outputs, elementwise results
   AccSpec oproj{DType::FP32, Order::Sequential, 32, true};
   DType rms = DType::FP32;             // RMSNorm internal precision (HF upcasts to fp32)
+  Order rms_order = Order::TorchCascade;  // order of the variance sum (torch CPU: 4-lane cascade, see numerics.hpp)
+  int rms_block = 4;
   AccSpec router{DType::FP32, Order::Sequential, 32, true};
   DType gate_out = DType::BF16;        // dtype of the stored router logits (F.linear output)
   DType softmax = DType::FP32;         // HF: softmax(..., dtype=torch.float)

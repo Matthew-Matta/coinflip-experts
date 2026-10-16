@@ -38,6 +38,7 @@ Numerics Numerics::oracle() {
   Numerics n;
   const AccSpec exact{DType::FP64, Order::Sequential, 32, true};
   n.storage = n.rms = n.gate_out = n.softmax = n.weights = n.combine_acc = DType::FP64;
+  n.rms_order = Order::Sequential;
   n.oproj = n.router = n.expert = exact;
   return n;
 }
@@ -246,14 +247,16 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
     double* ri = row("router_input");
     {
       const DType R = num.rms;
-      double ss = 0.0;
-      std::vector<double> xr(H);
+      std::vector<double> xr(H), sq(H);
       for (int i = 0; i < H; ++i) {
         xr[i] = round_to(R, rs[i]);
-        ss = round_to(R, ss + round_to(R, xr[i] * xr[i]));
+        sq[i] = round_to(R, xr[i] * xr[i]);
       }
+      const double ss = reduce_sum(sq, R, num.rms_order, num.rms_block);
       const double var = round_to(R, ss / H);
-      const double inv = round_to(R, 1.0 / std::sqrt(round_to(R, var + cfg.rms_eps)));
+      // torch.rsqrt on CPU computes 1 / sqrt(x) with two roundings, not a correctly rounded reciprocal sqrt.
+      // eps is a Python float added to a float32 tensor, so torch rounds it to the tensor's dtype first.
+      const double inv = round_to(R, 1.0 / round_to(R, std::sqrt(round_to(R, var + round_to(R, cfg.rms_eps)))));
       for (int i = 0; i < H; ++i) ri[i] = round_to(S, w.norm[i] * round_to(S, round_to(R, xr[i] * inv)));
     }
     dense_patch("router_input", ri);
