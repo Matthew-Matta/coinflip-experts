@@ -113,3 +113,78 @@ def test_calibrated_tolerances_absorb_benign_differences(setup):
     worst_benign = max(held["ops"][op]["max_scaled_ulp"] for op in ("expert_gate", "output"))
     worst_bug = rep["comparison"]["ops"]["expert_gate"]["max_scaled_ulp"]
     assert worst_bug > 4 * worst_benign
+
+
+# ---------------------------------------------------------------------------------------------- --split
+def _clone_run(src: Path, dst: Path) -> Path:
+    shutil.copytree(src, dst)
+    return dst
+
+
+def _perturb_rows(run_dir: Path, op: str, rows: np.ndarray, scale: float = 1e-2) -> None:
+    a = np.load(run_dir / f"{op}.npy")
+    a[rows] = a[rows] * (1 + scale)
+    np.save(run_dir / f"{op}.npy", a)
+
+
+def test_split_labels_come_from_the_export(setup):
+    from routediff.dumps import select_split, token_splits
+    tmp, export, ref = setup
+    labels = token_splits(load_run(ref))
+    meta = json.loads((export / "inputs" / "token_meta.json").read_text())
+    assert list(labels) == [m["split"] for m in meta]
+    cal, ev = select_split(load_run(ref), "calibration"), select_split(load_run(ref), "evaluation")
+    assert cal.tokens + ev.tokens == load_run(ref).tokens and cal.tokens > 0 and ev.tokens > 0
+    assert cal["output"].shape[0] == cal.tokens
+
+
+def test_calibration_never_touches_evaluation_tokens(setup):
+    from routediff.dumps import select_split, token_splits
+    tmp, export, ref = setup
+    benign = run(tmp, "split_benign", export, {"preset": "hf_bf16", "expert_fma": "false", "router_fma": "false"})
+    eval_rows = np.flatnonzero(token_splits(load_run(ref)) == "evaluation")
+    noisy = _clone_run(benign, tmp / "split_benign_noisy_eval")
+    for op in ("router_logits", "expert_gate", "output"):
+        _perturb_rows(noisy, op, eval_rows)
+    sel = lambda p: select_split(load_run(p), "calibration")
+    tol_clean = calibrate([(sel(ref), sel(benign))])
+    tol_noisy = calibrate([(sel(ref), sel(noisy))])
+    strip = lambda t: {k: v for k, v in t.items() if k != "_meta"}
+    assert strip(tol_clean) == strip(tol_noisy)
+    assert tol_clean["_meta"]["split"] == "calibration"
+    # and the perturbation is visible when evaluation tokens are included
+    assert strip(calibrate([(load_run(ref), load_run(noisy))])) != strip(tol_clean)
+
+
+def test_compare_on_evaluation_ignores_calibration_tokens(setup):
+    from routediff.dumps import select_split, token_splits
+    tmp, export, ref = setup
+    cal_rows = np.flatnonzero(token_splits(load_run(ref)) == "calibration")
+    noisy = _clone_run(ref, tmp / "ref_noisy_cal")
+    _perturb_rows(noisy, "output", cal_rows)
+    ev = lambda p: select_split(load_run(p), "evaluation")
+    assert compare(ev(ref), ev(noisy))["flagged_ops"] == []
+    assert compare(load_run(ref), load_run(noisy))["flagged_ops"] == ["output"]
+
+
+def test_runs_from_different_exports_or_splits_are_rejected(setup):
+    from routediff.dumps import select_split
+    tmp, export, ref = setup
+    other_export = make_export(tmp / "export_other", tokens=64, seed=99)
+    other = run(tmp, "other_export_run", other_export, {"preset": "hf_bf16"})
+    with pytest.raises(ValueError, match="different exports"):
+        compare(load_run(ref), load_run(other))
+    with pytest.raises(ValueError, match="different splits"):
+        compare(select_split(load_run(ref), "calibration"), select_split(load_run(ref), "evaluation"))
+
+
+def test_localize_judges_patch_checks_on_the_same_split(setup):
+    from routediff.dumps import select_split
+    tmp, export, ref = setup
+    name = "split_bug"
+    cand = run(tmp, name, export, {"preset": "hf_bf16"}, {"bug_id": name, "type": "router_accum", "params": {"dtype": "bf16"}})
+    ev = lambda p: select_split(load_run(p), "evaluation")
+    rep = localize(ev(ref), ev(cand), {}, rerun_template(tmp, name, export))
+    assert rep["localized_op"] == "router_logits"
+    assert rep["comparison"]["split"] == "evaluation"
+    assert rep["comparison"]["tokens"] == ev(ref).tokens

@@ -16,6 +16,7 @@ def write_reports(result: dict, ref: Run, cand: Run, out_dir: str | Path, tol_pa
         "reference_run": str(ref.path),
         "candidate_run": str(cand.path),
         "tokens": comp["tokens"],
+        "split": comp.get("split", "all"),
         "route_mismatch_tokens": comp["route_mismatch_tokens"],
         "ops": comp["ops"],
         "flagged_ops": comp["flagged_ops"],
@@ -34,7 +35,8 @@ def write_reports(result: dict, ref: Run, cand: Run, out_dir: str | Path, tol_pa
         "# routediff report", "",
         f"- Reference: `{ref.path}` ({ref.manifest.get('backend', '?')})",
         f"- Candidate: `{cand.path}` ({cand.manifest.get('backend', '?')})",
-        f"- Tokens: {comp['tokens']}; tokens whose expert set differs: {comp['route_mismatch_tokens']}",
+        f"- Tokens: {comp['tokens']} (split: {comp.get('split', 'all')}); tokens whose expert set differs: "
+        f"{comp['route_mismatch_tokens']}",
         "", f"**Verdict:** {result['verdict']}", "",
         "| # | op | flagged | worst scaled ULP | tolerance | tokens over | p99 elem ULP | rel L2 |",
         "|---|---|---|---|---|---|---|---|",

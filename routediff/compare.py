@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .dumps import OPS, SLOT_ALIGNED, Run, align_slots, same_route_sets, ulp
+from .dumps import OPS, SLOT_ALIGNED, Run, align_slots, check_same_export, same_route_sets, ulp
 
 
 def _valid_topk(probs: np.ndarray, chosen: np.ndarray) -> bool:
@@ -69,6 +69,7 @@ def compare(ref: Run, cand: Run, tol: dict | None = None) -> dict:
     """Per-op stats and flags. `tol` maps op -> scaled-ULP tolerance and "topk_unexplained" -> allowed fraction.
     Without tolerances every difference is flagged (exact comparison)."""
     tol = tol or {}
+    check_same_export(ref, cand)
     if ref.tokens != cand.tokens:
         raise ValueError("reference and candidate cover different numbers of tokens")
     routes = route_stats(ref, cand)
@@ -91,6 +92,7 @@ def compare(ref: Run, cand: Run, tol: dict | None = None) -> dict:
     flagged = [op for op in OPS if ops[op]["flagged"]]
     return {
         "tokens": ref.tokens,
+        "split": ref.split,
         "route_mismatch_tokens": routes["route_mismatch_tokens"],
         "ops": ops,
         "flagged_ops": flagged,
@@ -100,5 +102,6 @@ def compare(ref: Run, cand: Run, tol: dict | None = None) -> dict:
 
 def per_token_scaled(ref: Run, cand: Run) -> dict[str, np.ndarray]:
     """Per-token scaled ULP for every float op (used by calibration)."""
+    check_same_export(ref, cand)
     same = same_route_sets(ref["topk_ids"], cand["topk_ids"])
     return {op: float_stats(ref, cand, op, same)["per_token_scaled_ulp"] for op in OPS if op != "topk_ids"}

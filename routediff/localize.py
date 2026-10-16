@@ -24,7 +24,7 @@ from pathlib import Path
 import numpy as np
 
 from .compare import compare, per_token_scaled, route_stats
-from .dumps import OPS, SELECTION_OPS, SLOT_ALIGNED, Run, load_run
+from .dumps import OPS, SELECTION_OPS, SLOT_ALIGNED, Run, load_run, select_split
 
 
 def calibrate(pairs: list[tuple[Run, Run]], margin: float = 1.0) -> dict:
@@ -42,7 +42,8 @@ def calibrate(pairs: list[tuple[Run, Run]], margin: float = 1.0) -> dict:
     tol = {op: margin * v for op, v in worst.items()}
     tol["topk_unexplained"] = unexplained
     tol["benign_route_mismatch"] = mismatch
-    tol["_meta"] = {"pairs": len(pairs), "margin": margin,
+    tol["_meta"] = {"pairs": len(pairs), "margin": margin, "split": pairs[0][0].split if pairs else "all",
+                    "tokens_per_pair": [a.tokens for a, _ in pairs],
                     "pair_names": [f"{a.path.name} vs {b.path.name}" for a, b in pairs]}
     return tol
 
@@ -57,6 +58,8 @@ def _patch_args(ref: Run, ops: list[str]) -> list[str]:
 
 
 def rerun_with_patch(template: str, ref: Run, ops: list[str], workdir: Path) -> Run:
+    """Rerun the candidate with `ops` patched from the reference (full token range), then restrict the result to the
+    same split as the reference so patch checks are judged on the same tokens."""
     out = workdir / ("patched_" + "+".join(ops))
     cmd: list[str] = []
     for tok in shlex.split(template):
@@ -67,7 +70,7 @@ def rerun_with_patch(template: str, ref: Run, ops: list[str], workdir: Path) -> 
     proc = subprocess.run(cmd, capture_output=True, text=True)
     if proc.returncode != 0:
         raise RuntimeError(f"rerun failed for {ops}: {proc.stderr.strip()[-500:]}")
-    return load_run(out)
+    return select_split(load_run(out), ref.split)
 
 
 def _restored(ref: Run, rerun: Run, op: str, tol: dict, cand_route_mismatch: int, res: dict) -> dict:

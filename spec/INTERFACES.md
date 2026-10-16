@@ -93,10 +93,14 @@ tolerance, route-set mismatches split into explained / unexplained), `flagged_op
 step: ops patched so far, criterion used, restored, routes back, output back, ops still flagged), `verdict`,
 `tolerances` (file + sha256). Plus `report.md` for people.
 
-CLI: `python -m routediff calibrate REF CAND [REF CAND ...] --out tol.json` and
-`python -m routediff compare REF CAND --out DIR [--tolerances tol.json] [--rerun 'CMD ... {patch} ... {out}']`.
+CLI: `python -m routediff calibrate REF CAND [REF CAND ...] --out tol.json [--split calibration]` and
+`python -m routediff compare REF CAND --out DIR [--tolerances tol.json] [--rerun 'CMD ... {patch} ... {out}']
+[--split evaluation]`. `--split` keeps only the tokens that `<manifest.export.path>/inputs/token_meta.json` assigns to
+that split (sliced by `token_range`), for every comparison including patch-check reruns; runs from different exports
+(`export.config_sha256`) or different splits are refused. `report.json` records the split.
 
 ## Changelog
 - 2026-10-15: initial version.
+- 2026-10-16: `--split` for routediff calibrate/compare; export and split consistency checks.
 - 2026-10-15: rerun-command contract, `--list-bugs`, report fields for cumulative patching (`sites`, `patch_checks`).
 - 2026-10-15: `moe_run` flags finalised (`--patch-ids`, `--threads`), numerics JSON keys listed, bug registry pointer.
