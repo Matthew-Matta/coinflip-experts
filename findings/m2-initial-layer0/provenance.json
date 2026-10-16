@@ -1,0 +1,27 @@
+{
+  "purpose": "Initial preregistered H-port evaluation (PREREG section 1), layer 0, BEFORE any port change. Option A: reported as the official result; later fixes are post-fix validation.",
+  "head_commit_at_freeze": "267ddfb103d2ddad8a6540a523bbae0ee36780a3",
+  "port_code_commit": "8c2ec60f9cba59972f0ad4de48e7c95e69bc8427",
+  "port_tree_clean": true,
+  "moe_run_sha256": "8891bf7a2b17446082e81efc9fb4734f48566295022f4ece8b302fb4404b2285",
+  "prereg_sha256_at_freeze": "cbf43646e4bbaec0a336b3e9ccee8c3c424cd3c8ace40569bd6d33d6322b4049",
+  "prereg_commits": [
+    "c6b7835 2026-10-15 18:39:12 -0400 prereg amendment: cumulative patch-forward localisation (2026-10-15, no evaluation data)",
+    "e2ba5d0 2026-10-15 17:51:26 -0400 prereg: confirm thresholds (2026-10-15)",
+    "a9dbdfe 2026-10-15 17:45:50 -0400 prereg: scope, hypotheses, thresholds; component interfaces (2026-10-15)"
+  ],
+  "export_config_sha256": "2cdc86d8c1d6ff6dada14afa46d517904352ce8cfbae9ee10f470969e7918f23",
+  "configs": {
+    "numerics_hf_bf16.json": "77beefca8d071bbae6ca9fa34bbc19fb8ac0a2f210c4346dd99a700cc76af8e5",
+    "numerics_hf_bf16_tiehigher.json": "3de90b4c05d7f6fdec644e6f576f9de5b6026cb9f93a945a46631cda59824edd",
+    "numerics_hf_fp32.json": "d6d1cbca704950796ebda69ee89ed528d446cc893da72a30168c02b861ff51b4"
+  },
+  "dump_manifests": {
+    "layer0-cpp-hf_bf16": "61f4b447a861a90a1c16c0676427a8ce30e900c8bf0e83a231b3ac465ab99ced",
+    "layer0-cpp-hf_bf16-tiehigher": "40e821b34599c06c443a282d8e6b76e4b8fa9ea2491607ab51cbde9321407ae1",
+    "layer0-cpp-hf_fp32": "d07d03c72aeb3f8c6103799e7456bb7047820d0def3771cfc76b7afe3d361eed",
+    "layer0-cpp-hf_fp32-patch_router_input": "73bf86abdb6b7f4e22a3f61ac5dd85ad09639fb2b40be74e57a31d7d6f3480db",
+    "layer0-torch-bfloat16": "f0e7c78898e4d2b67653c866fe0a557334b290ed86d2543e543aefce650c4f0d",
+    "layer0-torch-float32": "b83aa88e4d11829b7674d0562366ae797951a38cd0806059cfe4fdf4d4aab3b0"
+  }
+}
