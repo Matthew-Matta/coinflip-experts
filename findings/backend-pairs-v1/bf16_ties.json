@@ -1,0 +1,376 @@
+{
+  "0": {
+    "tokens": 1348,
+    "tie_tokens_cpu": 13,
+    "tie_tokens_with_identical_probs_all_3": 0,
+    "identical_logits_all_3": 1257,
+    "identical_probs_all_3": 0,
+    "cpp_vs_mps_same_set_on_usable_ties": 0,
+    "cpu_vs_mps_same_set_on_usable_ties": 0,
+    "cpu_vs_cpp_same_set_on_usable_ties": 0,
+    "cpu_tie_rule_counts": {
+      "lowest_ids": 2,
+      "highest_ids": 11,
+      "other": 0
+    },
+    "examples": [
+      {
+        "token": 108,
+        "tied_group": [
+          33,
+          35
+        ],
+        "need": 1,
+        "cpu_chose": [
+          35
+        ],
+        "cpu_topk_order": [
+          14,
+          6,
+          52,
+          20,
+          15,
+          55,
+          21,
+          35
+        ],
+        "mps_chose": [
+          33
+        ],
+        "cpp_chose": [
+          33
+        ]
+      },
+      {
+        "token": 193,
+        "tied_group": [
+          6,
+          61
+        ],
+        "need": 1,
+        "cpu_chose": [
+          61
+        ],
+        "cpu_topk_order": [
+          4,
+          14,
+          32,
+          5,
+          17,
+          3,
+          34,
+          61
+        ],
+        "mps_chose": [
+          6
+        ],
+        "cpp_chose": [
+          6
+        ]
+      },
+      {
+        "token": 212,
+        "tied_group": [
+          11,
+          32
+        ],
+        "need": 1,
+        "cpu_chose": [
+          32
+        ],
+        "cpu_topk_order": [
+          36,
+          40,
+          6,
+          9,
+          10,
+          25,
+          53,
+          32
+        ],
+        "mps_chose": [
+          11
+        ],
+        "cpp_chose": [
+          11
+        ]
+      },
+      {
+        "token": 279,
+        "tied_group": [
+          13,
+          27
+        ],
+        "need": 1,
+        "cpu_chose": [
+          27
+        ],
+        "cpu_topk_order": [
+          6,
+          40,
+          20,
+          24,
+          15,
+          58,
+          32,
+          27
+        ],
+        "mps_chose": [
+          13
+        ],
+        "cpp_chose": [
+          13
+        ]
+      },
+      {
+        "token": 301,
+        "tied_group": [
+          0,
+          43
+        ],
+        "need": 1,
+        "cpu_chose": [
+          0
+        ],
+        "cpu_topk_order": [
+          14,
+          32,
+          46,
+          3,
+          34,
+          17,
+          57,
+          0
+        ],
+        "mps_chose": [
+          0
+        ],
+        "cpp_chose": [
+          0
+        ]
+      },
+      {
+        "token": 463,
+        "tied_group": [
+          23,
+          32
+        ],
+        "need": 1,
+        "cpu_chose": [
+          32
+        ],
+        "cpu_topk_order": [
+          6,
+          2,
+          52,
+          0,
+          15,
+          25,
+          8,
+          32
+        ],
+        "mps_chose": [
+          23
+        ],
+        "cpp_chose": [
+          23
+        ]
+      }
+    ],
+    "logit_based": {
+      "identical_logits_all_3": 1257,
+      "logit_tie_tokens": 13,
+      "usable": 13,
+      "cpp_vs_mps_same": 13,
+      "cpu_vs_mps_same": 2,
+      "cpu_vs_cpp_same": 2
+    }
+  },
+  "7": {
+    "tokens": 1348,
+    "tie_tokens_cpu": 25,
+    "tie_tokens_with_identical_probs_all_3": 0,
+    "identical_logits_all_3": 1296,
+    "identical_probs_all_3": 0,
+    "cpp_vs_mps_same_set_on_usable_ties": 0,
+    "cpu_vs_mps_same_set_on_usable_ties": 0,
+    "cpu_vs_cpp_same_set_on_usable_ties": 0,
+    "cpu_tie_rule_counts": {
+      "lowest_ids": 9,
+      "highest_ids": 16,
+      "other": 0
+    },
+    "examples": [
+      {
+        "token": 46,
+        "tied_group": [
+          4,
+          43
+        ],
+        "need": 1,
+        "cpu_chose": [
+          43
+        ],
+        "cpu_topk_order": [
+          49,
+          31,
+          42,
+          12,
+          33,
+          21,
+          13,
+          43
+        ],
+        "mps_chose": [
+          4
+        ],
+        "cpp_chose": [
+          4
+        ]
+      },
+      {
+        "token": 57,
+        "tied_group": [
+          29,
+          62
+        ],
+        "need": 1,
+        "cpu_chose": [
+          62
+        ],
+        "cpu_topk_order": [
+          43,
+          50,
+          1,
+          38,
+          54,
+          28,
+          51,
+          62
+        ],
+        "mps_chose": [
+          29
+        ],
+        "cpp_chose": [
+          29
+        ]
+      },
+      {
+        "token": 118,
+        "tied_group": [
+          33,
+          49
+        ],
+        "need": 1,
+        "cpu_chose": [
+          49
+        ],
+        "cpu_topk_order": [
+          12,
+          58,
+          4,
+          29,
+          1,
+          23,
+          48,
+          49
+        ],
+        "mps_chose": [
+          33
+        ],
+        "cpp_chose": [
+          33
+        ]
+      },
+      {
+        "token": 172,
+        "tied_group": [
+          1,
+          29
+        ],
+        "need": 1,
+        "cpu_chose": [
+          29
+        ],
+        "cpu_topk_order": [
+          24,
+          15,
+          19,
+          38,
+          52,
+          4,
+          17,
+          29
+        ],
+        "mps_chose": [
+          1
+        ],
+        "cpp_chose": [
+          1
+        ]
+      },
+      {
+        "token": 180,
+        "tied_group": [
+          37,
+          63
+        ],
+        "need": 1,
+        "cpu_chose": [
+          63
+        ],
+        "cpu_topk_order": [
+          12,
+          14,
+          22,
+          42,
+          16,
+          10,
+          49,
+          63
+        ],
+        "mps_chose": [
+          37
+        ],
+        "cpp_chose": [
+          37
+        ]
+      },
+      {
+        "token": 214,
+        "tied_group": [
+          1,
+          38
+        ],
+        "need": 1,
+        "cpu_chose": [
+          38
+        ],
+        "cpu_topk_order": [
+          29,
+          32,
+          4,
+          61,
+          25,
+          63,
+          55,
+          38
+        ],
+        "mps_chose": [
+          1
+        ],
+        "cpp_chose": [
+          1
+        ]
+      }
+    ],
+    "logit_based": {
+      "identical_logits_all_3": 1296,
+      "logit_tie_tokens": 25,
+      "usable": 25,
+      "cpp_vs_mps_same": 25,
+      "cpu_vs_mps_same": 9,
+      "cpu_vs_cpp_same": 9
+    }
+  }
+}

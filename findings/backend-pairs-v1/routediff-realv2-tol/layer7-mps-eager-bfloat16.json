@@ -1,0 +1,175 @@
+{
+  "reference_run": "data/dumps/layer7-torch-bfloat16",
+  "candidate_run": "data/dumps/real-backend-pairs-v1/layer7-mps-eager-bfloat16",
+  "tokens": 664,
+  "split": "evaluation",
+  "route_mismatch_tokens": 4,
+  "ops": {
+    "o_proj_out": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 1.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 66.0,
+      "rel_l2": 4.017307430866492e-05,
+      "exact": false,
+      "tolerance_scaled_ulp": 502.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "resid_sum": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 1.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 4.0,
+      "rel_l2": 2.1831518270989237e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 502.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_input": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 3.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 5.0,
+      "rel_l2": 3.587597064921925e-05,
+      "exact": false,
+      "tolerance_scaled_ulp": 366.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_logits": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 1.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 2.0,
+      "rel_l2": 7.095165606112321e-05,
+      "exact": false,
+      "tolerance_scaled_ulp": 122.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_probs": {
+      "dtype": "fp32",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 39262.5,
+      "p99_elem_ulp": 784.0,
+      "max_elem_ulp": 128592.0,
+      "rel_l2": 6.331225343189504e-05,
+      "exact": false,
+      "tolerance_scaled_ulp": 128.0,
+      "tokens_over_tolerance": 21,
+      "flagged": true
+    },
+    "topk_ids": {
+      "tokens": 664,
+      "route_mismatch_tokens": 4,
+      "unexplained_tokens": 4,
+      "explained_tokens": 0,
+      "flagged": true
+    },
+    "topk_weights": {
+      "dtype": "bf16",
+      "compared_tokens": 660,
+      "max_scaled_ulp": 1.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 1.0,
+      "rel_l2": 0.00015877313084878118,
+      "exact": false,
+      "tolerance_scaled_ulp": 128.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_gate": {
+      "dtype": "bf16",
+      "compared_tokens": 660,
+      "max_scaled_ulp": 1.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 1301.0,
+      "rel_l2": 0.00012786110541088518,
+      "exact": false,
+      "tolerance_scaled_ulp": 156.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_up": {
+      "dtype": "bf16",
+      "compared_tokens": 660,
+      "max_scaled_ulp": 1.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 1597.0,
+      "rel_l2": 0.0001390121202632424,
+      "exact": false,
+      "tolerance_scaled_ulp": 194.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_act": {
+      "dtype": "bf16",
+      "compared_tokens": 660,
+      "max_scaled_ulp": 3.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 1708.0,
+      "rel_l2": 0.0001876584179624423,
+      "exact": false,
+      "tolerance_scaled_ulp": 439.1875,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_down": {
+      "dtype": "bf16",
+      "compared_tokens": 660,
+      "max_scaled_ulp": 2.0,
+      "p99_elem_ulp": 1.0,
+      "max_elem_ulp": 54144.0,
+      "rel_l2": 0.0004148771114274297,
+      "exact": false,
+      "tolerance_scaled_ulp": 526.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "combine_terms": {
+      "dtype": "bf16",
+      "compared_tokens": 660,
+      "max_scaled_ulp": 3.0,
+      "p99_elem_ulp": 1.0,
+      "max_elem_ulp": 97561.0,
+      "rel_l2": 0.00044375718552826444,
+      "exact": false,
+      "tolerance_scaled_ulp": 432.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "output": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 465.0,
+      "p99_elem_ulp": 3.0,
+      "max_elem_ulp": 1.2129205461537357e+37,
+      "rel_l2": 0.015549116728441642,
+      "exact": false,
+      "tolerance_scaled_ulp": 339.0,
+      "tokens_over_tolerance": 1,
+      "flagged": true
+    }
+  },
+  "flagged_ops": [
+    "router_probs",
+    "topk_ids",
+    "output"
+  ],
+  "first_flagged_op": "router_probs",
+  "localized_op": null,
+  "sites": [],
+  "stage": null,
+  "patch_checks": [],
+  "verdict": "flagged but not patch-checked (no rerun command given)",
+  "tolerances": {
+    "file": "data/evaluation/real-v2/tolerances.json",
+    "sha256": "1944f35dfec6c5e3ff108f482cc47c8effb7a20e8c1d820d2d5c92d4cfd886ff"
+  }
+}

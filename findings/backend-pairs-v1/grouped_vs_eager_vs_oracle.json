@@ -1,0 +1,74 @@
+{
+  "layer0": {
+    "logits_identical_eager_vs_grouped": true,
+    "route_sets_identical_eager_vs_grouped": true,
+    "all": {
+      "tokens_compared": 1338,
+      "tokens_excluded_route_mismatch_vs_oracle": 10,
+      "eager_mean_rel_err": 0.005718201254013927,
+      "grouped_mean_rel_err": 0.004752245938058665,
+      "eager_p99_bf16_ulp": 50.35739013671878,
+      "grouped_p99_bf16_ulp": 48.05856964111332,
+      "frac_tokens_grouped_closer": 0.968609865470852,
+      "frac_tokens_equal": 0.0,
+      "mean_diff_grouped_minus_eager": -0.0009659553159552614,
+      "ci95": [
+        -0.0010052097703039417,
+        -0.0009265263121988166
+      ],
+      "prompts": 32
+    },
+    "evaluation": {
+      "tokens_compared": 659,
+      "tokens_excluded_route_mismatch_vs_oracle": null,
+      "eager_mean_rel_err": 0.005660325526250435,
+      "grouped_mean_rel_err": 0.0047476988871137885,
+      "eager_p99_bf16_ulp": 50.5317333984371,
+      "grouped_p99_bf16_ulp": 48.165375671386656,
+      "frac_tokens_grouped_closer": 0.9666160849772383,
+      "frac_tokens_equal": 0.0,
+      "mean_diff_grouped_minus_eager": -0.0009126266391366459,
+      "ci95": [
+        -0.0009635646112693118,
+        -0.0008670976910196095
+      ],
+      "prompts": 16
+    }
+  },
+  "layer7": {
+    "logits_identical_eager_vs_grouped": true,
+    "route_sets_identical_eager_vs_grouped": true,
+    "all": {
+      "tokens_compared": 1331,
+      "tokens_excluded_route_mismatch_vs_oracle": 17,
+      "eager_mean_rel_err": 0.006434377015757295,
+      "grouped_mean_rel_err": 0.005622670295292206,
+      "eager_p99_bf16_ulp": 62.004840545653494,
+      "grouped_p99_bf16_ulp": 59.39969055175777,
+      "frac_tokens_grouped_closer": 0.994740796393689,
+      "frac_tokens_equal": 0.0,
+      "mean_diff_grouped_minus_eager": -0.0008117067204650886,
+      "ci95": [
+        -0.0008352025657542253,
+        -0.0007877580957943647
+      ],
+      "prompts": 32
+    },
+    "evaluation": {
+      "tokens_compared": 659,
+      "tokens_excluded_route_mismatch_vs_oracle": null,
+      "eager_mean_rel_err": 0.0064273360894778996,
+      "grouped_mean_rel_err": 0.0056009557976343825,
+      "eager_p99_bf16_ulp": 62.558304138183374,
+      "grouped_p99_bf16_ulp": 60.250549621581726,
+      "frac_tokens_grouped_closer": 0.9939301972685888,
+      "frac_tokens_equal": 0.0,
+      "mean_diff_grouped_minus_eager": -0.0008263802918435158,
+      "ci95": [
+        -0.0008605472459610836,
+        -0.0007905120437517184
+      ],
+      "prompts": 16
+    }
+  }
+}

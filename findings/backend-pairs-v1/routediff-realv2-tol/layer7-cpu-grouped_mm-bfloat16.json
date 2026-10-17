@@ -1,0 +1,171 @@
+{
+  "reference_run": "data/dumps/layer7-torch-bfloat16",
+  "candidate_run": "data/dumps/real-backend-pairs-v1/layer7-cpu-grouped_mm-bfloat16",
+  "tokens": 664,
+  "split": "evaluation",
+  "route_mismatch_tokens": 0,
+  "ops": {
+    "o_proj_out": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 502.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "resid_sum": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 502.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_input": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 366.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_logits": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 122.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_probs": {
+      "dtype": "fp32",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 128.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "topk_ids": {
+      "tokens": 664,
+      "route_mismatch_tokens": 0,
+      "unexplained_tokens": 0,
+      "explained_tokens": 0,
+      "flagged": false
+    },
+    "topk_weights": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 128.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_gate": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 156.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_up": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 194.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_act": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 439.1875,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_down": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 526.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "combine_terms": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 432.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "output": {
+      "dtype": "bf16",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 5.0,
+      "p99_elem_ulp": 16.0,
+      "max_elem_ulp": 9.138442471021297e+35,
+      "rel_l2": 0.003938177951938742,
+      "exact": false,
+      "tolerance_scaled_ulp": 339.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    }
+  },
+  "flagged_ops": [],
+  "first_flagged_op": null,
+  "localized_op": null,
+  "sites": [],
+  "stage": null,
+  "patch_checks": [],
+  "verdict": "no op exceeds its tolerance",
+  "tolerances": {
+    "file": "data/evaluation/real-v2/tolerances.json",
+    "sha256": "1944f35dfec6c5e3ff108f482cc47c8effb7a20e8c1d820d2d5c92d4cfd886ff"
+  }
+}

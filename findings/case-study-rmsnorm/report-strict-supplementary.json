@@ -1,0 +1,238 @@
+{
+  "reference_run": "data/dumps/layer0-torch-float32",
+  "candidate_run": "data/results/m2-initial-layer0/dumps/layer0-cpp-hf_fp32",
+  "tokens": 664,
+  "split": "evaluation",
+  "route_mismatch_tokens": 0,
+  "ops": {
+    "o_proj_out": {
+      "dtype": "fp32",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 0.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "resid_sum": {
+      "dtype": "fp32",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 0.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_input": {
+      "dtype": "fp32",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 17.0,
+      "p99_elem_ulp": 9.0,
+      "max_elem_ulp": 17.0,
+      "rel_l2": 2.838835259226802e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 0.0,
+      "tokens_over_tolerance": 581,
+      "flagged": true
+    },
+    "router_logits": {
+      "dtype": "fp32",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 31.0,
+      "p99_elem_ulp": 41.0,
+      "max_elem_ulp": 20752.0,
+      "rel_l2": 3.5277655741426324e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 0.0,
+      "tokens_over_tolerance": 581,
+      "flagged": true
+    },
+    "router_probs": {
+      "dtype": "fp32",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 41.0,
+      "p99_elem_ulp": 19.0,
+      "max_elem_ulp": 50.0,
+      "rel_l2": 4.306513389840783e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 0.0,
+      "tokens_over_tolerance": 664,
+      "flagged": true
+    },
+    "topk_ids": {
+      "tokens": 664,
+      "route_mismatch_tokens": 0,
+      "unexplained_tokens": 0,
+      "explained_tokens": 0,
+      "flagged": false
+    },
+    "topk_weights": {
+      "dtype": "fp32",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 41.0,
+      "p99_elem_ulp": 14.0,
+      "max_elem_ulp": 41.0,
+      "rel_l2": 4.708591114689787e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 0.0,
+      "tokens_over_tolerance": 659,
+      "flagged": true
+    },
+    "expert_gate": {
+      "dtype": "fp32",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 40.0,
+      "p99_elem_ulp": 116.0,
+      "max_elem_ulp": 32550912.0,
+      "rel_l2": 4.133826158016784e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 0.0,
+      "tokens_over_tolerance": 581,
+      "flagged": true
+    },
+    "expert_up": {
+      "dtype": "fp32",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 78.0,
+      "p99_elem_ulp": 195.0,
+      "max_elem_ulp": 14039040.0,
+      "rel_l2": 4.925512192784113e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 0.0,
+      "tokens_over_tolerance": 581,
+      "flagged": true
+    },
+    "expert_act": {
+      "dtype": "fp32",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 80.0,
+      "p99_elem_ulp": 312.0,
+      "max_elem_ulp": 22318735.0,
+      "rel_l2": 7.512123848608476e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 0.0,
+      "tokens_over_tolerance": 664,
+      "flagged": true
+    },
+    "expert_down": {
+      "dtype": "fp32",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 131.0,
+      "p99_elem_ulp": 379.0,
+      "max_elem_ulp": 81305600.0,
+      "rel_l2": 7.667004583814564e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 0.0,
+      "tokens_over_tolerance": 664,
+      "flagged": true
+    },
+    "combine_terms": {
+      "dtype": "fp32",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 135.0,
+      "p99_elem_ulp": 378.0,
+      "max_elem_ulp": 49642053.0,
+      "rel_l2": 1.1137102159232303e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 0.0,
+      "tokens_over_tolerance": 664,
+      "flagged": true
+    },
+    "output": {
+      "dtype": "fp32",
+      "compared_tokens": 664,
+      "max_scaled_ulp": 97.0,
+      "p99_elem_ulp": 363.0,
+      "max_elem_ulp": 109051904.0,
+      "rel_l2": 1.0335700876635628e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 0.0,
+      "tokens_over_tolerance": 664,
+      "flagged": true
+    }
+  },
+  "flagged_ops": [
+    "router_input",
+    "router_logits",
+    "router_probs",
+    "topk_weights",
+    "expert_gate",
+    "expert_up",
+    "expert_act",
+    "expert_down",
+    "combine_terms",
+    "output"
+  ],
+  "first_flagged_op": "router_input",
+  "localized_op": "router_input",
+  "sites": [
+    "router_input",
+    "router_probs",
+    "expert_act"
+  ],
+  "stage": "selection",
+  "patch_checks": [
+    {
+      "patched": [
+        "router_input"
+      ],
+      "criterion": "output_tolerance",
+      "restored": false,
+      "routes_restored": true,
+      "output_restored": false,
+      "route_mismatch_after": 0,
+      "output_tokens_over_tolerance_after": 664,
+      "patch_skipped_token_ops": 0,
+      "still_flagged": [
+        "router_probs",
+        "topk_weights",
+        "expert_act",
+        "expert_down",
+        "combine_terms",
+        "output"
+      ]
+    },
+    {
+      "patched": [
+        "router_input",
+        "router_probs"
+      ],
+      "criterion": "output_tolerance",
+      "restored": false,
+      "routes_restored": true,
+      "output_restored": false,
+      "route_mismatch_after": 0,
+      "output_tokens_over_tolerance_after": 664,
+      "patch_skipped_token_ops": 0,
+      "still_flagged": [
+        "expert_act",
+        "expert_down",
+        "combine_terms",
+        "output"
+      ]
+    },
+    {
+      "patched": [
+        "router_input",
+        "router_probs",
+        "expert_act"
+      ],
+      "criterion": "output_tolerance",
+      "restored": true,
+      "routes_restored": true,
+      "output_restored": true,
+      "route_mismatch_after": 0,
+      "output_tokens_over_tolerance_after": 0,
+      "patch_skipped_token_ops": 0,
+      "still_flagged": []
+    }
+  ],
+  "verdict": "localized to router_input (fault touches router_input, router_probs, expert_act): patching restores the reference (output_tolerance)",
+  "tolerances": null
+}
