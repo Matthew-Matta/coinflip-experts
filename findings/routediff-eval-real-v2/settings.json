@@ -1,0 +1,132 @@
+{
+  "seed": 20261016,
+  "repeats": 2,
+  "margin": 2.0,
+  "baseline": "torch-cpu float32 vs C++ hf_fp32",
+  "calibration_configs": [
+    {
+      "preset": "hf_fp32"
+    },
+    {
+      "preset": "hf_fp32",
+      "oproj_order": "pairwise",
+      "router_order": "pairwise",
+      "expert_order": "pairwise"
+    },
+    {
+      "preset": "hf_fp32",
+      "oproj_fma": false,
+      "router_fma": false,
+      "expert_fma": false
+    }
+  ],
+  "binary_sha256": "c30b6f2faee45cb23ada7d8237bd5ca544a5bb59c8d1ed2d7fb3dac420c55a1b",
+  "localiser_source_sha256": {
+    "routediff/__init__.py": "4c47442cdac2966a7390b7b7d88c4bc0438b3899aab6669608069b1920d2b67c",
+    "routediff/__main__.py": "02eb77a0c988a4ec2963901f455864fdb006f7ec5dff984b5dc49791e9cf2790",
+    "routediff/compare.py": "d14ff20fc250f719c4cc419b1aef360804c6c884b1a80f27d65a494d0e606b86",
+    "routediff/dumps.py": "5a2adeaf6fc00eb0b01d3c5dd575ef592e1acbcc4d4a9a514d8e722ab93010d7",
+    "routediff/fidelity.py": "271bd635e7c54e8d18cb91e956a6636854f3938f1403f12ef53a8374986aa2b8",
+    "routediff/localize.py": "c9b0a14d66b0b22e74fcabb269b7b0bf28d9731867791210eaf457ba1b5b9e7f",
+    "routediff/report.py": "f419b93dcc13a4faecca0dd8f6b1a0b3646942f57a420153a529624477eb46b8",
+    "routediff/synthetic.py": "c4f74c0bf7bfbe8ec9651d9445cdd3f4f8f30504aea04ae282d7d6071a452217"
+  },
+  "evaluator_source_sha256": {
+    "__init__.py": "3d4c44fc9f4bd35ac603d95c36ffbbfbf79fb3fd98c01835b118fbe147740377",
+    "broker.py": "879e54d321b357eca0bd66d9a057d26451e544e813a671ad768bed9333dc9a2b",
+    "replay.py": "324bb0a2f1ac660150c9e8dd09ef7bc3865875eb3c0956e0577c55d0c49e8712",
+    "run.py": "17b14b889000e3d0538e0b918b102b9a9c491265a499323bed97ece7584f1451",
+    "scoring.py": "7c9a12425d2670e4cb9fecdf428ca03e4e95d7ab5e0bbef5074cb030bdbf4b0a"
+  },
+  "input_integrity": [
+    {
+      "<repo>/data/export/olmoe-1b-7b-0924/layer0/config.json": "2cdc86d8c1d6ff6dada14afa46d517904352ce8cfbae9ee10f470969e7918f23",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer0/inputs/token_meta.json": "04dd91f832945ecb884513a157e7054a8dfa0b28965f18e7d5d6c1cf7bd4b1b2",
+      "<repo>/data/dumps/layer0-torch-float32/manifest.json": "b83aa88e4d11829b7674d0562366ae797951a38cd0806059cfe4fdf4d4aab3b0",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer0/weights/down_proj.npy": "5982e097ae26f39c440c2557a62255709ec993879ec65c2b0b281cb618e2c504",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer0/weights/gate_up_proj.npy": "039c1cb71c652c39494a144852f4be4f59ef22d9e652912d35de4b74376fbea7",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer0/weights/o_proj.npy": "f3ecbef07e4235fded198f93e88a9b971b7580578222a7a56b3e57a719c4d090",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer0/weights/post_attention_layernorm.npy": "fbc314b9de6b499763e8d60349d5fc1cf9a6f2da2c500f3d8d45998b1ccec1a9",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer0/weights/router.npy": "70e0699871a9b6002d77694ab604795273ad952c00c18dc587091e8754fca963",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer0/inputs/o_proj_in.npy": "d09c6b6e96d42550b3de4028a673ed4549cd2913d344ee3261715a70c272b70c",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer0/inputs/residual.npy": "4d820c8ad57eceee59726a57abee22b833b88d9d28bd04c7f216f5b88d472ad4",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer0/inputs/token_ids.npy": "1a6e9c7c35bb04a6ae0f43e168ff9c42bb8869b8980b898198c311acde34deea",
+      "<repo>/data/dumps/layer0-torch-float32/combine_terms.npy": "e8e40ac5bc3e474e492793194c216fce8743223c3eea77a35044030a3ead8b2b",
+      "<repo>/data/dumps/layer0-torch-float32/expert_act.npy": "0739497821266c804ec9431aa60ec47053cbb1c775cae63690b53152831d18a0",
+      "<repo>/data/dumps/layer0-torch-float32/expert_down.npy": "5cc6cb4dbe817beee99233a321fcc1f5ef90418a69fac5721ef8c3b187902a14",
+      "<repo>/data/dumps/layer0-torch-float32/expert_gate.npy": "38e0a1751a198e12c6662ecd5994fae99250343af073422dd0420c199cbdbc38",
+      "<repo>/data/dumps/layer0-torch-float32/expert_up.npy": "64fd53dbd308317e1b7b8d19aa893602f6eb5ff4de95b6a8fa1454ab65e145a3",
+      "<repo>/data/dumps/layer0-torch-float32/o_proj_out.npy": "02ca660dea72af20702d94bcf30b446217277c035352ba08374366412e5bcca5",
+      "<repo>/data/dumps/layer0-torch-float32/output.npy": "063d7bb534ec82a58b82a93cf0e9038a5db8629374eeaac0a304092bf0693862",
+      "<repo>/data/dumps/layer0-torch-float32/resid_sum.npy": "c7577b67f441ec0900eb1f6c523ea8459619355b227dd0c15b2fc4490f18393e",
+      "<repo>/data/dumps/layer0-torch-float32/router_input.npy": "e09bf2fef305520667543a19faee95a7ef65cf332780da9a22d09e613c2300e3",
+      "<repo>/data/dumps/layer0-torch-float32/router_logits.npy": "33b74ed5c4da3b37d7c8fe3557196a39e6339375beef3f08b341c630ea0b5b2c",
+      "<repo>/data/dumps/layer0-torch-float32/router_probs.npy": "2d6629b3af5b4e28cd84771e25028cd8dbfb0478cce3e63920a7f951d9e05420",
+      "<repo>/data/dumps/layer0-torch-float32/topk_ids.npy": "3f21e5444d0df979d9318a41a41daf96f6128f808828e9a1a074b7f8901d86a0",
+      "<repo>/data/dumps/layer0-torch-float32/topk_weights.npy": "09fdd05befe85d6675f8ae27df7f2c98507e57aeccd47e54cf1914728ec2b113"
+    },
+    {
+      "<repo>/data/export/olmoe-1b-7b-0924/layer7/config.json": "d236583b464086a20ddcd517e4f73b6229c9a1892f139e29de7de2a165e6f232",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer7/inputs/token_meta.json": "04dd91f832945ecb884513a157e7054a8dfa0b28965f18e7d5d6c1cf7bd4b1b2",
+      "<repo>/data/dumps/layer7-torch-float32/manifest.json": "4acc4518792bece01f17d6a7b588d0e5eec48f6b9f6cf6cd7cb4f2056f749d01",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer7/weights/down_proj.npy": "84839e158e5da193f74c7371ef7adc41544d2680d5b6e8b118d7d8e7a3233192",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer7/weights/gate_up_proj.npy": "a32301044c7c68fddbe9a07863af404cc974e74aee083c103df06da00086ed6e",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer7/weights/o_proj.npy": "c92454087fe891daac8e9fb3f6d2b3eab836b6108c4f942f3e0003dfab7b7a56",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer7/weights/post_attention_layernorm.npy": "4586e44aa102abf42d9d78985c0bb0a344b1c60d94d4ab2d75d20bbd57e31c0a",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer7/weights/router.npy": "29d774e2d2004c1df156da8baef74e6d3098dbdd48edccb1d262aa4cf9f4cc2a",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer7/inputs/o_proj_in.npy": "adef4b052e578458e5cb47a41afe1f1f66425a060e04ed57068fd82f80508819",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer7/inputs/residual.npy": "5c977350edf11e001ea7332e95d7465d4ed74cf55df03f029fcc7ff3aa9e0dec",
+      "<repo>/data/export/olmoe-1b-7b-0924/layer7/inputs/token_ids.npy": "1a6e9c7c35bb04a6ae0f43e168ff9c42bb8869b8980b898198c311acde34deea",
+      "<repo>/data/dumps/layer7-torch-float32/combine_terms.npy": "dfc84d5a9d613d0c54c268d51946f697d59b868310aedbfd27d0feccd509ce89",
+      "<repo>/data/dumps/layer7-torch-float32/expert_act.npy": "2a6b6e4ef460654e1a4f0524714688eef0d8c1fa75a2c3cd04a2f16ea6ea8140",
+      "<repo>/data/dumps/layer7-torch-float32/expert_down.npy": "58c025650b4e323451a721ad45fcefebb05baca06a6ed7932f180a9c1ffd8b3b",
+      "<repo>/data/dumps/layer7-torch-float32/expert_gate.npy": "8b01c98ba43e1c334fa7854814c38a5f7b83605ee18f77ff4653c30566c1456c",
+      "<repo>/data/dumps/layer7-torch-float32/expert_up.npy": "83c303095873d080357611305e3b1149b2bd14059953403ca817548c535c611e",
+      "<repo>/data/dumps/layer7-torch-float32/o_proj_out.npy": "124ce2c4184b1b080637c0d7a6458458c5387cd5a495db39deadef2ef3a6a297",
+      "<repo>/data/dumps/layer7-torch-float32/output.npy": "610a66ac1d905c1c495cb1e2d341651330ca9e60d77da13e2d18c797159599ee",
+      "<repo>/data/dumps/layer7-torch-float32/resid_sum.npy": "f82ad38ea01603b1ef6630540e02fb5dc60ff6685c20ddfb81959bc7740a509d",
+      "<repo>/data/dumps/layer7-torch-float32/router_input.npy": "c169945b85f2488615cc3f9aebf87b96a0e20e414a380988ed5ad2df5f999c47",
+      "<repo>/data/dumps/layer7-torch-float32/router_logits.npy": "ba6fd58e72149005590721a464070df3100445ee85f0381c77bb755de94ae247",
+      "<repo>/data/dumps/layer7-torch-float32/router_probs.npy": "f7755ccfd729143def4fa077c3ef17586a4b63cad525c0bce9fa48a858a77f29",
+      "<repo>/data/dumps/layer7-torch-float32/topk_ids.npy": "9cc6620b438904d01ff17d1ed50301ea8f3f93b666a3fca73eca56751f53d069",
+      "<repo>/data/dumps/layer7-torch-float32/topk_weights.npy": "dc4251078c920849dc6ff6613d7062753971a64236979780b6caf13b864c48c6"
+    }
+  ],
+  "references": [
+    {
+      "path": "<repo>/data/dumps/layer0-torch-float32",
+      "sha256": "b83aa88e4d11829b7674d0562366ae797951a38cd0806059cfe4fdf4d4aab3b0"
+    },
+    {
+      "path": "<repo>/data/dumps/layer7-torch-float32",
+      "sha256": "4acc4518792bece01f17d6a7b588d0e5eec48f6b9f6cf6cd7cb4f2056f749d01"
+    }
+  ],
+  "inputs_previously_inspected_in_M2": true,
+  "interpretation": "Held-out prompt split for calibration/evaluation; not previously unseen inputs.",
+  "blinding": "Localiser receives only opaque replay URLs; logical separation, not an OS security sandbox.",
+  "provenance": {
+    "timestamp_utc": "2026-10-16T23:06:29.290574+00:00",
+    "host": "<redacted>",
+    "platform": "macOS-15.7.9-arm64-arm-64bit",
+    "python": "3.12.3",
+    "git_sha": "9dd291de4a84f21f6c468f0f66f218ce72298f8f",
+    "git_dirty": true,
+    "torch_cuda": null,
+    "packages": {
+      "torch": "2.14.1",
+      "transformers": "5.12.1",
+      "sglang": null,
+      "sglang-kernel": null,
+      "sgl-kernel": null,
+      "triton": null,
+      "flashinfer-python": null,
+      "numpy": "2.5.4",
+      "pandas": "3.0.6"
+    },
+    "config": {
+      "evaluation_seed": 20261016
+    },
+    "config_hash": "bf73214fb6c5"
+  }
+}
