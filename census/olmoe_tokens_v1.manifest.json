@@ -1,0 +1,11 @@
+{
+  "token_ids_sha256": "2cebf9203960a7e53756a9c82d23c98de2e560bd42dcc190bc2e5a28bf2bfb54",
+  "prompts": 200,
+  "per_source": 50,
+  "continuation_tokens": 256,
+  "total_length_cap": 512,
+  "selection_seed": 42,
+  "model_revision": "6d84c48581ece794365f2b8e9cfb043c68ade9c5",
+  "pool_sha256": "b57970111ed30d5336aa11db7c9ed1317f1cf298f4980faff92cd19aad2b7749",
+  "generation": "SGLang greedy, temperature 0, ignore_eos=True; output token ids retained verbatim"
+}
