@@ -12,13 +12,15 @@ spec.loader.exec_module(gate)
 
 def test_driver_and_command():
     assert gate.driver_major('Driver Version: 580.12.01') == 580
+    assert gate.driver_major('KMD Version: 610.57.04') == 610
     with pytest.raises(RuntimeError):
         gate.driver_major('no GPU')
     cmd = gate.server_command('/weights/test')
     assert cmd[cmd.index('--dtype')+1] == 'bfloat16'
     assert '--disable-radix-cache' in cmd
     assert '--enable-return-routed-experts' in cmd
-    assert cmd[cmd.index('--chunked-prefill-size')+1] == '-1'
+    chunk = int(cmd[cmd.index('--chunked-prefill-size')+1])
+    assert chunk == int(cmd[cmd.index('--max-prefill-tokens')+1]) >= 32 * 512
 
 
 def test_prefill_route_validation():

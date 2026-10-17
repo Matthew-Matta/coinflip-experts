@@ -10,6 +10,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shlex
 import signal
 import subprocess
 import sys
@@ -18,6 +19,21 @@ import time
 import uuid
 
 import modal
+
+# Backport of sgl-project/sglang#40980 (merged 2026-09-29, after 0.5.21): OLMoE's TopK lacks
+# layer_id, so --enable-return-routed-experts writes buffer[:, None, :] and crashes the scheduler.
+# layer_id only addresses the route-capture buffer here (TP=1, no EPLB/LPLB); routing is unchanged.
+OLMOE_TOPK_OLD = '        self.topk = TopK(\n            top_k=top_k,\n            renormalize=False,\n        )\n'
+OLMOE_TOPK_NEW = ('        self.topk = TopK(\n            top_k=top_k,\n            layer_id=layer_id,\n'
+                  '            renormalize=False,\n        )\n')
+# One line: Modal turns each run_commands entry into a Dockerfile RUN, which cannot hold raw newlines.
+BACKPORT_40980 = '; '.join([
+    'import importlib.util, pathlib',
+    "p = pathlib.Path(importlib.util.find_spec('sglang.srt.models.olmoe').origin); s = p.read_text()",
+    f"assert s.count({OLMOE_TOPK_OLD!r}) == 1, 'backport 40980: OLMoE TopK block not found exactly once'",
+    f'p.write_text(s.replace({OLMOE_TOPK_OLD!r}, {OLMOE_TOPK_NEW!r}))',
+    "print('backport 40980 applied to', p)",
+])
 
 MODEL = 'allenai/OLMoE-1B-7B-0924'
 VOLUME_PATH = '/weights'
@@ -35,12 +51,13 @@ gpu_image = (
     # SGLang pins an older torchaudio ABI; text-only OLMoE does not need it.
     .run_commands('python -m pip uninstall -y torchaudio',
                   'python -c "import torch, transformers; from transformers import AutoConfig"')
+    .run_commands(f'python -c {shlex.quote(BACKPORT_40980)}')
     .add_local_python_source('coinflip')
 )
 
 
 def driver_major(smi: str) -> int:
-    match = re.search(r'Driver Version:\s*(\d+)', smi)
+    match = re.search(r'(?:Driver|KMD) Version:\s*(\d+)', smi)
     if not match:
         raise RuntimeError('FAIL: cannot parse NVIDIA driver')
     return int(match.group(1))
@@ -50,7 +67,10 @@ def server_command(model_path: str) -> list[str]:
     return [sys.executable, '-m', 'sglang.launch_server', '--model-path', model_path,
             '--port', '30000', '--dtype', 'bfloat16', '--tp', '1',
             '--disable-cuda-graph', '--enable-return-routed-experts',
-            '--disable-radix-cache', '--chunked-prefill-size', '-1',
+            # Not -1: RoutedExpertsCapturer sizes its buffer max(chunked_prefill_size, max_running_requests)
+            # rows (state_capturer/routed_experts.py:79), so -1 gives 32 rows and crashes on longer prefills.
+            # Equal to --max-prefill-tokens, every gate/census batch (<= 32 x 512) runs as one unchunked prefill.
+            '--disable-radix-cache', '--chunked-prefill-size', '32768',
             '--max-prefill-tokens', '32768', '--max-running-requests', '32',
             '--mem-fraction-static', '0.80']
 
@@ -137,18 +157,20 @@ def run_gate(prepared: dict) -> dict:
     samples: list[dict] = []
     monitor = None
     start = time.perf_counter()
+    def sample_memory():
+        try:
+            result = subprocess.run(['nvidia-smi', '--query-gpu=memory.used', '--format=csv,noheader,nounits'],
+                                    capture_output=True, text=True, check=True, timeout=5)
+            samples.append(dict(seconds=time.perf_counter()-start, used_mib=int(result.stdout.strip().splitlines()[0])))
+        except Exception:
+            pass
     def memory_monitor():
         while not monitor_stop.is_set():
-            try:
-                result = subprocess.run(['nvidia-smi', '--query-gpu=memory.used', '--format=csv,noheader,nounits'],
-                                        capture_output=True, text=True, check=True, timeout=5)
-                samples.append(dict(seconds=time.perf_counter()-start, used_mib=int(result.stdout.strip().splitlines()[0])))
-            except Exception:
-                pass
+            sample_memory()
             monitor_stop.wait(0.1)
-    def check(name: str, **values):
-        summary['checks'].append(dict(check=name, status='PASS', **values))
-        print('PASS', name, json.dumps(values), flush=True)
+    def check(label: str, /, **values):
+        summary['checks'].append(dict(check=label, status='PASS', **values))
+        print('PASS', label, json.dumps(values), flush=True)
     try:
         smi = subprocess.run(['nvidia-smi'], capture_output=True, text=True, check=True, timeout=10).stdout
         print(smi, flush=True)
@@ -167,6 +189,13 @@ def run_gate(prepared: dict) -> dict:
             actual = md.version(package)
             if actual.split('+')[0] != version:
                 raise RuntimeError(f'FAIL version mismatch: {pin}, installed={actual}')
+        import hashlib
+        import sglang.srt.models.olmoe as sglang_olmoe
+        olmoe_source = Path(sglang_olmoe.__file__).read_text()
+        if OLMOE_TOPK_NEW not in olmoe_source:
+            raise RuntimeError('FAIL backport 40980 (OLMoE TopK layer_id) not present in image')
+        summary['sglang_patches'] = [dict(backport='sgl-project/sglang#40980', file='sglang/srt/models/olmoe.py',
+                                          sha256=hashlib.sha256(olmoe_source.encode()).hexdigest())]
         cfg = AutoConfig.from_pretrained(prepared['path'], local_files_only=True)
         if (cfg.num_hidden_layers, cfg.num_experts_per_tok, cfg.num_experts) != (16, 8, 64):
             raise RuntimeError('FAIL unexpected model dimensions')
@@ -233,8 +262,11 @@ def run_gate(prepared: dict) -> dict:
             if any(len(ids) != 512 for ids in batch):
                 raise RuntimeError('FAIL benchmark sequence length')
             generate(batch)
+            # Bracket the timed request with synchronous samples: a short prefill can finish between monitor ticks.
             sample_start = len(samples)
+            sample_memory()
             items, seconds = generate(batch)
+            sample_memory()
             for ids, item in zip(batch, items, strict=True):
                 decode_routes(item, len(ids), extract_routed_experts_from_meta_info)
             current = samples[sample_start:]
