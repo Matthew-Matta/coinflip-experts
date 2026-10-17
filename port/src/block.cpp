@@ -40,7 +40,7 @@ Numerics Numerics::oracle() {
   Numerics n;
   const AccSpec exact{DType::FP64, Order::Sequential, 32, true};
   n.storage = n.rms = n.rms_acc = n.gate_out = n.softmax = n.weights = n.combine_acc = DType::FP64;
-  n.rms_order = Order::Sequential;
+  n.rms_order = n.renorm_order = Order::Sequential;
   n.oproj = n.router = n.expert = exact;
   return n;
 }
@@ -95,7 +95,8 @@ BlockWeights BlockWeights::random(const BlockConfig& cfg, uint64_t seed) {
     v.resize(n);
     for (auto& x : v) x = static_cast<float>(round_to(DType::BF16, nd(rng) * scale));
   };
-  fill(w.o_proj, static_cast<size_t>(H) * H, 1.0 / std::sqrt(H));
+  const int Hin = oproj_width(cfg);
+  fill(w.o_proj, static_cast<size_t>(H) * Hin, 1.0 / std::sqrt(Hin));
   w.norm.resize(H);
   for (auto& x : w.norm) x = static_cast<float>(round_to(DType::BF16, 1.0 + 0.1 * nd(rng)));
   fill(w.router, static_cast<size_t>(E) * H, 1.0 / std::sqrt(H));
@@ -178,10 +179,11 @@ size_t per_token(const OpShape& s) {
 Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, const std::vector<float>& residual,
                 int T, const RunOptions& opt) {
   const BlockConfig& cfg = w.cfg;
-  const int H = cfg.hidden, I = cfg.inter, E = cfg.n_experts, K = cfg.top_k;
+  const int H = cfg.hidden, I = cfg.inter, E = cfg.n_experts, K = cfg.top_k, Hin = oproj_width(cfg);
   if (K >= E) throw std::invalid_argument("top_k must be < n_experts");
-  if (o_proj_in.size() != static_cast<size_t>(T) * H || residual.size() != static_cast<size_t>(T) * H)
-    throw std::invalid_argument("input shapes do not match [T, H]");
+  if (o_proj_in.size() != static_cast<size_t>(T) * Hin || residual.size() != static_cast<size_t>(T) * H)
+    throw std::invalid_argument("input shapes do not match [T, Hin] and [T, H]");
+  if (w.o_proj.size() != static_cast<size_t>(H) * Hin) throw std::invalid_argument("o_proj is not [H, Hin]");
 
   const Effective eff = apply_bug(cfg, opt.num, opt.bug);
   const Numerics& num = eff.num;
@@ -250,13 +252,11 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
     };
 
     // 1-2. o_proj (optionally through an emulated all-reduce), residual add.
-    std::vector<double> oin(H), res(H);
-    for (int i = 0; i < H; ++i) {
-      oin[i] = round_to(S, o_proj_in[static_cast<size_t>(t) * H + i]);
-      res[i] = round_to(S, residual[static_cast<size_t>(t) * H + i]);
-    }
+    std::vector<double> oin(Hin), res(H);
+    for (int i = 0; i < Hin; ++i) oin[i] = round_to(S, o_proj_in[static_cast<size_t>(t) * Hin + i]);
+    for (int i = 0; i < H; ++i) res[i] = round_to(S, residual[static_cast<size_t>(t) * H + i]);
     double* oo = row("o_proj_out");
-    matvec(w.o_proj.data(), H, H, oin.data(), oo, num.oproj, S, coll_oproj ? num.collective : Collective{});
+    matvec(w.o_proj.data(), H, Hin, oin.data(), oo, num.oproj, S, coll_oproj ? num.collective : Collective{});
     dense_patch("o_proj_out", oo);
     tick(0);
     double* rs = row("resid_sum");
@@ -326,11 +326,8 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
     // 7. Routing weights: probabilities of the chosen experts (renormalised if configured), then cast.
     double* tw = row("topk_weights");
     {
-      double sum = 0.0;
-      for (int s = 0; s < K; ++s) {
-        tw[s] = pr[ids[s]];
-        sum = round_to(num.softmax, sum + tw[s]);
-      }
+      for (int s = 0; s < K; ++s) tw[s] = pr[ids[s]];
+      const double sum = eff.norm_topk ? reduce_sum(tw, K, num.softmax, num.renorm_order, num.renorm_block) : 0.0;
       for (int s = 0; s < K; ++s) {
         if (eff.norm_topk) tw[s] = round_to(num.softmax, tw[s] / sum);
         tw[s] = round_to(num.weights, tw[s]);

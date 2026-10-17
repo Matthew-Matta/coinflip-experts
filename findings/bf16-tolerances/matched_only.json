@@ -1,0 +1,114 @@
+{
+  "calibration": {
+    "layer0-cal-0": {
+      "output_worst_matched": 5.0,
+      "output_worst_all": 98.25,
+      "route_mismatch": 5,
+      "tokens": 684
+    },
+    "layer0-cal-1": {
+      "output_worst_matched": 5.0,
+      "output_worst_all": 98.25,
+      "route_mismatch": 5,
+      "tokens": 684
+    },
+    "layer0-cal-2": {
+      "output_worst_matched": 5.0,
+      "output_worst_all": 98.25,
+      "route_mismatch": 5,
+      "tokens": 684
+    },
+    "layer7-cal-0": {
+      "output_worst_matched": 4.0,
+      "output_worst_all": 241.0,
+      "route_mismatch": 12,
+      "tokens": 684
+    },
+    "layer7-cal-1": {
+      "output_worst_matched": 4.0,
+      "output_worst_all": 241.0,
+      "route_mismatch": 12,
+      "tokens": 684
+    },
+    "layer7-cal-2": {
+      "output_worst_matched": 4.0,
+      "output_worst_all": 241.0,
+      "route_mismatch": 12,
+      "tokens": 684
+    }
+  },
+  "judged_evaluation": {
+    "layer0-mps-eager": {
+      "output_worst_matched": 5.0,
+      "ratio_to_matched_tol": 0.5,
+      "flagged_matched_only": false,
+      "route_mismatch": 6,
+      "tokens": 664
+    },
+    "layer0-cpu-grouped_mm": {
+      "output_worst_matched": 4.0,
+      "ratio_to_matched_tol": 0.4,
+      "flagged_matched_only": false,
+      "route_mismatch": 0,
+      "tokens": 664
+    },
+    "layer0-cpp-cal-0": {
+      "output_worst_matched": 5.0,
+      "ratio_to_matched_tol": 0.5,
+      "flagged_matched_only": false,
+      "route_mismatch": 6,
+      "tokens": 664
+    },
+    "layer0-cpp-cal-1": {
+      "output_worst_matched": 4.0,
+      "ratio_to_matched_tol": 0.4,
+      "flagged_matched_only": false,
+      "route_mismatch": 6,
+      "tokens": 664
+    },
+    "layer0-cpp-cal-2": {
+      "output_worst_matched": 5.0,
+      "ratio_to_matched_tol": 0.5,
+      "flagged_matched_only": false,
+      "route_mismatch": 6,
+      "tokens": 664
+    },
+    "layer7-mps-eager": {
+      "output_worst_matched": 5.0,
+      "ratio_to_matched_tol": 0.5,
+      "flagged_matched_only": false,
+      "route_mismatch": 4,
+      "tokens": 664
+    },
+    "layer7-cpu-grouped_mm": {
+      "output_worst_matched": 5.0,
+      "ratio_to_matched_tol": 0.5,
+      "flagged_matched_only": false,
+      "route_mismatch": 0,
+      "tokens": 664
+    },
+    "layer7-cpp-cal-0": {
+      "output_worst_matched": 5.0,
+      "ratio_to_matched_tol": 0.5,
+      "flagged_matched_only": false,
+      "route_mismatch": 4,
+      "tokens": 664
+    },
+    "layer7-cpp-cal-1": {
+      "output_worst_matched": 4.0,
+      "ratio_to_matched_tol": 0.4,
+      "flagged_matched_only": false,
+      "route_mismatch": 4,
+      "tokens": 664
+    },
+    "layer7-cpp-cal-2": {
+      "output_worst_matched": 5.0,
+      "ratio_to_matched_tol": 0.5,
+      "flagged_matched_only": false,
+      "route_mismatch": 4,
+      "tokens": 664
+    }
+  },
+  "output_tolerance_matched_only": 10.0,
+  "output_tolerance_routediff_all_tokens": 482.0
+}

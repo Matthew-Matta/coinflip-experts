@@ -80,6 +80,8 @@ Numerics load_numerics(const Json& j, std::string* preset_out) {
     else if (k == "topk_on") n.topk_on_logits = v.as_string() == "logits";
     else if (k == "tiebreak") n.tiebreak_lower_index = v.as_string() != "higher";
     else if (k == "weights") n.weights = parse_dtype(v.as_string());
+    else if (k == "renorm_order") n.renorm_order = parse_order(v.as_string());
+    else if (k == "renorm_block") n.renorm_block = std::stoi(v.as_string());
     else if (k == "combine_accum") n.combine_acc = parse_dtype(v.as_string());
     else if (k == "combine_order") n.combine_order = parse_combine_order(v.as_string());
     else if (k == "collective_n") n.collective.n = std::stoi(v.as_string());
@@ -109,7 +111,8 @@ std::string numerics_json(const Numerics& n, const std::string& preset) {
     << "\", \"rms_kahan\": " << (n.rms_kahan ? "true" : "false") << ", \"rms_order\": \"" << to_string(n.rms_order) << "\", \"rms_block\": " << n.rms_block << ", \"router\": " << describe(n.router) << ", \"gate_out\": \""
     << to_string(n.gate_out) << "\", \"softmax\": \"" << to_string(n.softmax) << "\", \"topk_on\": \""
     << (n.topk_on_logits ? "logits" : "probs") << "\", \"tiebreak\": \"" << (n.tiebreak_lower_index ? "lower" : "higher")
-    << "\", \"weights\": \"" << to_string(n.weights) << "\", \"expert\": " << describe(n.expert) << ", \"combine_accum\": \""
+    << "\", \"renorm_order\": \"" << to_string(n.renorm_order) << "\", \"renorm_block\": " << n.renorm_block
+    << ", \"weights\": \"" << to_string(n.weights) << "\", \"expert\": " << describe(n.expert) << ", \"combine_accum\": \""
     << to_string(n.combine_acc) << "\", \"combine_kahan\": " << (n.combine_kahan ? "true" : "false")
     << ", \"combine_order\": \"" << to_string(n.combine_order) << "\", \"collective\": {\"n\": "
     << n.collective.n << ", \"topology\": \"" << to_string(n.collective.topo) << "\", \"wire\": \"" << to_string(n.collective.wire)
@@ -179,9 +182,10 @@ int main(int argc, char** argv) {
     c.top_k = static_cast<int>(cfgj.at("top_k").num);
     c.norm_topk_prob = cfgj.at("norm_topk_prob").b;
     c.rms_eps = cfgj.at("rms_norm_eps").num;
-    const size_t H = c.hidden, I = c.inter, E = c.n_experts;
+    if (cfgj.has("o_proj_input_size")) c.oproj_in = static_cast<int>(cfgj.at("o_proj_input_size").num);
+    const size_t H = c.hidden, I = c.inter, E = c.n_experts, Hin = oproj_width(c);
     const std::string wd = export_dir + "/weights/";
-    w.o_proj = npy_read_f32(wd + "o_proj.npy", {H, H});
+    w.o_proj = npy_read_f32(wd + "o_proj.npy", {H, Hin});
     w.norm = npy_read_f32(wd + "post_attention_layernorm.npy", {H});
     w.router = npy_read_f32(wd + "router.npy", {E, H});
     w.gate_up = npy_read_f32(wd + "gate_up_proj.npy", {E, 2 * I, H});
@@ -189,14 +193,15 @@ int main(int argc, char** argv) {
 
     auto oin = npy_read_f32(export_dir + "/inputs/o_proj_in.npy", {});
     auto res = npy_read_f32(export_dir + "/inputs/residual.npy", {});
-    if (oin.size() % H || res.size() != oin.size()) throw std::runtime_error("inputs are not [T, H]");
-    int T_all = static_cast<int>(oin.size() / H), a = 0, b = T_all;
+    if (oin.size() % Hin || res.size() % H || oin.size() / Hin != res.size() / H)
+      throw std::runtime_error("inputs are not o_proj_in [T, Hin] and residual [T, H]");
+    int T_all = static_cast<int>(res.size() / H), a = 0, b = T_all;
     if (!token_range.empty()) {
       const auto colon = token_range.find(':');
       a = std::stoi(token_range.substr(0, colon));
       b = std::stoi(token_range.substr(colon + 1));
       if (a < 0 || b > T_all || a >= b) throw std::invalid_argument("bad --tokens range");
-      oin = slice_rows(oin, c.hidden, a, b);
+      oin = slice_rows(oin, static_cast<int>(Hin), a, b);
       res = slice_rows(res, c.hidden, a, b);
     }
     const int T = b - a;

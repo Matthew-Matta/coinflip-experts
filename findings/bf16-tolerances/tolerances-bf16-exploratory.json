@@ -1,0 +1,37 @@
+{
+  "o_proj_out": 2.0,
+  "resid_sum": 4.0,
+  "router_input": 6.0,
+  "router_logits": 2.0,
+  "router_probs": 129002.0,
+  "topk_weights": 2.0,
+  "expert_gate": 2.0,
+  "expert_up": 2.0,
+  "expert_act": 6.0,
+  "expert_down": 9.4375,
+  "combine_terms": 9.1875,
+  "output": 482.0,
+  "topk_unexplained": 0.017543859649122806,
+  "benign_route_mismatch": 0.017543859649122806,
+  "_meta": {
+    "pairs": 6,
+    "margin": 2.0,
+    "split": "calibration",
+    "tokens_per_pair": [
+      684,
+      684,
+      684,
+      684,
+      684,
+      684
+    ],
+    "pair_names": [
+      "layer0-torch-bfloat16 vs layer0-cpp-bf16-cal-0",
+      "layer0-torch-bfloat16 vs layer0-cpp-bf16-cal-1",
+      "layer0-torch-bfloat16 vs layer0-cpp-bf16-cal-2",
+      "layer7-torch-bfloat16 vs layer7-cpp-bf16-cal-0",
+      "layer7-torch-bfloat16 vs layer7-cpp-bf16-cal-1",
+      "layer7-torch-bfloat16 vs layer7-cpp-bf16-cal-2"
+    ]
+  }
+}

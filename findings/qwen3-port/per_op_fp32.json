@@ -1,0 +1,77 @@
+{
+  "o_proj_out": {
+    "bit_exact_tokens": 1361,
+    "rel_l2_cpp_vs_torch": 0.0,
+    "rel_l2_torch_vs_oracle": 8.278779861932242e-07,
+    "rel_l2_cpp_vs_oracle": 8.278779861932242e-07
+  },
+  "resid_sum": {
+    "bit_exact_tokens": 1361,
+    "rel_l2_cpp_vs_torch": 0.0,
+    "rel_l2_torch_vs_oracle": 6.774044469323086e-07,
+    "rel_l2_cpp_vs_oracle": 6.774044469323086e-07
+  },
+  "router_input": {
+    "bit_exact_tokens": 1361,
+    "rel_l2_cpp_vs_torch": 0.0,
+    "rel_l2_torch_vs_oracle": 7.308952895020502e-07,
+    "rel_l2_cpp_vs_oracle": 7.308952895020502e-07
+  },
+  "router_logits": {
+    "bit_exact_tokens": 1361,
+    "rel_l2_cpp_vs_torch": 0.0,
+    "rel_l2_torch_vs_oracle": 8.30514935333075e-07,
+    "rel_l2_cpp_vs_oracle": 8.30514935333075e-07
+  },
+  "router_probs": {
+    "bit_exact_tokens": 0,
+    "rel_l2_cpp_vs_torch": 1.8248419384527167e-07,
+    "rel_l2_torch_vs_oracle": 2.327978080738453e-06,
+    "rel_l2_cpp_vs_oracle": 2.3325872128782903e-06
+  },
+  "topk_ids": {
+    "route_set_match": 1361
+  },
+  "topk_weights": {
+    "bit_exact_tokens": 67,
+    "rel_l2_cpp_vs_torch": 7.465124092219658e-08,
+    "rel_l2_torch_vs_oracle": 1.7418638062532527e-06,
+    "rel_l2_cpp_vs_oracle": 1.7408358505531156e-06
+  },
+  "expert_gate": {
+    "bit_exact_tokens": 1361,
+    "rel_l2_cpp_vs_torch": 0.0,
+    "rel_l2_torch_vs_oracle": 8.818651653323466e-07,
+    "rel_l2_cpp_vs_oracle": 8.818651653323466e-07
+  },
+  "expert_up": {
+    "bit_exact_tokens": 1361,
+    "rel_l2_cpp_vs_torch": 0.0,
+    "rel_l2_torch_vs_oracle": 9.157703399168096e-07,
+    "rel_l2_cpp_vs_oracle": 9.157703399168096e-07
+  },
+  "expert_act": {
+    "bit_exact_tokens": 0,
+    "rel_l2_cpp_vs_torch": 5.124088991296138e-08,
+    "rel_l2_torch_vs_oracle": 1.2496653067530657e-06,
+    "rel_l2_cpp_vs_oracle": 1.2483497200552534e-06
+  },
+  "expert_down": {
+    "bit_exact_tokens": 0,
+    "rel_l2_cpp_vs_torch": 9.10997961541627e-08,
+    "rel_l2_torch_vs_oracle": 1.1400581851087437e-06,
+    "rel_l2_cpp_vs_oracle": 1.1394473240201666e-06
+  },
+  "combine_terms": {
+    "bit_exact_tokens": 0,
+    "rel_l2_cpp_vs_torch": 1.1701609723925326e-07,
+    "rel_l2_torch_vs_oracle": 1.9655651646505007e-06,
+    "rel_l2_cpp_vs_oracle": 1.9695921384223965e-06
+  },
+  "output": {
+    "bit_exact_tokens": 0,
+    "rel_l2_cpp_vs_torch": 1.0763380642479136e-07,
+    "rel_l2_torch_vs_oracle": 1.3397942870346311e-06,
+    "rel_l2_cpp_vs_oracle": 1.3448803824113042e-06
+  }
+}

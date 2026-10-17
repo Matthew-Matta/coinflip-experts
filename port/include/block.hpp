@@ -19,6 +19,7 @@ namespace coinflip {
 
 struct BlockConfig {
   int hidden = 2048;
+  int oproj_in = 0;  // o_proj input width (attention heads x head dim); 0 = hidden (OLMoE). Qwen3-30B-A3B: 4096.
   int inter = 1024;
   int n_experts = 64;
   int top_k = 8;
@@ -29,13 +30,15 @@ struct BlockConfig {
 // Weights as float32 values (exactly representable in the checkpoint dtype). Row-major.
 struct BlockWeights {
   BlockConfig cfg;
-  std::vector<float> o_proj;     // [H, H]
+  std::vector<float> o_proj;     // [H, Hin], Hin = oproj_width()
   std::vector<float> norm;       // [H]
   std::vector<float> router;     // [E, H]
   std::vector<float> gate_up;    // [E, 2I, H]: rows 0..I-1 gate, I..2I-1 up
   std::vector<float> down;       // [E, H, I]
   static BlockWeights random(const BlockConfig& cfg, uint64_t seed);  // for tests
 };
+
+inline int oproj_width(const BlockConfig& c) { return c.oproj_in > 0 ? c.oproj_in : c.hidden; }
 
 enum class CombineOrder { ExpertAsc, ExpertDesc, Slot };
 const char* to_string(CombineOrder o);
@@ -58,6 +61,12 @@ struct Numerics {
   bool topk_on_logits = false;         // HF: topk on fp32 probabilities
   bool tiebreak_lower_index = true;    // exact ties go to the lower expert id
   DType weights = DType::BF16;         // routing weights cast before combine (HF: .to(router_logits.dtype))
+  // norm_topk_prob renormalisation (Qwen3-MoE, modeling_qwen3_moe.py:268-269: router_top_value /= sum, in the softmax
+  // dtype): order of the K-term sum over the top-k slots (sorted by descending probability). torch CPU's sum is the
+  // SumKernel.cpp cascade with 4 lanes: reproduces Qwen3-30B-A3B layer 0 topk_weights 1361/1361 bit-exactly given
+  // torch's router_probs (sequential: 727, pairwise: 895).
+  Order renorm_order = Order::TorchCascade;
+  int renorm_block = 4;
   AccSpec expert{DType::FP32, Order::Sequential, 32, true};
   DType combine_acc = DType::BF16;     // HF: index_add_ into a model-dtype buffer
   bool combine_kahan = false;          // combine as a Kahan sum in combine_acc (same order)
@@ -115,7 +124,7 @@ struct RunOptions {
   Profile* profile = nullptr;  // if set, filled with seconds per stage
 };
 
-// Run the block on tokens [0, T) with inputs o_proj_in [T, H] and residual [T, H].
+// Run the block on tokens [0, T) with inputs o_proj_in [T, Hin] and residual [T, H].
 Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, const std::vector<float>& residual,
                 int tokens, const RunOptions& opt);
 

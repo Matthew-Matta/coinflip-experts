@@ -1,0 +1,171 @@
+{
+  "hypothesis": "H-port (PREREG section 1)",
+  "thresholds": {
+    "normalised_margin": 0.0001,
+    "p99_elem_ulp": 8.0
+  },
+  "reference": {
+    "path": "data/export/qwen3-30b-a3b-layer0/torch-float32",
+    "manifest_sha256": "9915866a874d760b7694c37cd3adb7bd2562a455e8064282ae95d3d666aba767",
+    "numerics": {
+      "dtype": "float32",
+      "experts_implementation": "eager",
+      "mirror_equals_module": true,
+      "transformers_source_sha256": "f07ab1b3a17e27612006a447812b83667af7ab3d527afe3ebbdf89dc5dac8a90",
+      "torch_num_threads": 4
+    }
+  },
+  "candidate": {
+    "path": "data/results/qwen3-port/cpp-hf_fp32",
+    "manifest_sha256": "c368ccc95e0c09c6decd916f71729b4142f47a5ee9389c429a2ef1ec26ae216a",
+    "numerics": {
+      "preset": "hf_fp32",
+      "storage": "fp32",
+      "oproj": {
+        "accum": "fp32",
+        "order": "seq",
+        "block": 32,
+        "fma": true,
+        "simd": false,
+        "simd_accs": 4,
+        "simd_native": true,
+        "kahan": false
+      },
+      "rms": "fp32",
+      "rms_accum": "fp32",
+      "rms_kahan": false,
+      "rms_order": "torch_cascade",
+      "rms_block": 4,
+      "router": {
+        "accum": "fp32",
+        "order": "seq",
+        "block": 32,
+        "fma": true,
+        "simd": false,
+        "simd_accs": 4,
+        "simd_native": true,
+        "kahan": false
+      },
+      "gate_out": "fp32",
+      "softmax": "fp32",
+      "topk_on": "probs",
+      "tiebreak": "lower",
+      "renorm_order": "torch_cascade",
+      "renorm_block": 4,
+      "weights": "fp32",
+      "expert": {
+        "accum": "fp32",
+        "order": "seq",
+        "block": 32,
+        "fma": true,
+        "simd": false,
+        "simd_accs": 4,
+        "simd_native": true,
+        "kahan": false
+      },
+      "combine_accum": "fp32",
+      "combine_kahan": false,
+      "combine_order": "expert_asc",
+      "collective": {
+        "n": 1,
+        "topology": "ring",
+        "wire": "fp32",
+        "on": "none"
+      }
+    },
+    "provenance": {
+      "timestamp_utc": "2026-10-17T04:59:04Z",
+      "git_sha": "446a8733ba822d37dd2ba87cd42eda73e7220c46",
+      "git_dirty": true,
+      "compiler": "Apple LLVM 17.0.0 (clang-1700.6.4.2)",
+      "threads": 8,
+      "wall_seconds": 41.7248
+    }
+  },
+  "tokens": 1361,
+  "tokens_above_margin": 1356,
+  "route_mismatch_tokens_above_margin": 0,
+  "route_mismatch_tokens_all": 0,
+  "routes_pass": true,
+  "ops": {
+    "o_proj_out": {
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "resid_sum": {
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "router_input": {
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "router_logits": {
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "router_probs": {
+      "p99_elem_ulp": 6.0,
+      "max_elem_ulp": 12.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "topk_weights": {
+      "p99_elem_ulp": 2.0,
+      "max_elem_ulp": 4.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "expert_gate": {
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "expert_up": {
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "expert_act": {
+      "p99_elem_ulp": 2.0,
+      "max_elem_ulp": 3.0,
+      "dtype": "fp32",
+      "pass": true
+    },
+    "expert_down": {
+      "p99_elem_ulp": 60.0,
+      "max_elem_ulp": 9461760.0,
+      "dtype": "fp32",
+      "pass": false
+    },
+    "combine_terms": {
+      "p99_elem_ulp": 59.0,
+      "max_elem_ulp": 6795966.75,
+      "dtype": "fp32",
+      "pass": false
+    },
+    "output": {
+      "p99_elem_ulp": 60.0,
+      "max_elem_ulp": 1048576.0,
+      "dtype": "fp32",
+      "pass": false
+    }
+  },
+  "ulp_pass": false,
+  "failing_ops": [
+    "expert_down",
+    "combine_terms",
+    "output"
+  ],
+  "verdict": "FAIL"
+}

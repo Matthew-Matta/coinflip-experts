@@ -108,10 +108,21 @@ static BlockConfig small_cfg() {
   return c;
 }
 
-static void inputs(int T, int H, uint64_t seed, std::vector<float>& oin, std::vector<float>& res) {
+// Qwen3-30B-A3B-shaped (scaled down): rectangular o_proj, renormalised top-k, more experts than OLMoE per top-k.
+static BlockConfig small_qwen_cfg() {
+  BlockConfig c = small_cfg();
+  c.oproj_in = 96;
+  c.n_experts = 32;
+  c.top_k = 8;
+  c.norm_topk_prob = true;
+  c.rms_eps = 1e-6;
+  return c;
+}
+
+static void inputs(int T, int H, uint64_t seed, std::vector<float>& oin, std::vector<float>& res, int Hin = 0) {
   std::mt19937_64 rng(seed);
   std::normal_distribution<double> nd(0.0, 1.0);
-  oin.resize(static_cast<size_t>(T) * H);
+  oin.resize(static_cast<size_t>(T) * (Hin > 0 ? Hin : H));
   res.resize(static_cast<size_t>(T) * H);
   for (auto& v : oin) v = static_cast<float>(round_to(DType::BF16, nd(rng)));
   for (auto& v : res) v = static_cast<float>(round_to(DType::BF16, nd(rng)));
@@ -151,11 +162,11 @@ static void test_block_oracle_vs_fp32_and_determinism() {
   CHECK(first_diff(a, b).empty(), "multi-threaded == single-threaded, bit for bit");
 }
 
-static void test_null_patch() {
-  const auto w = BlockWeights::random(small_cfg(), 21);
+static void test_null_patch(const BlockConfig& cfg, const std::string& tag) {
+  const auto w = BlockWeights::random(cfg, 21);
   const int T = 32;
   std::vector<float> oin, res;
-  inputs(T, w.cfg.hidden, 4, oin, res);
+  inputs(T, w.cfg.hidden, 4, oin, res, oproj_width(cfg));
   RunOptions base;
   const Trace clean = run_block(w, oin, res, T, base);
   for (const auto& op : op_order()) {
@@ -167,16 +178,16 @@ static void test_null_patch() {
     p.ref_ids = clean.ids.at("topk_ids");
     o.patches.push_back(p);
     const Trace t = run_block(w, oin, res, T, o);
-    const std::string msg = "null patch on " + op + " changes nothing";
+    const std::string msg = tag + ": null patch on " + op + " changes nothing";
     CHECK(first_diff(clean, t).empty() && t.patch_skipped_tokens == 0, msg.c_str());
   }
 }
 
-static void test_bugs_first_show_at_injected_op() {
-  auto w = BlockWeights::random(small_cfg(), 33);
+static void test_bugs_first_show_at_injected_op(const BlockConfig& cfg, const std::string& tag) {
+  auto w = BlockWeights::random(cfg, 33);
   const int T = 48;
   std::vector<float> oin, res;
-  inputs(T, w.cfg.hidden, 8, oin, res);
+  inputs(T, w.cfg.hidden, 8, oin, res, oproj_width(cfg));
   RunOptions base;
   const Trace clean = run_block(w, oin, res, T, base);
   for (const auto& info : bug_registry()) {
@@ -198,7 +209,7 @@ static void test_bugs_first_show_at_injected_op() {
     const bool ok = got == info.injected_op || (got.empty() && info.type == "topk_tiebreak_reversed");
     if (!ok) std::printf("  bug %s: first diff at '%s', registry says '%s'\n", info.type.c_str(), got.c_str(),
                          info.injected_op.c_str());
-    CHECK(ok, ("bug " + info.type + " first shows at its injected op").c_str());
+    CHECK(ok, (tag + ": bug " + info.type + " first shows at its injected op").c_str());
   }
 }
 
@@ -325,6 +336,27 @@ static void test_e8_formats_kahan_and_profile() {
   CHECK(first_diff(tb, tp).empty(), "profiling does not change results");
 }
 
+// norm_topk_prob: weights are the chosen probabilities divided by their sum, and the sum order is configurable.
+static void test_renorm() {
+  const auto w = BlockWeights::random(small_qwen_cfg(), 5);
+  const int T = 16, K = w.cfg.top_k;
+  std::vector<float> oin, res;
+  inputs(T, w.cfg.hidden, 9, oin, res, oproj_width(w.cfg));
+  RunOptions o;
+  o.num.storage = o.num.gate_out = o.num.weights = o.num.combine_acc = DType::FP32;
+  const Trace t = run_block(w, oin, res, T, o);
+  double worst = 0;
+  for (int i = 0; i < T; ++i) {
+    double s = 0;
+    for (int k = 0; k < K; ++k) s += t.f.at("topk_weights")[static_cast<size_t>(i) * K + k];
+    worst = std::max(worst, std::fabs(s - 1.0));
+  }
+  CHECK(worst < 1e-6, "renormalised top-k weights sum to 1");
+  RunOptions p = o;
+  p.num.renorm_order = Order::Pairwise;
+  CHECK(first_diff(t, run_block(w, oin, res, T, p)) != "o_proj_out", "renorm order only acts after selection");
+}
+
 int main() {
   test_rounding_known_values();
   test_fast_rounding_matches_slow();
@@ -332,8 +364,11 @@ int main() {
   test_fp32_fma_matches_hardware();
   test_collective();
   test_block_oracle_vs_fp32_and_determinism();
-  test_null_patch();
-  test_bugs_first_show_at_injected_op();
+  test_null_patch(small_cfg(), "olmoe-shaped");
+  test_bugs_first_show_at_injected_op(small_cfg(), "olmoe-shaped");
+  test_null_patch(small_qwen_cfg(), "qwen-shaped");
+  test_bugs_first_show_at_injected_op(small_qwen_cfg(), "qwen-shaped");
+  test_renorm();
   test_npy_roundtrip_and_sha();
   test_simd_matches_documented_order();
   test_e8_formats_kahan_and_profile();

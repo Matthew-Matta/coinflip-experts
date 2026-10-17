@@ -66,7 +66,10 @@ port/build/moe_run --export DIR --numerics numerics.json --dump OUT_DIR \
   `gate_out`, `softmax`, `weights`, `combine_accum` (dtypes `fp64|fp32|bf16|fp16`); `{oproj,router,expert}_{accum,order,
   block,fma}` (orders `seq|pairwise|blocked|strided`); `topk_on` (`probs|logits`); `tiebreak` (`lower|higher`);
   `combine_order` (`expert_asc|expert_desc|slot`); `collective_{n,topology,wire,on}` (`ring|tree`; `none|oproj|down|both`).
-  Unknown keys are an error. The resolved settings are echoed into the manifest.
+  Additive keys (2026-10-17): `{oproj,router,expert}_{simd,simd_accs,kahan}`; `rms_accum` (variance-sum accumulator,
+  defaults to `rms`), `rms_kahan`, `combine_kahan`; dtypes may also be `e8m<m>` (8-bit exponent, m mantissa bits,
+  1-51). Unknown keys are an error. The resolved settings are echoed into the manifest.
+- `--ops a,b,c` writes only those ops; `--profile FILE` writes wall seconds per block stage as JSON.
 - `--patch OP=path.npy`: replace that op's output with the given array, then recompute everything downstream. A patch
   on a slot-aligned op (`topk_weights` and the expert / combine ops) also needs `--patch-ids` (the patch source's
   `topk_ids`): values are matched per expert id, and only on tokens whose top-k set equals the source's; elsewhere the
@@ -102,5 +105,8 @@ that split (sliced by `token_range`), for every comparison including patch-check
 ## Changelog
 - 2026-10-15: initial version.
 - 2026-10-16: `--split` for routediff calibrate/compare; export and split consistency checks.
+- 2026-10-17 (additive, awaiting sign-off): moe_run numerics keys for SIMD, Kahan, `rms_accum`, `renorm_{order,block}`
+  and `e8m<m>` dtypes; `--ops`, `--profile`; moe_run reads the optional export config key `o_proj_input_size`
+  (rectangular o_proj, e.g. Qwen3-30B-A3B: weights [H, Hin], `inputs/o_proj_in.npy` [T, Hin]; absent = square).
 - 2026-10-15: rerun-command contract, `--list-bugs`, report fields for cumulative patching (`sites`, `patch_checks`).
 - 2026-10-15: `moe_run` flags finalised (`--patch-ids`, `--threads`), numerics JSON keys listed, bug registry pointer.
