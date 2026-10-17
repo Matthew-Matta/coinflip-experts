@@ -12,14 +12,20 @@ import time
 import uuid
 
 
+def save_census(records, directory, summary):
+    """Snapshot successful measurements without marking the run done before I/O."""
+    import pandas as pd
+    from coinflip.provenance import save_run
+    save_run(pd.DataFrame(records),directory,{**summary,'status':'PASS'},name='census')
+
+
 def execute(prepared, rows, mode, command, expected_patch, pins, root='/weights'):
     import numpy as np
     import requests
-    from coinflip.provenance import collect,save_run
+    from coinflip.provenance import collect
     from census.protocol import batches,parse_prefills,validate_tokens
     from sglang.srt.state_capturer.routed_experts import extract_routed_experts_from_meta_info
     import sglang.srt.models.olmoe as olmoe
-    import pandas as pd
     directory=Path(root)/'census-results'/f'{mode}-{uuid.uuid4().hex[:12]}'
     directory.mkdir(parents=True)
     log=directory/'server.log';proc=None;handle=None;start=time.perf_counter()
@@ -109,7 +115,7 @@ def execute(prepared, rows, mode, command, expected_patch, pins, root='/weights'
                     flips=np.any(saved[('r0a',i)]!=saved[(label,i)],axis=-1)
                     records.append(dict(prompt_id=row['prompt_id'],source=row['source'],config=label,
                                         units=flips.size,flips=int(flips.sum()),r0_flips=int(r0.sum()),any_flip=bool(flips.any())))
-            save_run(pd.DataFrame(records),directory,summary,name='census')
+            save_census(records,directory,summary)
             (directory/'batch_composition.json').write_text(json.dumps(batch_records,indent=2))
             summary['counts']=records
         summary['status']='PASS'

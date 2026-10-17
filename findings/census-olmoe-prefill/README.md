@@ -71,6 +71,13 @@ is `data/census/olmoe_tokens_v1.json`. SHA-verified measurement-time Python sour
 snapshots are included in `source/`; the normal runner later gained archive and
 successful-gate-input checks without changing this measurement.
 
+The frozen `census.provenance.json` records `config.status: FAIL` because the
+measurement-time worker saved the sidecar before assigning `PASS`
+(`census/worker.py:112` vs `:115` in that source version). The final `summary.json`
+records `PASS`; counts and verification are unaffected. The frozen sidecar is
+retained unchanged. The writer now snapshots `PASS` for future successful
+measurement writes while retaining failure handling if output writing fails.
+
 ## Reproduce
 
 ```sh
