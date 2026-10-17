@@ -28,15 +28,24 @@ def require_version() -> None:
 
 
 def make_modules(c: dict, arrays: dict, dtype: torch.dtype, *, implementation='eager', device='cpu'):
-    cfg = OlmoeConfig(hidden_size=c['hidden_size'], intermediate_size=c['intermediate_size'],
-                      num_experts=c['num_experts'], num_experts_per_tok=c['top_k'],
-                      norm_topk_prob=c['norm_topk_prob'], rms_norm_eps=c['rms_norm_eps'],
-                      hidden_act='silu')
+    if c.get('model_type') == 'qwen3_moe':
+        from transformers import Qwen3MoeConfig
+        from transformers.models.qwen3_moe.modeling_qwen3_moe import Qwen3MoeRMSNorm, Qwen3MoeSparseMoeBlock
+        cfg = Qwen3MoeConfig(hidden_size=c['hidden_size'], moe_intermediate_size=c['intermediate_size'],
+                            num_experts=c['num_experts'], num_experts_per_tok=c['top_k'],
+                            norm_topk_prob=c['norm_topk_prob'], rms_norm_eps=c['rms_norm_eps'])
+        block_class, norm_class = Qwen3MoeSparseMoeBlock, Qwen3MoeRMSNorm
+    else:
+        block_class, norm_class = OlmoeSparseMoeBlock, OlmoeRMSNorm
+        cfg = OlmoeConfig(hidden_size=c['hidden_size'], intermediate_size=c['intermediate_size'],
+                          num_experts=c['num_experts'], num_experts_per_tok=c['top_k'],
+                          norm_topk_prob=c['norm_topk_prob'], rms_norm_eps=c['rms_norm_eps'],
+                          hidden_act='silu')
     cfg._experts_implementation = implementation
     # Allocate directly in the model dtype, avoiding a large temporary fp32 block.
     with torch.device('meta'):
-        module = OlmoeSparseMoeBlock(cfg)
-        norm = OlmoeRMSNorm(c['hidden_size'], eps=c['rms_norm_eps'])
+        module = block_class(cfg)
+        norm = norm_class(c['hidden_size'], eps=c['rms_norm_eps'])
     tensor = lambda name: torch.from_numpy(arrays[name]).to(device=device, dtype=dtype)
     module.load_state_dict({
         'gate.weight': tensor('router'),
@@ -106,7 +115,11 @@ def dump_block(export: Path, destination: Path, dtype_name: str = 'bfloat16') ->
         entries.append({'name': name, 'file': f'{name}.npy', 'shape': list(ops[name].shape),
                         'logical_dtype': 'int32' if integer else ('fp32' if name == 'router_probs' or dtype_name == 'float32' else 'bf16'),
                         'stage': 'selection' if OPS.index(name) < 6 else 'post-selection'})
-    source = Path(inspect.getsourcefile(OlmoeSparseMoeBlock))
+    source_class = OlmoeSparseMoeBlock
+    if c.get('model_type') == 'qwen3_moe':
+        from transformers.models.qwen3_moe.modeling_qwen3_moe import Qwen3MoeSparseMoeBlock
+        source_class = Qwen3MoeSparseMoeBlock
+    source = Path(inspect.getsourcefile(source_class))
     manifest = {
         'run_id': destination.name, 'backend': 'torch-cpu',
         'export': {'path': str(export), 'config_sha256': sha256(export / 'config.json')},

@@ -121,7 +121,7 @@ def capture_and_export(model, selected: list[dict], layers: list[int], output: P
             save_array(directory / 'inputs' / f'{name}.npy', value)
         save_array(directory / 'inputs/token_ids.npy', ids[valid], integer=True)
         write_json(directory / 'inputs/token_meta.json', meta)
-        source = Path(inspect.getsourcefile(OlmoeDecoderLayer))
+        source = Path(inspect.getsourcefile(type(decoder)))
         config = dict(model_id=model_id, hf_revision=revision, layer=layer,
                       hidden_size=cfg.hidden_size, intermediate_size=cfg.intermediate_size,
                       num_experts=cfg.num_experts, top_k=cfg.num_experts_per_tok,
@@ -133,6 +133,9 @@ def capture_and_export(model, selected: list[dict], layers: list[int], output: P
                                    valid_tokens=len(meta), wall_seconds=elapsed, peak_rss_gib=peak_rss_gib(),
                                    transformers_source_sha256=sha256(source)),
                       provenance=collect({'layer': layer, 'revision': revision}))
+        if cfg.model_type == 'qwen3_moe':
+            config.update(model_type=cfg.model_type, o_proj_input_size=decoder.self_attn.o_proj.weight.shape[1],
+                          port_compatible=False, port_limitation='Current C++ port assumes square o_proj; rectangular Qwen export is reference-only.')
         write_json(directory / 'config.json', config)
         print(f'PASS export layer={layer} tokens={len(meta)} capture_s={elapsed:.3f} peak_rss_GiB={peak_rss_gib():.3f}', flush=True)
         paths.append(directory)

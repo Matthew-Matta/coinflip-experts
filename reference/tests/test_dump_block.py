@@ -16,14 +16,14 @@ def tiny_export(tmp_path):
     (root / 'weights').mkdir(parents=True)
     (root / 'inputs').mkdir()
     c = dict(model_id='synthetic-test-fixture', hf_revision='fixture', layer=0,
-             hidden_size=8, intermediate_size=4, num_experts=4, top_k=2,
+             hidden_size=8, intermediate_size=8, num_experts=4, top_k=2,
              norm_topk_prob=False, rms_norm_eps=1e-5, model_dtype='bfloat16',
              checkpoint_dtype='bfloat16', experts_implementation='eager',
              transformers_version='5.12.1', torch_version=torch.__version__, provenance={})
     write_json(root / 'config.json', c)
     gen = torch.Generator().manual_seed(4)
     for name, shape in {'o_proj': (8, 8), 'post_attention_layernorm': (8,),
-                        'router': (4, 8), 'gate_up_proj': (4, 8, 8), 'down_proj': (4, 8, 4)}.items():
+                        'router': (4, 8), 'gate_up_proj': (4, 16, 8), 'down_proj': (4, 8, 8)}.items():
         value = (torch.randn(shape, generator=gen) * 0.2).bfloat16()
         save_array(root / 'weights' / f'{name}.npy', value)
     for name in ('residual', 'o_proj_in'):
@@ -166,3 +166,76 @@ def test_mps_fallback_is_rejected(tiny_export, monkeypatch):
     monkeypatch.setenv('PYTORCH_ENABLE_MPS_FALLBACK','1')
     with pytest.raises(RuntimeError,match='fallback'):
         compute_backend(c,a,torch.float32,'mps','eager')
+
+
+@pytest.mark.parametrize('implementation', ['eager','grouped_mm'])
+@pytest.mark.parametrize('dtype', [torch.float32,torch.bfloat16])
+def test_backend_forward_hook_null_patch(tiny_export,tmp_path,implementation,dtype):
+    from reference.backend_pairs import compute_backend
+    c,arrays=load_export(tiny_export)
+    baseline,_=compute_backend(c,arrays,dtype,'cpu',implementation)
+    patches={}
+    for name,value in baseline.items():
+        path=tmp_path/f'{name}.npy';save_array(path,value,integer=name=='topk_ids');patches[name]=path
+    hooked,_=compute_backend(c,arrays,dtype,'cpu',implementation,patches,patches['topk_ids'])
+    assert all(torch.equal(baseline[name],hooked[name]) for name in OPS)
+
+
+def test_backend_hook_recomputes_downstream(tiny_export,tmp_path):
+    from reference.backend_pairs import compute_backend
+    c,a=load_export(tiny_export)
+    baseline,_=compute_backend(c,a,torch.float32,'cpu','grouped_mm')
+    path=tmp_path/'gate.npy';save_array(path,baseline['expert_gate']+1)
+    ids=tmp_path/'ids.npy';save_array(ids,baseline['topk_ids'],integer=True)
+    patched,_=compute_backend(c,a,torch.float32,'cpu','grouped_mm',{'expert_gate':path},ids)
+    assert torch.equal(patched['router_logits'],baseline['router_logits'])
+    assert not torch.equal(patched['expert_act'],baseline['expert_act'])
+    assert not torch.equal(patched['output'],baseline['output'])
+
+
+def test_qwen_rectangular_reference(tiny_export):
+    from reference.dump_block import compute_ops
+    c,a=load_export(tiny_export);c.update(model_type='qwen3_moe',o_proj_input_size=12,norm_topk_prob=True)
+    a['o_proj']=np.resize(a['o_proj'],(8,12)).copy();a['o_proj_in']=np.resize(a['o_proj_in'],(5,12)).copy()
+    ops=compute_ops(c,a,torch.bfloat16)
+    assert ops['output'].shape==(5,8)
+
+
+def test_qwen_download_plan_selects_only_layer0():
+    from reference.export_qwen import required_keys
+    keys,shards=required_keys({'model.embed_tokens.weight':'one','model.layers.0.mlp.gate.weight':'one',
+                               'model.layers.1.mlp.gate.weight':'two','model.norm.weight':'last'})
+    assert len(keys)==2 and shards==['one']
+
+
+def test_slot_patch_aligns_expert_ids(tiny_export,tmp_path):
+    from reference.backend_pairs import compute_backend
+    c,a=load_export(tiny_export)
+    baseline,_=compute_backend(c,a,torch.float32,'cpu','eager')
+    path=tmp_path/'gate.npy';save_array(path,baseline['expert_gate'].flip(1))
+    ids=tmp_path/'ids.npy';save_array(ids,baseline['topk_ids'].flip(1),integer=True)
+    patched,_=compute_backend(c,a,torch.float32,'cpu','eager',{'expert_gate':path},ids)
+    assert torch.equal(patched['expert_gate'],baseline['expert_gate'])
+    assert torch.equal(patched['output'],baseline['output'])
+
+
+def test_nccl_ulp_metric_including_zero():
+    from reference.nccl_worker import max_ulp
+    ref=np.array([1.],dtype=np.float32)
+    assert max_ulp(np.nextafter(ref,np.float32(2)),ref,'fp32')==1
+    assert max_ulp(np.array([1+2**-7],dtype=np.float32),ref,'bf16')==1
+    assert max_ulp(np.array([2**-133],dtype=np.float32),np.zeros(1,dtype=np.float32),'bf16')==1
+
+
+def test_rerun_cli_accepts_out_and_patch(tiny_export,tmp_path,monkeypatch):
+    import sys
+    from reference.backend_pairs import main,compute_backend
+    c,a=load_export(tiny_export)
+    baseline,_=compute_backend(c,a,torch.float32,'cpu','eager')
+    patch=tmp_path/'output.npy';save_array(patch,baseline['output']+1)
+    dest=tmp_path/'rerun'
+    monkeypatch.setattr(sys,'argv',['backend_pairs','--export',str(tiny_export),'--out',str(dest),
+                                    '--dtype','float32','--implementation','eager','--patch',f'output={patch}'])
+    main()
+    assert np.array_equal(np.load(dest/'output.npy'),(baseline['output']+1).numpy())
+    assert not json.loads((dest/'manifest.json').read_text())['numerics']['mirror_equals_module']

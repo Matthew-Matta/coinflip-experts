@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "null_patch_equals_unpatched": true,
+  "unpatched_equals_original_dumps": true,
+  "tokens": 1348,
+  "all_ops": 13
+}

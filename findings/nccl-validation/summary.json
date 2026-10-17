@@ -1,0 +1,725 @@
+{
+  "status": "PASS",
+  "input_sha256": {
+    "down-n2-bf16-partials.npy": "3c88f9105237dd344d2bd00fe302c0bb75c39689add91bd1a64e3a8d253307c0",
+    "down-n2-bf16-ring.npy": "50d63adad1e0f78b537df636289a76393f0a30299c053bea257fe5534f2ce419",
+    "down-n2-bf16-tree.npy": "50d63adad1e0f78b537df636289a76393f0a30299c053bea257fe5534f2ce419",
+    "down-n2-fp32-partials.npy": "bf2878994272aaf7d0a43fa9ea5d7480e8d4d4b283f036f5f9bf587fa03e32e1",
+    "down-n2-fp32-ring.npy": "35153021a33301e99a31beb6196c3ae5e56bd52fff7a1e6c11b4dd1127bce6b2",
+    "down-n2-fp32-tree.npy": "35153021a33301e99a31beb6196c3ae5e56bd52fff7a1e6c11b4dd1127bce6b2",
+    "down-n4-bf16-partials.npy": "7568c780a10f3d8e710e630b7fa04371ee53f441df8712ab30971eae913da1c9",
+    "down-n4-bf16-ring.npy": "5b4a11eac69d3a2d2ebbfc325e45bce16c00ee78bc19b1239d9b7fbc4ea62993",
+    "down-n4-bf16-tree.npy": "e26b164859f7368918a2f2641d058d1064808f723e382149efef7d628bb1bce1",
+    "down-n4-fp32-partials.npy": "ea7039522b03b27560d3d80fac6a91b4c3b0ba65430c2884b534685e3f2473ad",
+    "down-n4-fp32-ring.npy": "b0bc75c527d73d400e99a2d5419fd3d3fda082913df99c9b3bb274f28e4ea7c7",
+    "down-n4-fp32-tree.npy": "48c5230d29b7e73cee4760838a0e6c5df5e2786f58c2724238771dcf977d808e",
+    "oproj-n2-bf16-partials.npy": "380ede03e06fe3ec73ab6032f34b672b96ec64a215cde88038d0434a90aa7e28",
+    "oproj-n2-bf16-ring.npy": "42899b01e9e6251c419bdadc0dbb9dfaeb62754834d89dfd6f6c9c2c1596dffb",
+    "oproj-n2-bf16-tree.npy": "42899b01e9e6251c419bdadc0dbb9dfaeb62754834d89dfd6f6c9c2c1596dffb",
+    "oproj-n2-fp32-partials.npy": "8b68b2989f172b10aa50936a6a1408d75939cc8dfc620d6c73d9e593121c3104",
+    "oproj-n2-fp32-ring.npy": "d6972a29c05fd09b23a9b36f08e86697a7ba8d1ec27a1d6876873aa6f6c8618c",
+    "oproj-n2-fp32-tree.npy": "d6972a29c05fd09b23a9b36f08e86697a7ba8d1ec27a1d6876873aa6f6c8618c",
+    "oproj-n4-bf16-partials.npy": "fb98c3bdfb7953e7b38a5d91d10b0e1634c6e8ccd61c9dea9be4109c79d3b32c",
+    "oproj-n4-bf16-ring.npy": "1fcd04ef8dc151a6387b138bdc50ae63d1d0525747f7051352332124e995834f",
+    "oproj-n4-bf16-tree.npy": "bd48890d5cbaf3ce5e8d16f5fe7c54d205c029f4acb5e44f2bb9585abb3d90f0",
+    "oproj-n4-fp32-partials.npy": "69636a205f4ac2377b97eff0f2f6e94a714085e2907ce60cf48e5e43212c1693",
+    "oproj-n4-fp32-ring.npy": "44a70eb0285b5777f9a804c5b3a5604a0cdf7fdce75444337ec1ec1124d0725d",
+    "oproj-n4-fp32-tree.npy": "85edf3579c831c0eb2fdc34d63a9d0de06f049ad4072b4800fc6c235329f8ff3"
+  },
+  "numerical_mismatch_is_valid": true,
+  "directory": "/weights/nccl-results/c09e4c336db6",
+  "selection": "64 captured positions, first two per original prompt",
+  "nvidia_smi": "Sat Oct 17 04:51:53 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 610.57.04              KMD Version: 610.57.04     CUDA UMD Version: 13.3     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA L4                      On  |   00000000:AE:00.0 Off |                    0 |\n| N/A   40C    P8             16W /   72W |       3MiB /  23034MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n|   1  NVIDIA L4                      On  |   00000000:B0:00.0 Off |                    0 |\n| N/A   38C    P8             15W /   72W |       3MiB /  23034MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n|   2  NVIDIA L4                      On  |   00000000:B2:00.0 Off |                    0 |\n| N/A   37C    P8             16W /   72W |       3MiB /  23034MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n|   3  NVIDIA L4                      On  |   00000000:B4:00.0 Off |                    0 |\n| N/A   38C    P8             15W /   72W |       3MiB /  23034MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|  No running processes found                                                             |\n+-----------------------------------------------------------------------------------------+\n",
+  "interconnect_topology": {
+    "command": "nvidia-smi topo -m",
+    "returncode": 255,
+    "stdout": "\t\u001b[4mGPU0\tGPU1\tGPU2\tGPU3\tCPU Affinity\tNUMA Affinity\tGPU NUMA ID\u001b[0m\nFailed to run topology matrix\n\n",
+    "stderr": "",
+    "limitation": "Do not infer PCIe/NVLink topology if this command fails."
+  },
+  "pci_bus_ids": {
+    "returncode": 0,
+    "stdout": "NVIDIA L4, [Unknown Error]\nNVIDIA L4, [Unknown Error]\nNVIDIA L4, [Unknown Error]\nNVIDIA L4, [Unknown Error]\n",
+    "stderr": ""
+  },
+  "nccl_version": [
+    2,
+    29,
+    7
+  ],
+  "runs": [
+    {
+      "results": [
+        {
+          "target": "oproj",
+          "n": 2,
+          "rank": 0,
+          "dtype": "fp32",
+          "algo": "Ring",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 131072,
+          "max_ulp": 0.0
+        },
+        {
+          "target": "oproj",
+          "n": 2,
+          "rank": 0,
+          "dtype": "bf16",
+          "algo": "Ring",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 131072,
+          "max_ulp": 0.0
+        },
+        {
+          "target": "down",
+          "n": 2,
+          "rank": 0,
+          "dtype": "fp32",
+          "algo": "Ring",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 1048576,
+          "max_ulp": 0.0
+        },
+        {
+          "target": "down",
+          "n": 2,
+          "rank": 0,
+          "dtype": "bf16",
+          "algo": "Ring",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 1048576,
+          "max_ulp": 0.0
+        }
+      ],
+      "gpu": "NVIDIA L4",
+      "nccl_version": [
+        2,
+        29,
+        7
+      ],
+      "torch_version": "2.13.0+cu130",
+      "cuda_version": "13.0"
+    },
+    {
+      "results": [
+        {
+          "target": "oproj",
+          "n": 2,
+          "rank": 1,
+          "dtype": "fp32",
+          "algo": "Ring",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 131072,
+          "max_ulp": 0.0
+        },
+        {
+          "target": "oproj",
+          "n": 2,
+          "rank": 1,
+          "dtype": "bf16",
+          "algo": "Ring",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 131072,
+          "max_ulp": 0.0
+        },
+        {
+          "target": "down",
+          "n": 2,
+          "rank": 1,
+          "dtype": "fp32",
+          "algo": "Ring",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 1048576,
+          "max_ulp": 0.0
+        },
+        {
+          "target": "down",
+          "n": 2,
+          "rank": 1,
+          "dtype": "bf16",
+          "algo": "Ring",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 1048576,
+          "max_ulp": 0.0
+        }
+      ],
+      "gpu": "NVIDIA L4",
+      "nccl_version": [
+        2,
+        29,
+        7
+      ],
+      "torch_version": "2.13.0+cu130",
+      "cuda_version": "13.0"
+    },
+    {
+      "results": [
+        {
+          "target": "oproj",
+          "n": 2,
+          "rank": 0,
+          "dtype": "fp32",
+          "algo": "Tree",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 131072,
+          "max_ulp": 0.0
+        },
+        {
+          "target": "oproj",
+          "n": 2,
+          "rank": 0,
+          "dtype": "bf16",
+          "algo": "Tree",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 131072,
+          "max_ulp": 0.0
+        },
+        {
+          "target": "down",
+          "n": 2,
+          "rank": 0,
+          "dtype": "fp32",
+          "algo": "Tree",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 1048576,
+          "max_ulp": 0.0
+        },
+        {
+          "target": "down",
+          "n": 2,
+          "rank": 0,
+          "dtype": "bf16",
+          "algo": "Tree",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 1048576,
+          "max_ulp": 0.0
+        }
+      ],
+      "gpu": "NVIDIA L4",
+      "nccl_version": [
+        2,
+        29,
+        7
+      ],
+      "torch_version": "2.13.0+cu130",
+      "cuda_version": "13.0"
+    },
+    {
+      "results": [
+        {
+          "target": "oproj",
+          "n": 2,
+          "rank": 1,
+          "dtype": "fp32",
+          "algo": "Tree",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 131072,
+          "max_ulp": 0.0
+        },
+        {
+          "target": "oproj",
+          "n": 2,
+          "rank": 1,
+          "dtype": "bf16",
+          "algo": "Tree",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 131072,
+          "max_ulp": 0.0
+        },
+        {
+          "target": "down",
+          "n": 2,
+          "rank": 1,
+          "dtype": "fp32",
+          "algo": "Tree",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 1048576,
+          "max_ulp": 0.0
+        },
+        {
+          "target": "down",
+          "n": 2,
+          "rank": 1,
+          "dtype": "bf16",
+          "algo": "Tree",
+          "bitwise_match": true,
+          "mismatched_elements": 0,
+          "elements": 1048576,
+          "max_ulp": 0.0
+        }
+      ],
+      "gpu": "NVIDIA L4",
+      "nccl_version": [
+        2,
+        29,
+        7
+      ],
+      "torch_version": "2.13.0+cu130",
+      "cuda_version": "13.0"
+    },
+    {
+      "results": [
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 0,
+          "dtype": "fp32",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 41399,
+          "elements": 131072,
+          "max_ulp": 12288.0
+        },
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 0,
+          "dtype": "bf16",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 43738,
+          "elements": 131072,
+          "max_ulp": 3.32306998946229e+35
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 0,
+          "dtype": "fp32",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 328970,
+          "elements": 1048576,
+          "max_ulp": 1048576.0
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 0,
+          "dtype": "bf16",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 327421,
+          "elements": 1048576,
+          "max_ulp": 2.658455991569832e+36
+        }
+      ],
+      "gpu": "NVIDIA L4",
+      "nccl_version": [
+        2,
+        29,
+        7
+      ],
+      "torch_version": "2.13.0+cu130",
+      "cuda_version": "13.0"
+    },
+    {
+      "results": [
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 1,
+          "dtype": "fp32",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 41399,
+          "elements": 131072,
+          "max_ulp": 12288.0
+        },
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 1,
+          "dtype": "bf16",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 43738,
+          "elements": 131072,
+          "max_ulp": 3.32306998946229e+35
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 1,
+          "dtype": "fp32",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 328970,
+          "elements": 1048576,
+          "max_ulp": 1048576.0
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 1,
+          "dtype": "bf16",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 327421,
+          "elements": 1048576,
+          "max_ulp": 2.658455991569832e+36
+        }
+      ],
+      "gpu": "NVIDIA L4",
+      "nccl_version": [
+        2,
+        29,
+        7
+      ],
+      "torch_version": "2.13.0+cu130",
+      "cuda_version": "13.0"
+    },
+    {
+      "results": [
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 2,
+          "dtype": "fp32",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 41399,
+          "elements": 131072,
+          "max_ulp": 12288.0
+        },
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 2,
+          "dtype": "bf16",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 43738,
+          "elements": 131072,
+          "max_ulp": 3.32306998946229e+35
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 2,
+          "dtype": "fp32",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 328970,
+          "elements": 1048576,
+          "max_ulp": 1048576.0
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 2,
+          "dtype": "bf16",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 327421,
+          "elements": 1048576,
+          "max_ulp": 2.658455991569832e+36
+        }
+      ],
+      "gpu": "NVIDIA L4",
+      "nccl_version": [
+        2,
+        29,
+        7
+      ],
+      "torch_version": "2.13.0+cu130",
+      "cuda_version": "13.0"
+    },
+    {
+      "results": [
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 3,
+          "dtype": "fp32",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 41399,
+          "elements": 131072,
+          "max_ulp": 12288.0
+        },
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 3,
+          "dtype": "bf16",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 43738,
+          "elements": 131072,
+          "max_ulp": 3.32306998946229e+35
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 3,
+          "dtype": "fp32",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 328970,
+          "elements": 1048576,
+          "max_ulp": 1048576.0
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 3,
+          "dtype": "bf16",
+          "algo": "Ring",
+          "bitwise_match": false,
+          "mismatched_elements": 327421,
+          "elements": 1048576,
+          "max_ulp": 2.658455991569832e+36
+        }
+      ],
+      "gpu": "NVIDIA L4",
+      "nccl_version": [
+        2,
+        29,
+        7
+      ],
+      "torch_version": "2.13.0+cu130",
+      "cuda_version": "13.0"
+    },
+    {
+      "results": [
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 0,
+          "dtype": "fp32",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 40060,
+          "elements": 131072,
+          "max_ulp": 6144.0
+        },
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 0,
+          "dtype": "bf16",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 41666,
+          "elements": 131072,
+          "max_ulp": 3.32306998946229e+35
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 0,
+          "dtype": "fp32",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 306549,
+          "elements": 1048576,
+          "max_ulp": 1048576.0
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 0,
+          "dtype": "bf16",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 306765,
+          "elements": 1048576,
+          "max_ulp": 1.329227995784916e+36
+        }
+      ],
+      "gpu": "NVIDIA L4",
+      "nccl_version": [
+        2,
+        29,
+        7
+      ],
+      "torch_version": "2.13.0+cu130",
+      "cuda_version": "13.0"
+    },
+    {
+      "results": [
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 1,
+          "dtype": "fp32",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 40060,
+          "elements": 131072,
+          "max_ulp": 6144.0
+        },
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 1,
+          "dtype": "bf16",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 41666,
+          "elements": 131072,
+          "max_ulp": 3.32306998946229e+35
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 1,
+          "dtype": "fp32",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 306549,
+          "elements": 1048576,
+          "max_ulp": 1048576.0
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 1,
+          "dtype": "bf16",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 306765,
+          "elements": 1048576,
+          "max_ulp": 1.329227995784916e+36
+        }
+      ],
+      "gpu": "NVIDIA L4",
+      "nccl_version": [
+        2,
+        29,
+        7
+      ],
+      "torch_version": "2.13.0+cu130",
+      "cuda_version": "13.0"
+    },
+    {
+      "results": [
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 2,
+          "dtype": "fp32",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 40060,
+          "elements": 131072,
+          "max_ulp": 6144.0
+        },
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 2,
+          "dtype": "bf16",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 41666,
+          "elements": 131072,
+          "max_ulp": 3.32306998946229e+35
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 2,
+          "dtype": "fp32",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 306549,
+          "elements": 1048576,
+          "max_ulp": 1048576.0
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 2,
+          "dtype": "bf16",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 306765,
+          "elements": 1048576,
+          "max_ulp": 1.329227995784916e+36
+        }
+      ],
+      "gpu": "NVIDIA L4",
+      "nccl_version": [
+        2,
+        29,
+        7
+      ],
+      "torch_version": "2.13.0+cu130",
+      "cuda_version": "13.0"
+    },
+    {
+      "results": [
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 3,
+          "dtype": "fp32",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 40060,
+          "elements": 131072,
+          "max_ulp": 6144.0
+        },
+        {
+          "target": "oproj",
+          "n": 4,
+          "rank": 3,
+          "dtype": "bf16",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 41666,
+          "elements": 131072,
+          "max_ulp": 3.32306998946229e+35
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 3,
+          "dtype": "fp32",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 306549,
+          "elements": 1048576,
+          "max_ulp": 1048576.0
+        },
+        {
+          "target": "down",
+          "n": 4,
+          "rank": 3,
+          "dtype": "bf16",
+          "algo": "Tree",
+          "bitwise_match": false,
+          "mismatched_elements": 306765,
+          "elements": 1048576,
+          "max_ulp": 1.329227995784916e+36
+        }
+      ],
+      "gpu": "NVIDIA L4",
+      "nccl_version": [
+        2,
+        29,
+        7
+      ],
+      "torch_version": "2.13.0+cu130",
+      "cuda_version": "13.0"
+    }
+  ],
+  "wall_seconds": 41.124615022
+}

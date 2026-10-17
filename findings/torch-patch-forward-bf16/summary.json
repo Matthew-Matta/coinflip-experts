@@ -1,0 +1,39 @@
+{
+  "exploratory": true,
+  "tolerances_sha256": "01fae51b5dc969a62529a3466732189af7cf656fcedf25bef3a073960ffd07a0",
+  "split": "evaluation",
+  "comparisons": [
+    {
+      "layer": 0,
+      "device": "cpu",
+      "verdict": "no op exceeds its tolerance",
+      "flagged_ops": [],
+      "patch_checks": [],
+      "route_mismatch_tokens": 0
+    },
+    {
+      "layer": 0,
+      "device": "mps",
+      "verdict": "no op exceeds its tolerance",
+      "flagged_ops": [],
+      "patch_checks": [],
+      "route_mismatch_tokens": 6
+    },
+    {
+      "layer": 7,
+      "device": "cpu",
+      "verdict": "no op exceeds its tolerance",
+      "flagged_ops": [],
+      "patch_checks": [],
+      "route_mismatch_tokens": 0
+    },
+    {
+      "layer": 7,
+      "device": "mps",
+      "verdict": "no op exceeds its tolerance",
+      "flagged_ops": [],
+      "patch_checks": [],
+      "route_mismatch_tokens": 4
+    }
+  ]
+}

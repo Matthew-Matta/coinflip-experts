@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "revision": "ad44e777bcd18fa416d9da3bd8f70d33ebb85d39",
+  "downloaded_shards": [
+    "model-00001-of-00016.safetensors"
+  ],
+  "shard_bytes": 3999417504,
+  "peak_rss_gib": 3.6602630615234375,
+  "seconds": 456.0068574590259,
+  "dumps": [
+    "data/export/qwen3-30b-a3b-layer0/torch-bfloat16",
+    "data/export/qwen3-30b-a3b-layer0/torch-float32"
+  ],
+  "mirror_equals_module": true,
+  "final_norm_omitted": true,
+  "scope": "Single truncated layer, reference-only rectangular o_proj; not full-model generation."
+}

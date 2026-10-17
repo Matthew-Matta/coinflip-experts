@@ -16,4 +16,4 @@ modal = ["modal==1.6.1"]
 include = ["coinflip*", "routetrace*", "census*", "attribution*", "routediff*", "budget*", "reference*", "evaluation*", "analysis*"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests", "reference/tests", "modal/tests", "evaluation/tests", "analysis/tests"]
+testpaths = ["tests", "reference/tests", "modal/tests", "evaluation/tests", "analysis/tests", "census/tests"]

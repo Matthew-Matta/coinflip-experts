@@ -49,7 +49,8 @@ def load_export(directory: Path) -> tuple[dict, dict[str, np.ndarray]]:
         raise ValueError('invalid export dimensions or top_k')
     if c['experts_implementation'] != 'eager':
         raise ValueError('reference requires experts_implementation=eager')
-    shapes = dict(zip(WEIGHTS, ((h, h), (h,), (e, h), (e, 2*i, h), (e, h, i)), strict=True))
+    o_input = c.get('o_proj_input_size', h)
+    shapes = dict(zip(WEIGHTS, ((h, o_input), (h,), (e, h), (e, 2*i, h), (e, h, i)), strict=True))
     arrays = {}
     for name in WEIGHTS + ('o_proj_in', 'residual', 'token_ids'):
         sub = 'weights' if name in WEIGHTS else 'inputs'
@@ -64,8 +65,9 @@ def load_export(directory: Path) -> tuple[dict, dict[str, np.ndarray]]:
     if t == 0 or arrays['token_ids'].shape != (t,):
         raise ValueError('token_ids must be a nonempty vector')
     for name in ('o_proj_in', 'residual'):
-        if arrays[name].shape != (t, h):
-            raise ValueError(f'{name}: expected {(t, h)}')
+        width = o_input if name == 'o_proj_in' else h
+        if arrays[name].shape != (t, width):
+            raise ValueError(f'{name}: expected {(t, width)}')
     meta = json.loads((directory / 'inputs/token_meta.json').read_text())
     if len(meta) != t:
         raise ValueError('token metadata length does not match inputs')

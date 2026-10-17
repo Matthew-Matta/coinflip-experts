@@ -1,0 +1,66 @@
+[
+  {
+    "config": "oproj-n2-fp32-ring",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "oproj-n2-fp32-tree",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "down-n2-fp32-ring",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "down-n2-fp32-tree",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "oproj-n2-bf16-ring",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "oproj-n2-bf16-tree",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "down-n2-bf16-ring",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "down-n2-bf16-tree",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "oproj-n4-fp32-ring",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "oproj-n4-fp32-tree",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "down-n4-fp32-ring",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "down-n4-fp32-tree",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "oproj-n4-bf16-ring",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "oproj-n4-bf16-tree",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "down-n4-bf16-ring",
+    "partial_helper_equals_moe_run": true
+  },
+  {
+    "config": "down-n4-bf16-tree",
+    "partial_helper_equals_moe_run": true
+  }
+]
