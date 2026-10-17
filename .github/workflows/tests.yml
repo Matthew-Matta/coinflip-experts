@@ -29,6 +29,13 @@ jobs:
           ctest --test-dir port/build --output-on-failure
       - name: Require real reference tests (no missing-Torch skip)
         run: python -m pytest -q reference/tests
+      - name: Describe Linux top-k choices on macOS bf16 tie rows
+        run: python -m analysis.topk_portability --out topk-linux.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: topk-linux
+          path: topk-linux.json
       - name: Full Python and blinded-pipeline tests
         run: python -m pytest -q --junitxml=test-results.xml
       - uses: actions/upload-artifact@v4

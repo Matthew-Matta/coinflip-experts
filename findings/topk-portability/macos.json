@@ -1,0 +1,2178 @@
+{
+  "kind": "descriptive CPU top-k platform comparison; mismatch is not a test failure",
+  "platform": "Darwin",
+  "machine": "arm64",
+  "torch_version": "2.14.1",
+  "fixture_sha256": "e96d819c956ba2a82381796d8b33f3899e64a6b11d1cfd3c5abb5b55bccc5cc3",
+  "rows": [
+    {
+      "layer": 0,
+      "token": 108,
+      "macos_chosen_set": [
+        6,
+        14,
+        15,
+        20,
+        21,
+        35,
+        52,
+        55
+      ],
+      "stored_probs_order": [
+        14,
+        6,
+        52,
+        20,
+        15,
+        55,
+        21,
+        35
+      ],
+      "stored_probs_chosen_set": [
+        6,
+        14,
+        15,
+        20,
+        21,
+        35,
+        52,
+        55
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        14,
+        6,
+        52,
+        20,
+        15,
+        55,
+        21,
+        35
+      ],
+      "logits_softmax_chosen_set": [
+        6,
+        14,
+        15,
+        20,
+        21,
+        35,
+        52,
+        55
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 0,
+      "token": 193,
+      "macos_chosen_set": [
+        3,
+        4,
+        5,
+        14,
+        17,
+        32,
+        34,
+        61
+      ],
+      "stored_probs_order": [
+        4,
+        14,
+        32,
+        5,
+        17,
+        3,
+        34,
+        61
+      ],
+      "stored_probs_chosen_set": [
+        3,
+        4,
+        5,
+        14,
+        17,
+        32,
+        34,
+        61
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        4,
+        14,
+        32,
+        5,
+        17,
+        3,
+        34,
+        61
+      ],
+      "logits_softmax_chosen_set": [
+        3,
+        4,
+        5,
+        14,
+        17,
+        32,
+        34,
+        61
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 0,
+      "token": 212,
+      "macos_chosen_set": [
+        6,
+        9,
+        10,
+        25,
+        32,
+        36,
+        40,
+        53
+      ],
+      "stored_probs_order": [
+        36,
+        40,
+        6,
+        9,
+        10,
+        25,
+        53,
+        32
+      ],
+      "stored_probs_chosen_set": [
+        6,
+        9,
+        10,
+        25,
+        32,
+        36,
+        40,
+        53
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        36,
+        40,
+        6,
+        9,
+        10,
+        25,
+        53,
+        32
+      ],
+      "logits_softmax_chosen_set": [
+        6,
+        9,
+        10,
+        25,
+        32,
+        36,
+        40,
+        53
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 0,
+      "token": 279,
+      "macos_chosen_set": [
+        6,
+        15,
+        20,
+        24,
+        27,
+        32,
+        40,
+        58
+      ],
+      "stored_probs_order": [
+        6,
+        40,
+        20,
+        24,
+        15,
+        58,
+        32,
+        27
+      ],
+      "stored_probs_chosen_set": [
+        6,
+        15,
+        20,
+        24,
+        27,
+        32,
+        40,
+        58
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        6,
+        40,
+        20,
+        24,
+        15,
+        58,
+        32,
+        27
+      ],
+      "logits_softmax_chosen_set": [
+        6,
+        15,
+        20,
+        24,
+        27,
+        32,
+        40,
+        58
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 0,
+      "token": 301,
+      "macos_chosen_set": [
+        0,
+        3,
+        14,
+        17,
+        32,
+        34,
+        46,
+        57
+      ],
+      "stored_probs_order": [
+        14,
+        32,
+        46,
+        3,
+        34,
+        17,
+        57,
+        0
+      ],
+      "stored_probs_chosen_set": [
+        0,
+        3,
+        14,
+        17,
+        32,
+        34,
+        46,
+        57
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        14,
+        32,
+        46,
+        3,
+        34,
+        17,
+        57,
+        0
+      ],
+      "logits_softmax_chosen_set": [
+        0,
+        3,
+        14,
+        17,
+        32,
+        34,
+        46,
+        57
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 0,
+      "token": 463,
+      "macos_chosen_set": [
+        0,
+        2,
+        6,
+        8,
+        15,
+        25,
+        32,
+        52
+      ],
+      "stored_probs_order": [
+        6,
+        2,
+        52,
+        0,
+        15,
+        25,
+        8,
+        32
+      ],
+      "stored_probs_chosen_set": [
+        0,
+        2,
+        6,
+        8,
+        15,
+        25,
+        32,
+        52
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        6,
+        2,
+        52,
+        0,
+        15,
+        25,
+        8,
+        32
+      ],
+      "logits_softmax_chosen_set": [
+        0,
+        2,
+        6,
+        8,
+        15,
+        25,
+        32,
+        52
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 0,
+      "token": 793,
+      "macos_chosen_set": [
+        6,
+        15,
+        21,
+        37,
+        40,
+        49,
+        53,
+        55
+      ],
+      "stored_probs_order": [
+        49,
+        6,
+        21,
+        40,
+        53,
+        37,
+        15,
+        55
+      ],
+      "stored_probs_chosen_set": [
+        6,
+        15,
+        21,
+        37,
+        40,
+        49,
+        53,
+        55
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        49,
+        6,
+        21,
+        40,
+        53,
+        37,
+        15,
+        55
+      ],
+      "logits_softmax_chosen_set": [
+        6,
+        15,
+        21,
+        37,
+        40,
+        49,
+        53,
+        55
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 0,
+      "token": 890,
+      "macos_chosen_set": [
+        4,
+        6,
+        7,
+        25,
+        29,
+        43,
+        45,
+        62
+      ],
+      "stored_probs_order": [
+        25,
+        29,
+        6,
+        43,
+        62,
+        45,
+        4,
+        7
+      ],
+      "stored_probs_chosen_set": [
+        4,
+        6,
+        7,
+        25,
+        29,
+        43,
+        45,
+        62
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        25,
+        29,
+        6,
+        43,
+        62,
+        45,
+        4,
+        7
+      ],
+      "logits_softmax_chosen_set": [
+        4,
+        6,
+        7,
+        25,
+        29,
+        43,
+        45,
+        62
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 0,
+      "token": 969,
+      "macos_chosen_set": [
+        2,
+        6,
+        12,
+        19,
+        41,
+        51,
+        52,
+        61
+      ],
+      "stored_probs_order": [
+        2,
+        19,
+        6,
+        51,
+        12,
+        41,
+        52,
+        61
+      ],
+      "stored_probs_chosen_set": [
+        2,
+        6,
+        12,
+        19,
+        41,
+        51,
+        52,
+        61
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        2,
+        19,
+        6,
+        51,
+        12,
+        41,
+        52,
+        61
+      ],
+      "logits_softmax_chosen_set": [
+        2,
+        6,
+        12,
+        19,
+        41,
+        51,
+        52,
+        61
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 0,
+      "token": 975,
+      "macos_chosen_set": [
+        11,
+        16,
+        17,
+        24,
+        29,
+        30,
+        41,
+        50
+      ],
+      "stored_probs_order": [
+        29,
+        24,
+        41,
+        50,
+        30,
+        16,
+        11,
+        17
+      ],
+      "stored_probs_chosen_set": [
+        11,
+        16,
+        17,
+        24,
+        29,
+        30,
+        41,
+        50
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        29,
+        24,
+        41,
+        50,
+        30,
+        16,
+        11,
+        17
+      ],
+      "logits_softmax_chosen_set": [
+        11,
+        16,
+        17,
+        24,
+        29,
+        30,
+        41,
+        50
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 0,
+      "token": 1065,
+      "macos_chosen_set": [
+        6,
+        13,
+        21,
+        23,
+        38,
+        49,
+        54,
+        62
+      ],
+      "stored_probs_order": [
+        6,
+        62,
+        38,
+        13,
+        21,
+        23,
+        49,
+        54
+      ],
+      "stored_probs_chosen_set": [
+        6,
+        13,
+        21,
+        23,
+        38,
+        49,
+        54,
+        62
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        6,
+        62,
+        38,
+        13,
+        21,
+        23,
+        49,
+        54
+      ],
+      "logits_softmax_chosen_set": [
+        6,
+        13,
+        21,
+        23,
+        38,
+        49,
+        54,
+        62
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 0,
+      "token": 1208,
+      "macos_chosen_set": [
+        0,
+        1,
+        6,
+        21,
+        27,
+        34,
+        59,
+        63
+      ],
+      "stored_probs_order": [
+        59,
+        27,
+        6,
+        1,
+        21,
+        0,
+        34,
+        63
+      ],
+      "stored_probs_chosen_set": [
+        0,
+        1,
+        6,
+        21,
+        27,
+        34,
+        59,
+        63
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        59,
+        27,
+        6,
+        1,
+        21,
+        0,
+        34,
+        63
+      ],
+      "logits_softmax_chosen_set": [
+        0,
+        1,
+        6,
+        21,
+        27,
+        34,
+        59,
+        63
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 0,
+      "token": 1268,
+      "macos_chosen_set": [
+        6,
+        12,
+        29,
+        31,
+        33,
+        41,
+        58,
+        59
+      ],
+      "stored_probs_order": [
+        33,
+        59,
+        41,
+        58,
+        6,
+        12,
+        31,
+        29
+      ],
+      "stored_probs_chosen_set": [
+        6,
+        12,
+        29,
+        31,
+        33,
+        41,
+        58,
+        59
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        33,
+        59,
+        41,
+        58,
+        6,
+        12,
+        31,
+        29
+      ],
+      "logits_softmax_chosen_set": [
+        6,
+        12,
+        29,
+        31,
+        33,
+        41,
+        58,
+        59
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 46,
+      "macos_chosen_set": [
+        12,
+        13,
+        21,
+        31,
+        33,
+        42,
+        43,
+        49
+      ],
+      "stored_probs_order": [
+        49,
+        31,
+        42,
+        12,
+        33,
+        21,
+        13,
+        43
+      ],
+      "stored_probs_chosen_set": [
+        12,
+        13,
+        21,
+        31,
+        33,
+        42,
+        43,
+        49
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        49,
+        31,
+        42,
+        12,
+        33,
+        21,
+        13,
+        43
+      ],
+      "logits_softmax_chosen_set": [
+        12,
+        13,
+        21,
+        31,
+        33,
+        42,
+        43,
+        49
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 57,
+      "macos_chosen_set": [
+        1,
+        28,
+        38,
+        43,
+        50,
+        51,
+        54,
+        62
+      ],
+      "stored_probs_order": [
+        43,
+        50,
+        1,
+        38,
+        54,
+        28,
+        51,
+        62
+      ],
+      "stored_probs_chosen_set": [
+        1,
+        28,
+        38,
+        43,
+        50,
+        51,
+        54,
+        62
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        43,
+        50,
+        1,
+        38,
+        54,
+        28,
+        51,
+        62
+      ],
+      "logits_softmax_chosen_set": [
+        1,
+        28,
+        38,
+        43,
+        50,
+        51,
+        54,
+        62
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 118,
+      "macos_chosen_set": [
+        1,
+        4,
+        12,
+        23,
+        29,
+        48,
+        49,
+        58
+      ],
+      "stored_probs_order": [
+        12,
+        58,
+        4,
+        29,
+        1,
+        23,
+        48,
+        49
+      ],
+      "stored_probs_chosen_set": [
+        1,
+        4,
+        12,
+        23,
+        29,
+        48,
+        49,
+        58
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        12,
+        58,
+        4,
+        29,
+        1,
+        23,
+        48,
+        49
+      ],
+      "logits_softmax_chosen_set": [
+        1,
+        4,
+        12,
+        23,
+        29,
+        48,
+        49,
+        58
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 172,
+      "macos_chosen_set": [
+        4,
+        15,
+        17,
+        19,
+        24,
+        29,
+        38,
+        52
+      ],
+      "stored_probs_order": [
+        24,
+        15,
+        19,
+        38,
+        52,
+        4,
+        17,
+        29
+      ],
+      "stored_probs_chosen_set": [
+        4,
+        15,
+        17,
+        19,
+        24,
+        29,
+        38,
+        52
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        24,
+        15,
+        19,
+        38,
+        52,
+        4,
+        17,
+        29
+      ],
+      "logits_softmax_chosen_set": [
+        4,
+        15,
+        17,
+        19,
+        24,
+        29,
+        38,
+        52
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 180,
+      "macos_chosen_set": [
+        10,
+        12,
+        14,
+        16,
+        22,
+        42,
+        49,
+        63
+      ],
+      "stored_probs_order": [
+        12,
+        14,
+        22,
+        42,
+        16,
+        10,
+        49,
+        63
+      ],
+      "stored_probs_chosen_set": [
+        10,
+        12,
+        14,
+        16,
+        22,
+        42,
+        49,
+        63
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        12,
+        14,
+        22,
+        42,
+        16,
+        10,
+        49,
+        63
+      ],
+      "logits_softmax_chosen_set": [
+        10,
+        12,
+        14,
+        16,
+        22,
+        42,
+        49,
+        63
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 214,
+      "macos_chosen_set": [
+        4,
+        25,
+        29,
+        32,
+        38,
+        55,
+        61,
+        63
+      ],
+      "stored_probs_order": [
+        29,
+        32,
+        4,
+        61,
+        25,
+        63,
+        55,
+        38
+      ],
+      "stored_probs_chosen_set": [
+        4,
+        25,
+        29,
+        32,
+        38,
+        55,
+        61,
+        63
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        29,
+        32,
+        4,
+        61,
+        25,
+        63,
+        55,
+        38
+      ],
+      "logits_softmax_chosen_set": [
+        4,
+        25,
+        29,
+        32,
+        38,
+        55,
+        61,
+        63
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 260,
+      "macos_chosen_set": [
+        12,
+        14,
+        22,
+        27,
+        37,
+        42,
+        49,
+        63
+      ],
+      "stored_probs_order": [
+        12,
+        22,
+        49,
+        63,
+        37,
+        42,
+        27,
+        14
+      ],
+      "stored_probs_chosen_set": [
+        12,
+        14,
+        22,
+        27,
+        37,
+        42,
+        49,
+        63
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        12,
+        22,
+        49,
+        63,
+        37,
+        42,
+        27,
+        14
+      ],
+      "logits_softmax_chosen_set": [
+        12,
+        14,
+        22,
+        27,
+        37,
+        42,
+        49,
+        63
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 317,
+      "macos_chosen_set": [
+        4,
+        16,
+        18,
+        25,
+        29,
+        32,
+        55,
+        63
+      ],
+      "stored_probs_order": [
+        25,
+        29,
+        16,
+        18,
+        63,
+        32,
+        4,
+        55
+      ],
+      "stored_probs_chosen_set": [
+        4,
+        16,
+        18,
+        25,
+        29,
+        32,
+        55,
+        63
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        25,
+        29,
+        16,
+        18,
+        63,
+        32,
+        4,
+        55
+      ],
+      "logits_softmax_chosen_set": [
+        4,
+        16,
+        18,
+        25,
+        29,
+        32,
+        55,
+        63
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 341,
+      "macos_chosen_set": [
+        1,
+        4,
+        25,
+        29,
+        34,
+        35,
+        37,
+        61
+      ],
+      "stored_probs_order": [
+        29,
+        61,
+        34,
+        4,
+        37,
+        25,
+        1,
+        35
+      ],
+      "stored_probs_chosen_set": [
+        1,
+        4,
+        25,
+        29,
+        34,
+        35,
+        37,
+        61
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        29,
+        61,
+        34,
+        4,
+        37,
+        25,
+        1,
+        35
+      ],
+      "logits_softmax_chosen_set": [
+        1,
+        4,
+        25,
+        29,
+        34,
+        35,
+        37,
+        61
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 384,
+      "macos_chosen_set": [
+        1,
+        4,
+        16,
+        23,
+        39,
+        41,
+        48,
+        56
+      ],
+      "stored_probs_order": [
+        48,
+        23,
+        56,
+        41,
+        16,
+        39,
+        1,
+        4
+      ],
+      "stored_probs_chosen_set": [
+        1,
+        4,
+        16,
+        23,
+        39,
+        41,
+        48,
+        56
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        48,
+        23,
+        56,
+        41,
+        16,
+        39,
+        1,
+        4
+      ],
+      "logits_softmax_chosen_set": [
+        1,
+        4,
+        16,
+        23,
+        39,
+        41,
+        48,
+        56
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 393,
+      "macos_chosen_set": [
+        4,
+        5,
+        16,
+        18,
+        25,
+        26,
+        29,
+        46
+      ],
+      "stored_probs_order": [
+        16,
+        46,
+        4,
+        26,
+        18,
+        5,
+        25,
+        29
+      ],
+      "stored_probs_chosen_set": [
+        4,
+        5,
+        16,
+        18,
+        25,
+        26,
+        29,
+        46
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        16,
+        46,
+        4,
+        26,
+        18,
+        5,
+        25,
+        29
+      ],
+      "logits_softmax_chosen_set": [
+        4,
+        5,
+        16,
+        18,
+        25,
+        26,
+        29,
+        46
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 421,
+      "macos_chosen_set": [
+        0,
+        2,
+        4,
+        13,
+        14,
+        17,
+        24,
+        58
+      ],
+      "stored_probs_order": [
+        17,
+        58,
+        4,
+        14,
+        2,
+        0,
+        24,
+        13
+      ],
+      "stored_probs_chosen_set": [
+        0,
+        2,
+        4,
+        13,
+        14,
+        17,
+        24,
+        58
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        17,
+        58,
+        4,
+        14,
+        2,
+        0,
+        24,
+        13
+      ],
+      "logits_softmax_chosen_set": [
+        0,
+        2,
+        4,
+        13,
+        14,
+        17,
+        24,
+        58
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 427,
+      "macos_chosen_set": [
+        2,
+        12,
+        14,
+        17,
+        34,
+        35,
+        39,
+        45
+      ],
+      "stored_probs_order": [
+        12,
+        45,
+        39,
+        17,
+        14,
+        35,
+        2,
+        34
+      ],
+      "stored_probs_chosen_set": [
+        2,
+        12,
+        14,
+        17,
+        34,
+        35,
+        39,
+        45
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        12,
+        45,
+        39,
+        17,
+        14,
+        35,
+        2,
+        34
+      ],
+      "logits_softmax_chosen_set": [
+        2,
+        12,
+        14,
+        17,
+        34,
+        35,
+        39,
+        45
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 436,
+      "macos_chosen_set": [
+        0,
+        4,
+        14,
+        17,
+        24,
+        31,
+        36,
+        58
+      ],
+      "stored_probs_order": [
+        17,
+        58,
+        4,
+        14,
+        24,
+        0,
+        36,
+        31
+      ],
+      "stored_probs_chosen_set": [
+        0,
+        4,
+        14,
+        17,
+        24,
+        31,
+        36,
+        58
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        17,
+        58,
+        4,
+        14,
+        24,
+        0,
+        36,
+        31
+      ],
+      "logits_softmax_chosen_set": [
+        0,
+        4,
+        14,
+        17,
+        24,
+        31,
+        36,
+        58
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 499,
+      "macos_chosen_set": [
+        2,
+        4,
+        17,
+        24,
+        35,
+        38,
+        58,
+        61
+      ],
+      "stored_probs_order": [
+        17,
+        58,
+        2,
+        4,
+        24,
+        35,
+        38,
+        61
+      ],
+      "stored_probs_chosen_set": [
+        2,
+        4,
+        17,
+        24,
+        35,
+        38,
+        58,
+        61
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        17,
+        58,
+        2,
+        4,
+        24,
+        35,
+        38,
+        61
+      ],
+      "logits_softmax_chosen_set": [
+        2,
+        4,
+        17,
+        24,
+        35,
+        38,
+        58,
+        61
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 553,
+      "macos_chosen_set": [
+        0,
+        2,
+        4,
+        14,
+        17,
+        26,
+        31,
+        46
+      ],
+      "stored_probs_order": [
+        17,
+        4,
+        2,
+        0,
+        14,
+        26,
+        46,
+        31
+      ],
+      "stored_probs_chosen_set": [
+        0,
+        2,
+        4,
+        14,
+        17,
+        26,
+        31,
+        46
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        17,
+        4,
+        2,
+        0,
+        14,
+        26,
+        46,
+        31
+      ],
+      "logits_softmax_chosen_set": [
+        0,
+        2,
+        4,
+        14,
+        17,
+        26,
+        31,
+        46
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 554,
+      "macos_chosen_set": [
+        0,
+        2,
+        4,
+        12,
+        14,
+        17,
+        45,
+        58
+      ],
+      "stored_probs_order": [
+        17,
+        58,
+        14,
+        4,
+        2,
+        0,
+        45,
+        12
+      ],
+      "stored_probs_chosen_set": [
+        0,
+        2,
+        4,
+        12,
+        14,
+        17,
+        45,
+        58
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        17,
+        58,
+        14,
+        4,
+        2,
+        0,
+        45,
+        12
+      ],
+      "logits_softmax_chosen_set": [
+        0,
+        2,
+        4,
+        12,
+        14,
+        17,
+        45,
+        58
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 561,
+      "macos_chosen_set": [
+        0,
+        2,
+        4,
+        17,
+        26,
+        35,
+        46,
+        58
+      ],
+      "stored_probs_order": [
+        17,
+        2,
+        4,
+        26,
+        0,
+        58,
+        46,
+        35
+      ],
+      "stored_probs_chosen_set": [
+        0,
+        2,
+        4,
+        17,
+        26,
+        35,
+        46,
+        58
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        17,
+        2,
+        4,
+        26,
+        0,
+        58,
+        46,
+        35
+      ],
+      "logits_softmax_chosen_set": [
+        0,
+        2,
+        4,
+        17,
+        26,
+        35,
+        46,
+        58
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 575,
+      "macos_chosen_set": [
+        12,
+        14,
+        16,
+        17,
+        22,
+        35,
+        39,
+        45
+      ],
+      "stored_probs_order": [
+        12,
+        45,
+        39,
+        14,
+        17,
+        16,
+        22,
+        35
+      ],
+      "stored_probs_chosen_set": [
+        12,
+        14,
+        16,
+        17,
+        22,
+        35,
+        39,
+        45
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        12,
+        45,
+        39,
+        14,
+        17,
+        16,
+        22,
+        35
+      ],
+      "logits_softmax_chosen_set": [
+        12,
+        14,
+        16,
+        17,
+        22,
+        35,
+        39,
+        45
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 597,
+      "macos_chosen_set": [
+        0,
+        2,
+        4,
+        17,
+        19,
+        31,
+        46,
+        52
+      ],
+      "stored_probs_order": [
+        17,
+        4,
+        0,
+        52,
+        19,
+        31,
+        2,
+        46
+      ],
+      "stored_probs_chosen_set": [
+        0,
+        2,
+        4,
+        17,
+        19,
+        31,
+        46,
+        52
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        17,
+        4,
+        0,
+        52,
+        19,
+        31,
+        2,
+        46
+      ],
+      "logits_softmax_chosen_set": [
+        0,
+        2,
+        4,
+        17,
+        19,
+        31,
+        46,
+        52
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 628,
+      "macos_chosen_set": [
+        0,
+        4,
+        13,
+        17,
+        24,
+        36,
+        54,
+        61
+      ],
+      "stored_probs_order": [
+        17,
+        61,
+        24,
+        4,
+        36,
+        54,
+        0,
+        13
+      ],
+      "stored_probs_chosen_set": [
+        0,
+        4,
+        13,
+        17,
+        24,
+        36,
+        54,
+        61
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        17,
+        61,
+        24,
+        4,
+        36,
+        54,
+        0,
+        13
+      ],
+      "logits_softmax_chosen_set": [
+        0,
+        4,
+        13,
+        17,
+        24,
+        36,
+        54,
+        61
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 751,
+      "macos_chosen_set": [
+        0,
+        2,
+        4,
+        17,
+        31,
+        32,
+        37,
+        46
+      ],
+      "stored_probs_order": [
+        4,
+        17,
+        46,
+        2,
+        32,
+        31,
+        0,
+        37
+      ],
+      "stored_probs_chosen_set": [
+        0,
+        2,
+        4,
+        17,
+        31,
+        32,
+        37,
+        46
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        4,
+        17,
+        46,
+        2,
+        32,
+        31,
+        0,
+        37
+      ],
+      "logits_softmax_chosen_set": [
+        0,
+        2,
+        4,
+        17,
+        31,
+        32,
+        37,
+        46
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 953,
+      "macos_chosen_set": [
+        0,
+        12,
+        13,
+        22,
+        31,
+        33,
+        47,
+        49
+      ],
+      "stored_probs_order": [
+        12,
+        13,
+        47,
+        31,
+        49,
+        22,
+        33,
+        0
+      ],
+      "stored_probs_chosen_set": [
+        0,
+        12,
+        13,
+        22,
+        31,
+        33,
+        47,
+        49
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        12,
+        13,
+        47,
+        31,
+        49,
+        22,
+        33,
+        0
+      ],
+      "logits_softmax_chosen_set": [
+        0,
+        12,
+        13,
+        22,
+        31,
+        33,
+        47,
+        49
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 1085,
+      "macos_chosen_set": [
+        11,
+        14,
+        24,
+        38,
+        43,
+        47,
+        52,
+        61
+      ],
+      "stored_probs_order": [
+        43,
+        61,
+        14,
+        24,
+        47,
+        38,
+        11,
+        52
+      ],
+      "stored_probs_chosen_set": [
+        11,
+        14,
+        24,
+        38,
+        43,
+        47,
+        52,
+        61
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        43,
+        61,
+        14,
+        24,
+        47,
+        38,
+        11,
+        52
+      ],
+      "logits_softmax_chosen_set": [
+        11,
+        14,
+        24,
+        38,
+        43,
+        47,
+        52,
+        61
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    },
+    {
+      "layer": 7,
+      "token": 1117,
+      "macos_chosen_set": [
+        2,
+        31,
+        33,
+        42,
+        47,
+        49,
+        58,
+        62
+      ],
+      "stored_probs_order": [
+        42,
+        31,
+        49,
+        47,
+        62,
+        2,
+        33,
+        58
+      ],
+      "stored_probs_chosen_set": [
+        2,
+        31,
+        33,
+        42,
+        47,
+        49,
+        58,
+        62
+      ],
+      "stored_probs_same_set": true,
+      "logits_softmax_order": [
+        42,
+        31,
+        49,
+        47,
+        62,
+        2,
+        33,
+        58
+      ],
+      "logits_softmax_chosen_set": [
+        2,
+        31,
+        33,
+        42,
+        47,
+        49,
+        58,
+        62
+      ],
+      "logits_softmax_same_set": true,
+      "softmax_bit_exact_to_macos": true
+    }
+  ],
+  "total_rows": 38,
+  "stored_probs_same_sets": 38,
+  "logits_softmax_same_sets": 38
+}
