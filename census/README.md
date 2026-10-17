@@ -1,5 +1,8 @@
 # Frozen-input prefill census
 
+Use `--prepared-file PATH` to supply a successful gate summary (the default is the
+recorded local gate); its immutable cached model revision is reused.
+
 Corpus: 200 seeded prompts, 50 each GSM8K/HumanEval/ShareGPT/FLORES, prefix capped
 at 256 tokens, followed by exactly 256 greedy reference continuation tokens.
 Generation retains `output_ids` directly; no text re-tokenisation. Raw token IDs

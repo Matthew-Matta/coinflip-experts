@@ -1,0 +1,77 @@
+{
+  "phase": "prefill only, not decode",
+  "model": "OLMoE-1B-7B-0924",
+  "results": {
+    "r0b": {
+      "flips": 0,
+      "units": 1059312,
+      "flip_rate": 0.0,
+      "ci": [
+        0.0,
+        0.0
+      ],
+      "r0_flips": 0,
+      "excess_over_r0": 0.0,
+      "excess_ci": [
+        0.0,
+        0.0
+      ],
+      "sequences_with_flip": 0,
+      "sequences": 200,
+      "sequence_flip_fraction_ci": [
+        0.0,
+        0.0
+      ]
+    },
+    "bs8": {
+      "flips": 76852,
+      "units": 1059312,
+      "flip_rate": 0.07254897518389294,
+      "ci": [
+        0.07026008631137735,
+        0.07484234748465587
+      ],
+      "r0_flips": 0,
+      "excess_over_r0": 0.07254897518389294,
+      "excess_ci": [
+        0.07026008631137735,
+        0.07484234748465587
+      ],
+      "sequences_with_flip": 200,
+      "sequences": 200,
+      "sequence_flip_fraction_ci": [
+        1.0,
+        1.0
+      ]
+    },
+    "bs32": {
+      "flips": 76371,
+      "units": 1059312,
+      "flip_rate": 0.072094906882958,
+      "ci": [
+        0.06977810287392965,
+        0.07440493050734114
+      ],
+      "r0_flips": 0,
+      "excess_over_r0": 0.072094906882958,
+      "excess_ci": [
+        0.06977810287392965,
+        0.07440493050734114
+      ],
+      "sequences_with_flip": 200,
+      "sequences": 200,
+      "sequence_flip_fraction_ci": [
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "h1": "PASS",
+  "robustness_upper_below_0_01_percent": false,
+  "limitation": "Zero-event percentile bootstrap can be degenerate; do not infer a general population upper bound. Results apply only to the frozen prompts and configuration.",
+  "seed": 20261017,
+  "resamples": 10000,
+  "bootstrap_unit": "prompt",
+  "margins": "not captured",
+  "source_sha256": "fcf2262633a08809c19aaccf9e8ea5e1e66687d7ca485eac10bcb13f68d305a0"
+}

@@ -54,6 +54,8 @@ def run(out: Path,cache: Path,selection: Path):
         with safe_open(paths[shard],framework='pt',device='cpu') as stream:
             for key in keys:
                 if mapping[key]==shard:state[key.removeprefix('model.')]=stream.get_tensor(key)
+    if any(value.dtype != torch.bfloat16 for value in state.values()):
+        raise ValueError('selected checkpoint weights must all be bf16; refusing dtype mislabelling')
     prefix='layers.0.mlp.experts.'
     fused=[];downs=[]
     for e in range(config.num_experts):

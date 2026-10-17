@@ -353,11 +353,59 @@ def run_nccl_job(input_hashes: dict):
     return result
 
 
+@app.function(image=gpu_image, volumes={VOLUME_PATH: volume}, timeout=600, retries=0,
+              cpu=2, memory=4096)
+def archive_census(directory: str):
+    import numpy as np
+    import tarfile
+    import hashlib
+    volume.reload()
+    root=Path(directory)
+    if root.parent != Path('/weights/census-results') or not root.name.startswith('census-'):
+        raise ValueError('expected a completed census result directory')
+    summary=json.loads((root/'summary.json').read_text())
+    if summary['status']!='PASS':raise ValueError('census failed')
+    records=json.loads((root/'batch_composition.json').read_text())
+    ids={label:[] for label in ('r0a','r0b','bs8','bs32')}
+    for row in records:
+        assert row['cached_tokens']==0 and row['sequences']==len(row['prompt_ids'])
+        ids[row['config']].extend(row['prompt_ids'])
+    for label,values in ids.items():assert len(values)==200 and len(set(values))==200
+    recalc=[]
+    for i in range(200):
+        routes={label:np.sort(np.load(root/label/f'{i:03d}.npy'),axis=-1) for label in ids}
+        assert all(v.shape==routes['r0a'].shape for v in routes.values())
+        for label in ('r0b','bs8','bs32'):
+            flipped=np.any(routes['r0a']!=routes[label],axis=-1)
+            recalc.append(dict(index=i,config=label,flips=int(flipped.sum()),units=flipped.size))
+    expected={(r['config'],r['prompt_id']):r for r in summary['counts']}
+    # Worker writes records prompt-major and config-minor; bind by the frozen record order.
+    for actual,record in zip(recalc,summary['counts'],strict=True):
+        assert actual['config']==record['config'] and actual['flips']==record['flips'] and actual['units']==record['units']
+    for label in ids:
+        run=json.loads((root/label/'run.json').read_text())
+        assert run['patched_file_sha256']==summary['patched_file_sha256']
+        assert run['token_ids_sha256']==summary['model']['token_ids_sha256']
+    validation=dict(status='PASS',raw_array_recompute_matches_counts=True,
+                    batch_records=len(records),sequences_per_config=200,
+                    totals={label:sum(r['flips'] for r in recalc if r['config']==label) for label in ('r0b','bs8','bs32')})
+    (root/'independent_validation.json').write_text(json.dumps(validation,indent=2))
+    archive=Path(str(root)+'.tar.gz')
+    with tarfile.open(archive,'w:gz') as tar:tar.add(root,arcname=root.name)
+    volume.commit()
+    return dict(archive=str(archive).removeprefix('/weights'),sha256=hashlib.sha256(archive.read_bytes()).hexdigest(),validation=validation)
+
+
 @app.local_entrypoint()
 def main(gpu_approved: bool = False, revision: str = 'main', mode: str = 'gate',
          pool: str = 'data/prompts/block_pool_v1.jsonl',
          tokens: str = 'data/census/olmoe_tokens_v1.json',
+         prepared_file: str = 'data/gate/gate-0769297bc8dd/summary.json',
          out: str = 'data/census'):
+    if mode == 'archive':
+        result=archive_census.remote(out)
+        Path('data/census/archive.json').write_text(json.dumps(result,indent=2))
+        print(json.dumps(result,indent=2));return
     if mode == 'nccl':
         if not gpu_approved:
             print('DRY RUN NCCL: 4xL4; n=2/4, Ring/Tree, fp32/bf16, o_proj/down; timeout900s; no GPU invoked.')
@@ -378,7 +426,9 @@ def main(gpu_approved: bool = False, revision: str = 'main', mode: str = 'gate',
         if not gpu_approved:
             print(f'DRY RUN {mode}: L4, timeout 3600s; no GPU invoked. Explicit --gpu-approved required.')
             return
-        prepared = json.loads(Path('data/gate/gate-0769297bc8dd/summary.json').read_text())['model']
+        gate_summary = json.loads(Path(prepared_file).read_text())
+        if gate_summary['status'] != 'PASS': raise ValueError('a successful gate summary is required')
+        prepared = dict(gate_summary['model'])
         prepared['code_git'] = git_info()
         prepared['gate_source_sha256'] = sha256(Path(__file__))
         prepared['census_source_sha256'] = {str(p):sha256(p) for p in sorted(Path('census').glob('*.py'))}

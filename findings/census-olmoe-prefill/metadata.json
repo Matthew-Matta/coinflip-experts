@@ -1,0 +1,110 @@
+{
+  "status": "PASS",
+  "mode": "census",
+  "directory": "/weights/census-results/census-6549ef998bce",
+  "phase": "prefill",
+  "model": {
+    "model_id": "allenai/OLMoE-1B-7B-0924",
+    "revision": "6d84c48581ece794365f2b8e9cfb043c68ade9c5",
+    "path": "/weights/olmoe/6d84c48581ece794365f2b8e9cfb043c68ade9c5",
+    "bytes": 13841134016,
+    "download_seconds": 0.36424346499999993,
+    "code_git": {
+      "git_sha": "446a8733ba822d37dd2ba87cd42eda73e7220c46",
+      "git_dirty": true
+    },
+    "gate_source_sha256": "8f10f986603e19460a02035d2683e8f0445502833ccef7815dd04fa904c95e8c",
+    "census_source_sha256": {
+      "census/__init__.py": "7d58e0395a299ae119028e8c5f1e26b4cfcd37539d6099dd1135ca25469f3393",
+      "census/protocol.py": "7890e0a3a91cabef8de4c8cbd23b900663ca023ce03afc96046f0010ed986b2d",
+      "census/worker.py": "3987026027827e1e6a38857af13f6889aa3ce9a26c0e89f040cbc3207892e314"
+    },
+    "token_ids_sha256": "2cebf9203960a7e53756a9c82d23c98de2e560bd42dcc190bc2e5a28bf2bfb54"
+  },
+  "patched_file": "sglang/srt/models/olmoe.py",
+  "patched_file_sha256": "4de433fa6dbceafec19fb10ad44d05120135aba8f6629555f119f75260076ee4",
+  "sglang_backport": "sgl-project/sglang#40980",
+  "server_command": [
+    "/usr/local/bin/python",
+    "-m",
+    "sglang.launch_server",
+    "--model-path",
+    "/weights/olmoe/6d84c48581ece794365f2b8e9cfb043c68ade9c5",
+    "--port",
+    "30000",
+    "--dtype",
+    "bfloat16",
+    "--tp",
+    "1",
+    "--disable-cuda-graph",
+    "--enable-return-routed-experts",
+    "--disable-radix-cache",
+    "--chunked-prefill-size",
+    "32768",
+    "--max-prefill-tokens",
+    "32768",
+    "--max-running-requests",
+    "32",
+    "--mem-fraction-static",
+    "0.80"
+  ],
+  "nvidia_smi": "Sat Oct 17 05:01:56 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 610.57.04              KMD Version: 610.57.04     CUDA UMD Version: 13.3     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA L4                      On  |   00000000:00:06.0 Off |                    0 |\n| N/A   40C    P8             16W /   72W |       3MiB /  23034MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|  No running processes found                                                             |\n+-----------------------------------------------------------------------------------------+\n",
+  "provenance": {
+    "timestamp_utc": "2026-10-17T05:01:56.763447+00:00",
+    "host": "<redacted>",
+    "platform": "Linux-4.19.0-gvisor-x86_64-with-glibc2.39",
+    "python": "3.12.1",
+    "git_sha": null,
+    "git_dirty": null,
+    "gpus": [
+      "NVIDIA L4, 610.57.04, 23034 MiB"
+    ],
+    "torch_cuda": "13.0",
+    "cuda_capability": [
+      [
+        8,
+        9
+      ]
+    ],
+    "packages": {
+      "torch": "2.13.0",
+      "transformers": "5.12.1",
+      "sglang": "0.5.21",
+      "sglang-kernel": "0.4.7",
+      "sgl-kernel": null,
+      "triton": "3.7.1",
+      "flashinfer-python": "0.6.18",
+      "numpy": "2.3.5",
+      "pandas": "3.0.6"
+    },
+    "config": {
+      "model_id": "allenai/OLMoE-1B-7B-0924",
+      "revision": "6d84c48581ece794365f2b8e9cfb043c68ade9c5",
+      "path": "/weights/olmoe/6d84c48581ece794365f2b8e9cfb043c68ade9c5",
+      "bytes": 13841134016,
+      "download_seconds": 0.36424346499999993,
+      "code_git": {
+        "git_sha": "446a8733ba822d37dd2ba87cd42eda73e7220c46",
+        "git_dirty": true
+      },
+      "gate_source_sha256": "8f10f986603e19460a02035d2683e8f0445502833ccef7815dd04fa904c95e8c",
+      "census_source_sha256": {
+        "census/__init__.py": "7d58e0395a299ae119028e8c5f1e26b4cfcd37539d6099dd1135ca25469f3393",
+        "census/protocol.py": "7890e0a3a91cabef8de4c8cbd23b900663ca023ce03afc96046f0010ed986b2d",
+        "census/worker.py": "3987026027827e1e6a38857af13f6889aa3ce9a26c0e89f040cbc3207892e314"
+      },
+      "token_ids_sha256": "2cebf9203960a7e53756a9c82d23c98de2e560bd42dcc190bc2e5a28bf2bfb54"
+    },
+    "config_hash": "19084121359b"
+  },
+  "wall_seconds": 272.42749027699995,
+  "peak_device_memory_mib": 21859,
+  "token_hash_commit": "446a8733ba822d37dd2ba87cd42eda73e7220c46",
+  "selection_seed": 42,
+  "batch_seed": 20261017,
+  "memory_sampling_interval_seconds": 0.2,
+  "supplemental_metadata_note": "Seeds and sampling interval recovered from verified measurement source; raw summary unchanged.",
+  "original_rpc_summary_sha256": "fcf2262633a08809c19aaccf9e8ea5e1e66687d7ca485eac10bcb13f68d305a0",
+  "downloaded_remote_summary_sha256": "55acda3db00d71c546a81be82542127e6c587f28b1cf468526dfb918c6f6152f",
+  "rpc_remote_summary_contents_equal": true
+}

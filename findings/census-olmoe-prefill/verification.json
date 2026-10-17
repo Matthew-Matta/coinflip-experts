@@ -1,0 +1,31 @@
+{
+  "archive": "/census-results/census-6549ef998bce.tar.gz",
+  "sha256": "4e0c73e2ca388b2cc3c5d5af8d6b68581be87fde5e1df583d4b71d25d67f359f",
+  "validation": {
+    "status": "PASS",
+    "raw_array_recompute_matches_counts": true,
+    "batch_records": 432,
+    "sequences_per_config": 200,
+    "totals": {
+      "r0b": 0,
+      "bs8": 76852,
+      "bs32": 76371
+    },
+    "local_raw_scheduler_lines_verified": 432,
+    "batch_membership_matches_frozen_ids": true,
+    "excluded_startup_health_prefills": [
+      [
+        1,
+        6,
+        0
+      ],
+      [
+        1,
+        1,
+        0
+      ]
+    ],
+    "measurement_start": "After first HTTP GET /health 200 response",
+    "local_array_shapes_ranges_and_uniqueness_verified": 800
+  }
+}

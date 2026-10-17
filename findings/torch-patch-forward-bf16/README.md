@@ -18,13 +18,13 @@ applied where route sets match and are remapped by expert ID; skipped token-op
 counts are recorded.
 
 Full routediff comparison ran on the held-out evaluation split (664 tokens per
-layer) with the coder's `findings/bf16-tolerances/tolerances-bf16-exploratory.json`
+layer) with `findings/bf16-tolerances/tolerances-bf16-exploratory.json`
 and the torch rerun command enabled. **All four pairs are inside the envelope**;
 therefore the engine requested **zero patch checks** and localised no fault.
 This is not causal patch-forward evidence on a detected real bug. MPS route-set
 mismatches are 6 (L0) and 4 (L7), inside the calibrated exact-tie allowance;
 grouped_mm has zero. The bf16 tolerance recipe is exploratory and its output
-tolerance is inflated by tie mismatches (see the coder's findings).
+tolerance is inflated by tie mismatches (see the bf16-tolerance findings).
 
 Raw reports are in `data/results/torch-patch-forward-bf16`; `summary.json` and
 per-pair null-patch verification records are copied here. No planted ground
