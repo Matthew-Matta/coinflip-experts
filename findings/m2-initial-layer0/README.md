@@ -1,7 +1,22 @@
-# M2 initial result: layer 0 (preregistered H-port evaluation)
+# C++ port vs PyTorch, first preregistered test (layer 0): FAIL
 
-Frozen before any change to the C++ port. This is the official preregistered outcome for layer 0 (option A).
-Any later result is post-fix validation and is reported separately.
+**In one line:** the fp32 C++ port picked the **same experts as PyTorch on all 1348 tokens**, but the preregistered
+element-wise test (**p99 <= 8 ULP** at every op) **failed** at every op from `router_input` on.
+- **What I found:** the first divergence was the RMSNorm summation order (`router_input`, 9 ULP p99), found by
+  patching PyTorch's value in; the rest came from `exp` and the down projection.
+- **Why it matters:** this is the honest preregistered outcome, frozen before I changed the port; every later
+  improvement is reported separately as post-fix validation (`findings/m2-postfix-validation`).
+- **Caveat:** one layer; the ULP criterion is strict on near-cancelling sums, so routes matching and ULP failing can
+  both be true.
+
+**Type:** preregistered (H-port, layer 0)   ·   **Reproduce:** `python -m routediff.fidelity data/dumps/layer0-torch-float32 data/results/m2-initial-layer0/dumps/layer0-cpp-hf_fp32 --out NEW.json`
+
+---
+
+## Details
+
+Frozen before any change to the C++ port. This is the official preregistered outcome for layer 0, a reporting choice
+I made before fixing anything. Any later result is post-fix validation and is reported separately.
 
 - **Verdict: FAIL** (thresholds unchanged: normalised margin > 0.0001, p99 element ULP <= 8.0)
 - Routes: 0 mismatches among 1346 tokens above the margin cutoff (pass); 0 of 1348 overall
@@ -22,10 +37,10 @@ Any later result is post-fix validation and is reported separately.
 | `combine_terms` | 375 | 3.208e+08 | **no** |
 | `output` | 354 | 1.091e+08 | **no** |
 
-## Diagnosis (exploratory, after the evaluation)
+### Diagnosis (exploratory, after the evaluation)
 Patching `router_input` with PyTorch's value (`dumps/layer0-cpp-hf_fp32-patch_router_input`) makes `router_logits`, `expert_gate` and `expert_up` bit-exact, so the first divergence is the RMSNorm reduction order. Remaining differences come from `exp` (softmax, SiLU) and the down projection.
 
-## bf16 (exploratory, not part of H-port)
+### bf16 (exploratory, not part of H-port)
 11 / 1348 route-set mismatches, all unexplained (exact ties at the 8th place; 13 / 1348 tokens have such a tie). `tiebreak=higher` leaves 2, so PyTorch's tie order is not a simple index rule.
 
 Contents here: `configs/`, `hport_layer0_fp32.json`, `provenance.json`. The frozen read-only originals, including

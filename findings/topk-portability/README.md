@@ -1,4 +1,16 @@
-# CPU top-k portability probe
+# Ties change across CPU builds
+
+**In one line:** Linux matched macOS on only **19/38** tied expert choices.
+
+- **What I found:** I gave both CPU builds the same saved probabilities and saw different selections.
+- **Why it matters:** A model port needs an explicit rule for exact ties.
+- **Caveat:** This small fixture does not establish general portability or identify the library responsible.
+
+**Type:** descriptive   ·   **Reproduce:** `python -m analysis.topk_portability --out NEW_TOPK.json`
+
+---
+
+## Details
 
 The small committed fixture `reference/tests/fixtures/bf16_topk_ties.json`
 contains the lossless logits and macOS fp32 probabilities for all **38** bf16
@@ -6,7 +18,7 @@ contains the lossless logits and macOS fp32 probabilities for all **38** bf16
 to `findings/backend-pairs-v1/bf16_ties.json`. It also records source SHA256 hashes
 and the original macOS CPU expert sets. No prompt text or weights are included.
 
-Two descriptive probes run on Ubuntu CI with torch 2.14.1:
+I ran two descriptive probes on Ubuntu CI with torch 2.14.1:
 
 1. `torch.topk` on saved macOS probabilities isolates the selection algorithm.
 2. fp32 `torch.softmax(logits)` then `torch.topk` includes platform softmax math.
@@ -27,8 +39,8 @@ A stable lower-expert-ID rule matches **16/38 Linux** sets and **11/38 macOS**
 sets, using the saved fixed probabilities. Thus neither tested CPU build behaves
 as that simple tie rule on all rows. Differences already occur when both builds
 receive identical saved probabilities, independently of softmax recomputation.
-This is descriptive evidence of platform/build-dependent tie choices; **no
-attribution to libstdc++ or libc++ is made** without checking the actual builds
+I treat this as descriptive evidence of platform/build-dependent tie choices; I make **no
+attribution to libstdc++ or libc++** without checking the actual builds
 and selection implementation.
 
 ```sh

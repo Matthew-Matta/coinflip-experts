@@ -1,8 +1,19 @@
-# Known forward-hook fault: CPU demo, not blinded evaluation
+# Repairing a known CPU fault
 
-**CPU only.** A new MPS run was not performed because the task prohibits GPU
-runs, including the Apple GPU. This is an explicitly labelled CPU substitute,
-not claimed as MPS evidence.
+**In one line:** Patching the injected fault restored all **13** intermediate arrays exactly.
+
+- **What I found:** I multiplied expert contributions before combining them, then localised and repaired that operation.
+- **Why it matters:** This demonstrates a repair through the Torch backend adapter.
+- **Caveat:** The fault is conspicuous and known in advance; this is not blinded or sensitivity evidence.
+
+**Type:** exploratory   ·   **Reproduce:** `python -m reference.torch_hook_demo --device cpu --out NEW_OUTPUT_DIRECTORY`
+
+---
+
+## Details
+
+**CPU only.** I ran this demonstration on CPU without a new MPS run.
+It is a CPU substitute, not MPS evidence.
 
 On real OLMoE layer-0 bf16 data (64 positions, two per original prompt), a forward
 hook multiplies `combine_terms` by 16. The repaired-value hook executes after the

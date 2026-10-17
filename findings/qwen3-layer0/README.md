@@ -1,7 +1,19 @@
-# Qwen3-30B-A3B layer-0 reference export
+# A reference for the second model
 
-**PASS:** a one-layer truncated model, eager attention and experts pinned,
-produces bf16 and fp32 MoE-block mirrors bit-exact to the Transformers module.
+**In one line:** I captured **1,361** valid positions and matched the Transformers block exactly.
+
+- **What I found:** I exported a single Qwen layer and checked its lower- and full-precision block computations.
+- **Why it matters:** A second model tests the export format beyond the original square projection.
+- **Caveat:** This checks one truncated layer, not full-model generation or serving.
+
+**Type:** exploratory   ·   **Reproduce:** `HF_HOME=data/hf-cache python -m reference.export_qwen --out NEW_OUTPUT_DIRECTORY`
+
+---
+
+## Details
+
+**PASS:** I checked a one-layer truncated model with eager attention and experts pinned;
+its bf16 and fp32 MoE-block mirrors match the Transformers module bit-exactly.
 This is a layer reference check, not a full-model serving experiment.
 
 - Checkpoint revision: `ad44e777bcd18fa416d9da3bd8f70d33ebb85d39`.
@@ -23,7 +35,7 @@ Qwen has a **rectangular o_proj**. The export records `o_proj_input_size` and
 C++ port at the time of this export could not consume it. That historical
 metadata is retained unchanged. Rectangular o_proj support was subsequently
 added in 43ee582; later parity results are in [qwen3-port](../qwen3-port/).
-No shape was coerced during this export.
+I did not coerce any shape during this export.
 
 ```sh
 HF_HOME=data/hf-cache python -m reference.export_qwen --out NEW_OUTPUT_DIRECTORY

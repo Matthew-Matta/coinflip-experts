@@ -1,7 +1,18 @@
-# README chart inventory
+# Charts for the results
 
-These paths are relative to the repository root. The three available charts were
-visually checked locally; their numerical sources remain separate experiments.
+**In one line:** I collected **three** charts, each tied to a separate measurement.
+
+- **What I found:** I checked the rendered census, communication-model and accumulator-width charts.
+- **Why it matters:** The charts connect serving behavior and porting precision to their evidence.
+- **Caveat:** The experiments stay separate; modelled communication is not measured interconnect performance.
+
+**Type:** descriptive   ·   **Reproduce:** `python port/sweeps/plot_accumulator_width.py data/results/accumulator-width/accumulator_width.parquet --out NEW_OUTPUT_DIRECTORY/flips_vs_bits.png`
+
+---
+
+## Details
+
+These paths are relative to the repository root. I visually checked the three available charts; their numerical sources remain separate experiments.
 
 | Chart | PNG (SVG alongside it) | Status |
 | --- | --- | --- |

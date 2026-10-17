@@ -1,13 +1,31 @@
-# bf16 tolerances and the bf16 real backend pairs (EXPLORATORY, post-preregistration)
+# bf16 tolerances for routediff
 
-**Question.** The frozen real-v2 tolerances are calibrated in fp32, so they cannot judge bf16 pairs
-(`findings/backend-pairs-v1`). What does the same recipe give in bf16, and how do the bf16 backends look against it?
+**In one line:** with tolerances learned in bf16, Apple GPU (MPS) and grouped_mm bf16 are **inside the benign
+envelope at every op**; but the bf16 output tolerance (**482**) is useless as a detector until ties are decided like
+the reference.
+- **What I found:** before the router, a bf16 port and PyTorch agree within 1-3 bf16 ULP (tolerances 2-6). Exact
+  ties at 8th/9th place, decided differently, inflate the output tolerance; on route-matched tokens it would be
+  **10** (48x tighter).
+- **Why it matters:** in bf16, a port must break top-k ties exactly like the reference before output-level checks
+  mean anything (numerics contract R4).
+- **Caveat:** detection power is untested (no planted bugs in bf16), and the benign envelope comes from three C++
+  variants only.
 
-**Recipe.** The same as real-v2 (`evaluation/run.py:29-31`; margin 2.0 per PREREG amendment 5dc67ef):
+**Type:** exploratory (after preregistration)   ·   **Reproduce:** `bash findings/bf16-tolerances/run.sh` (then `matched_only.py`, below)
+
+---
+
+## Details
+
+**Question.** The frozen tolerances of the blinded evaluation (`findings/routediff-eval-real-v2/tolerances.json`) are
+calibrated in fp32, so they cannot judge bf16 pairs (`findings/backend-pairs-v1`). What does the same recipe give in
+bf16, and how do the bf16 backends look against it?
+
+**Recipe.** The same as the blinded evaluation (`evaluation/run.py:29-31`; margin 2.0 per PREREG amendment 5dc67ef):
 - Reference: torch CPU bf16 eager dumps.
 - Candidates: three C++ `hf_bf16` variants (default; pairwise order; FMA-free).
 - Layers 0 and 7, **calibration split only** (684 tokens per layer, 6 pairs).
-- Binary: `port/build/moe_run` sha256 `c30b6f2f…`, the real-v2 binary (built from commit 9dd291d).
+- Binary: `port/build/moe_run` sha256 `c30b6f2f…`, the blinded evaluation's binary (built from commit 9dd291d).
 - Output: `data/evaluation/tolerances-bf16-exploratory.json`; sha256 in `sha256.txt`.
 - Judged afterwards on the **evaluation split** (664 tokens per layer): MPS eager bf16, CPU grouped_mm bf16, and the
   three C++ variants (held-out benign check). There is no patch-forward rerun: torch backends cannot be patched.
@@ -16,8 +34,8 @@ Reproduce (needs the local exports and torch dumps under `data/`): build `port/`
 `bash findings/bf16-tolerances/run.sh` (writes dumps and reports to `data/results/bf16-tolerances/`; refuses to
 overwrite the tolerance file), then `.venv/bin/python findings/bf16-tolerances/matched_only.py --out NEW.json`.
 
-## Tolerances (scaled ULP in each op's logical dtype)
-| op | bf16 (this) | fp32 real-v2 |
+### Tolerances (scaled ULP in each op's logical dtype)
+| op | bf16 (this) | fp32 (blinded evaluation) |
 |---|---|---|
 | o_proj_out / resid_sum / router_input | 2 / 4 / 6 | 502 / 502 / 366 |
 | router_logits | 2 | 122 |
@@ -39,7 +57,7 @@ overwrite the tolerance file), then `.venv/bin/python findings/bf16-tolerances/m
   - **In bf16, a port must decide ties exactly like the reference (numerics contract R4) before output-level
     tolerances mean anything.**
 
-## Verdicts on the evaluation split
+### Verdicts on the evaluation split
 | pair | route-set mismatches | all unexplained (ties)? | routediff (bf16 tol) | output worst, route-matched tokens (tol 10) |
 |---|---|---|---|---|
 | L0 MPS eager bf16 | 6 / 664 | yes | nothing flagged | 5 (0.5x) |

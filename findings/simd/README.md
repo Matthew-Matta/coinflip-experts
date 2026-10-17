@@ -1,15 +1,30 @@
-# SIMD (NEON) path: speed and numerics (PREREG 3c, descriptive)
+# SIMD (NEON) path: speed and numerics
+
+**In one line:** explicit NEON is **2.6-2.9x faster** than plain C++ computing the same summation order, and its order
+changes **0** expert choices.
+- **What I found:** the whole block runs **15x faster** on one thread than the sequential scalar port (21-23x for one
+  matvec, mostly from breaking one long dependency chain). The SIMD order is 4-5x closer to fp64; routediff traces the
+  change to exactly the five matmuls the SIMD path replaces.
+- **Why it matters:** a vectorised port is allowed to reorder sums: it stays inside the calibrated benign envelope and
+  changes no routes.
+- **Caveat:** one core of one laptop (M1 Pro), on a quiet but not idle machine; no memory-bandwidth claim.
+
+**Type:** descriptive (PREREG 3c: SIMD claimed only with a measured speedup)   ·   **Reproduce:** `port/build/bench_simd --rows 1024 --label L2-resident` and `--rows 32768 --reps 3 --label DRAM-bound`
+
+---
+
+## Details
 
 Single thread, Apple M1 Pro (8 performance + 2 efficiency cores). Speed numbers are a median of 20 timed runs on the
 same data. "Scalar" is the port's default fp32 dot product: one sequential FMA chain, the order it emulates.
 
-## What the SIMD path is
+### What the SIMD path is
 An fp32 dot product with `accs` NEON accumulators (4 or 8) of 4 lanes each, using FMA. The accumulators are summed as a
 balanced tree, ((a0+a1)+(a2+a3)) for accs 4, and the lanes by FADDP, ((l0+l1)+(l2+l3)). The scalar tail is added last.
 A portable loop in exactly the same order backs it. Tests show NEON == portable bit-exactly (including tails) for
 accs 1, 2, 4 and 8, and 1-accumulator SIMD == `Order::Strided(4)` (`port/tests/test_moe.cpp`).
 
-## Speed (fp32 matvec, 2048 columns)
+### Speed (fp32 matvec, 2048 columns)
 
 Canonical run: run 4, binary `bench_simd` sha256 `ebd4374d…`.
 
@@ -51,7 +66,7 @@ Canonical run: run 4, binary `bench_simd` sha256 `ebd4374d…`.
   - The benchmark is single-threaded, so it had a performance core to itself, but this is a quiet machine, not an
     idle one.
 
-### Earlier runs (kept, labelled)
+#### Earlier runs (kept, labelled)
 - `run1_*` (local only, not committed): first pass, accs 4, load average not settled.
 - `run2_possibly-contended_*`: accs 4. These overlapped routediff backend-pair compares (files written 20:17-20:20),
   so they were *not* on an idle machine.
@@ -64,7 +79,7 @@ Canonical run: run 4, binary `bench_simd` sha256 `ebd4374d…`.
   of `matvec` (activation copy per call) dominates at that size, so it says nothing about the kernel. Not used.
 - For accs 4, runs 1-3 agree with run 4 within ~10%.
 
-## Where the time goes in one block (bottleneck profile)
+### Where the time goes in one block (bottleneck profile)
 `moe_run --profile`: wall time per stage, single thread, layer 0, first 128 tokens, fp32 (`profile_layer0_128tok_1thread_*.json`).
 
 | | scalar (sequential FMA) | NEON accs 4 | NEON accs 8 |
@@ -82,7 +97,7 @@ Canonical run: run 4, binary `bench_simd` sha256 `ebd4374d…`.
 - The bf16-storage preset (`hf_bf16`, scalar) costs the same as fp32 scalar (107.2 ms per token). Rounding to bf16 is
   cheap next to the matmuls.
 
-## Numerics (fp32, real layers, 1348 tokens; fp64 oracle)
+### Numerics (fp32, real layers, 1348 tokens; fp64 oracle)
 
 | layer | route flips vs oracle (scalar / accs 4 / accs 8) | flips between any two | output rel L2 vs oracle (scalar / accs 4 / accs 8) |
 |---|---|---|---|
@@ -92,13 +107,13 @@ Canonical run: run 4, binary `bench_simd` sha256 `ebd4374d…`.
 - The SIMD orders change no expert choices. They are 4-5x closer to the fp64 oracle than the sequential order (many
   short partial sums lose less than one long chain). They differ from scalar bit-wise on every token, and accs 4 and
   accs 8 differ from each other on every token (rel L2 3.0e-7 / 3.6e-7), as expected for different orders.
-- **routediff, calibrated:** scalar reference vs SIMD candidate, evaluation split, frozen real-v2 tolerances sha256
-  `1944f35d…`. Nothing is flagged for accs 4 or accs 8 on either layer: both orders are inside the benign envelope.
+- **routediff, calibrated:** scalar reference vs SIMD candidate, evaluation split, the blinded evaluation's frozen
+  tolerances (`findings/routediff-eval-real-v2/tolerances.json`, sha256 `1944f35d…`). Nothing is flagged for accs 4 or accs 8 on either layer: both orders are inside the benign envelope.
 - **routediff, strict (supplementary):** localises to `o_proj_out`, with sites `o_proj_out, router_logits, expert_gate,
   expert_up, expert_down`. These are exactly the five matmuls the SIMD path replaces, for accs 4 and accs 8 on both
   layers, and patching them restores the output. This is correct attribution against a fully known ground truth.
 
-## Provenance
+### Provenance
 - Current binaries: `port/build-simd/bench_simd` sha256 `ebd4374d9bb4229a55e5751c13a997e30185590ccdfe5dc3c8c24a54b13daccf`,
   `port/build-simd/moe_run` sha256 `ccd7537151d6a308acb9eea741930981a3147f988c16d405877dd038cfc94f86`. Built from the
   working tree before the SIMD, e8m-format and profile changes were committed (fcfa361).

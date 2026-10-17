@@ -6,7 +6,7 @@ port/build/
 port/build-*/
 *.egg-info/
 .pytest_cache/
-# large artifacts live in Kaggle Datasets / Modal Volumes, not git
+# large artifacts live in Modal Volumes, not git
 data/
 traces/
 *.parquet
@@ -14,7 +14,7 @@ traces/
 third_party/
 logs/
 
-# secrets / tokens (HF, Modal, Kaggle) - never commit
+# secrets / tokens (HF, Modal) - never commit
 .env
 .env.*
 .envrc
@@ -33,7 +33,7 @@ access_token
 # notebooks
 .ipynb_checkpoints/
 
-# experiment outputs and model artifacts (keep in Kaggle Datasets / Modal Volumes)
+# experiment outputs and model artifacts (keep in Modal Volumes)
 results/
 *.provenance.json
 *.npy

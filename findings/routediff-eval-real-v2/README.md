@@ -1,6 +1,18 @@
-# Blinded routediff evaluation: real-v2
+# Blinded debugger evaluation
 
-**H-routediff PASS** under the amended, frozen margin-2.0 calibration
+**In one line:** I detected and localised **44/44** effective planted bugs with **0/32** false alarms.
+
+- **What I found:** I froze calibration tolerances, sealed the reports, and then scored the hidden injection labels.
+- **Why it matters:** The debugger can identify and confirm repairs for the tested porting faults.
+- **Caveat:** The planted faults are large; these counts do not establish sensitivity or a population false-alarm bound.
+
+**Type:** preregistered   ·   **Reproduce:** `python -m evaluation.run --exports data/export/olmoe-1b-7b-0924/layer0 data/export/olmoe-1b-7b-0924/layer7 --references data/dumps/layer0-torch-float32 data/dumps/layer7-torch-float32 --out NEW_OUTPUT_DIRECTORY --seed 20261016 --repeats 2 --margin 2.0`
+
+---
+
+## Details
+
+**My evaluation passes H-routediff** under the amended, frozen margin-2.0 calibration
 (PREREG amendment `5dc67ef`). Reference: PyTorch CPU fp32; candidate: C++
 `hf_fp32`; OLMoE layers 0 and 7. Inputs were previously inspected during M2;
 the evaluation prompts were held out from tolerance calibration, not unseen.
@@ -13,7 +25,7 @@ the evaluation prompts were held out from tolerance calibration, not unseen.
 | No-effect injected bugs | 8 (zero alarms) |
 | Execution errors | 0 |
 
-All 84 reports were sealed before scoring. The 8 no-effect injections are four
+I sealed all 84 reports before scoring. The 8 no-effect injections are four
 combine-order changes within benign tolerance and four tie-break reversals with
 no fp32 ties; they are excluded from the effective-bug denominator.
 
@@ -26,7 +38,7 @@ no fp32 ties; they are excluded from the effective-bug denominator.
   independent cases, whereas cases share prompts, and are supplementary rather
   than a replacement for cluster inference. The point estimates pass the
   thresholds; the sample does not establish population FP <=5%.
-- The verifier found injected dtype-bug effects roughly **250x–1,000,000x** the
+- I found injected dtype-bug effects roughly **250x–1,000,000x** the
   calibrated tolerance. This validates debugging mechanics on large faults,
   **not sensitivity to subtle faults**; this range is not claimed for every bug.
 - Route-set restoration was the criterion in **11/44** cases; **33/44**
@@ -37,7 +49,7 @@ no fp32 ties; they are excluded from the effective-bug denominator.
 
 ## Margin-1.0 sensitivity: partial real-v1
 
-Only the first **15 completed cases** were scored after real-v2 was sealed,
+I scored only the first **15 completed cases** after sealing real-v2,
 as required by amendment `5dc67ef`: detection **13/13**, localisation **13/13**,
 plus two no-effect injections with no alarms. **No benign cases completed**,
 so there is **no false-positive evidence at margin 1.0**, not a measured 0% FP
@@ -56,4 +68,4 @@ in an isolated worktree; binary SHA256:
 `c30b6f2faee45cb23ada7d8237bd5ca544a5bb59c8d1ed2d7fb3dac420c55a1b`.
 Seed 20261016, two repeats, margin 2.0. Raw runs remain in ignored
 `data/evaluation/real-v2`; partial sensitivity scores in
-`data/evaluation/real-v1-scoring`. Source runs were not modified.
+`data/evaluation/real-v1-scoring`. I did not modify the source runs.

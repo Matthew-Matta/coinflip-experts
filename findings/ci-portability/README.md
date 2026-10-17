@@ -1,13 +1,25 @@
-# Eager mirror portability: layout-dependent elementwise kernel selection observed
+# Memory layout changes rounding
+
+**In one line:** Equal input values in different layouts changed **3** activation elements on the tested Linux CPU.
+
+- **What I found:** I traced the earliest difference to the activation and restored the original fused-projection layout.
+- **Why it matters:** Exact numerical matching requires matching memory layout as well as values.
+- **Caveat:** I did not identify the kernel or prove the cause of the earlier CI failures.
+
+**Type:** descriptive   ·   **Reproduce:** `python -m reference.ci_portability --out NEW_OUTPUT_DIRECTORY`
+
+---
+
+## Details
 
 Two GitHub Linux runs failed three fp32 eager-adapter tests with `eager mirror !=
 actual Transformers module`: [39059895380](https://github.com/Matthew-Matta/coinflip-experts/actions/runs/39059895380)
 and [39065786553](https://github.com/Matthew-Matta/coinflip-experts/actions/runs/39065786553).
-The maintainer identified [39007858464](https://github.com/Matthew-Matta/coinflip-experts/actions/runs/39007858464)
+I used [39007858464](https://github.com/Matthew-Matta/coinflip-experts/actions/runs/39007858464)
 as the passing baseline. These runs used torch 2.14.1 and Transformers 5.12.1.
 The failing logs do not contain per-op traces or sufficient CPU diagnostics to
 identify the first differing operation or attribute the failure to a CPU model.
-The new controlled run below supplies the missing per-op evidence.
+I used the controlled run below to capture the missing per-operation evidence.
 
 ## Source discrepancy and correction
 
@@ -28,7 +40,7 @@ substituted, and no production-path skip was added.
 
 [Run 39066770369](https://github.com/Matthew-Matta/coinflip-experts/actions/runs/39066770369) is green. Its artifact records AMD EPYC 7763, AVX2, torch **2.14.1+cpu**, GCC 13.3, oneAPI MKL 2024.2, MKL-DNN v3.12.0, and OpenMP 4.5. At **both one and two threads**, the legacy contiguous layout first differs at **expert_act**: **3 elements**, maximum absolute difference **9.313225746154785e-10**. Every earlier op is bit-exact. The corrected fused-strided layout passes the strict module comparison at both thread counts.
 
-**Layout-dependent elementwise kernel selection observed.** This controlled comparison changes the activation input layout while retaining the same values and module. We do not identify or claim which specific kernel executes. The full Torch build and CPU output are retained in `linux-39066770369.json`; per-op counts and activation input strides are in `linux-39066770369-ops.json`.
+**Layout-dependent elementwise kernel selection observed.** I changed the activation input layout while retaining the same values and module. I do not identify or claim which specific kernel executes. The full Torch build and CPU output are retained in `linux-39066770369.json`; per-op counts and activation input strides are in `linux-39066770369-ops.json`.
 
 ## Additional checks
 
@@ -38,7 +50,7 @@ A controlled test simulates stride-dependent activation dispatch: the old layout
 fails first at `expert_act`, saves the two paths, and the corrected layout passes.
 This test validates the diagnostic and correction mechanism; it is **not** a
 measurement of Linux dispatch or proof that SiLU caused the historical failures.
-Previously recorded Mac experiment results remain unchanged.
+I left the previously recorded Mac results unchanged.
 
 The CI workflow now logs `lscpu`, `torch.__config__.show()`, Torch CPU capability
 and thread settings. `python -m reference.ci_portability --out ci-portability`

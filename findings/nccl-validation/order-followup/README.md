@@ -1,13 +1,25 @@
-# Saved-rank NCCL follow-up: order and position (descriptive)
+# The order behind NCCL sums
+
+**In one line:** I found summation orders that explain **100%** of the saved elements.
+
+- **What I found:** I found a fixed tree order and a ring order that rotates with position in the buffer.
+- **Why it matters:** An emulator must account for where each element sits in the reduction.
+- **Caveat:** This is a fit to saved outputs, not proof of executed instructions or NCCL channel mapping.
+
+**Type:** descriptive   ·   **Reproduce:** `python -m analysis.nccl_followup --source data/followup/downloaded/84cdd47f1494 --partials data/nccl/partials --out NEW_OUTPUT_DIRECTORY`
+
+---
+
+## Details
 
 **4xL4 on Modal, SHM transport.** All four NCCL logs confirm
 `SHM/direct/direct`; no PCIe or NVLink topology claim. Torch 2.13.0+cu130,
 CUDA 13.0, NCCL 2.29.7, NVIDIA driver 610.57.04 (`run.json`).
 
-The rerun used the original 24 frozen partial/expectation arrays, unchanged
+I reran the original 24 frozen partial/expectation arrays with unchanged
 world sizes, algorithm settings, dtypes and collective call order. It saved
 all per-rank outputs as float32 `.npy` files (bf16 values remain exactly
-representable). Every archived output hash was verified locally. All ranks
+representable). I verified every archived output hash locally. All ranks
 are bit-identical within each configuration. Raw files are under
 `data/followup/downloaded/84cdd47f1494/nccl/`, also linked locally at
 `data/nccl/remote/followup-84cdd47f1494/`.
@@ -18,9 +30,9 @@ Two ranks reproduce the port in **8/8 configurations**; four ranks reproduce it
 in **0/8**. Mismatch counts and maximum reference ULP repeat the original
 aggregate results. The original tensors were not saved, so the order analysis
 below describes the new captured outputs, not recovered historical tensors.
-The port and frozen expectations were not tuned.
+I did not tune the port or frozen expectations.
 
-For **each element**, all 24 permutations of the four partials were tested with
+For **each element**, I tested all 24 permutations of the four partials with
 sequential and balanced-pairwise summation (48 labelled candidates). Each add
 rounds in the stated wire dtype. BF16 arithmetic is checked against explicit
 Torch additions for all 48 candidates. Equivalent permutations can overlap;
@@ -65,7 +77,7 @@ with element position for Ring, while the same fixed Tree order suffices here.
 
 ## Size-aware error
 
-`errors.csv` adds the requested magnitude-normalised error:
+`errors.csv` records magnitude-normalised error:
 
 ```text
 abs(NCCL - emulation) / sum(abs(partials)) / eps_wire
@@ -93,4 +105,4 @@ python -m analysis.nccl_followup --source data/followup/downloaded/84cdd47f1494 
 
 The runner verifies input/output hashes and analyses every distinct rank output.
 Local parquet and full provenance remain under `data/followup/order-analysis/`;
-public summaries retain source hashes without copying local host metadata.
+I retained source hashes in the public summaries without copying local host metadata.

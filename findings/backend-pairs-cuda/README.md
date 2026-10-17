@@ -1,13 +1,25 @@
-# CPU / CUDA backend pairs (descriptive)
+# CPU versus NVIDIA GPU
+
+**In one line:** The full-precision pairs had **0** route differences; the lower-precision patches left a difference.
+
+- **What I found:** I compared the same captured inputs on CPU and CUDA, then patched operations that exceeded tolerance.
+- **Why it matters:** A passing tolerance check need not mean identical expert choices.
+- **Caveat:** The Torch builds differ too, so I cannot attribute the differences to hardware alone.
+
+**Type:** descriptive   ·   **Reproduce:** `modal run modal/numerics_followup.py --gpu-approved`
+
+---
+
+## Details
 
 OLMoE layers 0 and 7, eager pinned, **64 identical captured positions per layer**:
 first two positions from each original prompt (32 prompts; calibration/evaluation
-positions both included). CPU references were recomputed at this same shape,
-not sliced from a larger-batch computation. No new tolerances were calibrated.
+positions both included). I recomputed CPU references at this same shape,
+rather than slicing a larger-batch computation. I did not calibrate new tolerances.
 
 CUDA: **NVIDIA L4**, driver **610.57.04**, torch **2.13.0+cu130**, CUDA **13.0**,
 Transformers **5.12.1**. CPU: Apple M1 Pro, torch **2.14.1**, Accelerate,
-Transformers 5.12.1. These pairs differ in hardware and software build; do not
+Transformers 5.12.1. These pairs differ in hardware and software build; I cannot
 attribute a discrepancy to hardware alone. TF32 disabled for CUDA dump generation.
 
 | Layer | Dtype | Initial route-set differences / 64 | Earliest flagged op | Patch result |
@@ -20,7 +32,7 @@ attribute a discrepancy to hardware alone. TF32 disabled for CUDA dump generatio
 All **four unpatched CUDA mirrors equal the actual Transformers module
 bit-exactly**. A same-CUDA router-logit null patch leaves **all 13 operations
 bit-exact** in every pair. Full patch-forward uses the torch forward-hook adapter.
-The reports retain every per-op metric and patch check.
+I retained every per-op metric and patch check in the reports.
 
 ## Interpretation limits
 
@@ -34,7 +46,7 @@ not a demonstration that an initially unacceptable combined output was repaired.
 The frozen bf16 route allowance is 0.017543859649122806, or about 1.123 tokens
 on 64 positions. Consequently the tool's `routes_restored=true` means within
 that allowance, **not exact route agreement**. Patching introduces one route-set
-difference on layer 0; the one difference on layer 7 remains. We do not claim
+difference on layer 0; the one difference on layer 7 remains. I do not claim
 bit-exact CPU/CUDA restoration or score these real pairs as planted bugs.
 The separate known-fault MPS demo supplies the exact route-affecting repair demo.
 

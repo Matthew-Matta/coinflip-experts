@@ -1,6 +1,18 @@
-# SGLang OLMoE prefill census: H1 PASS
+# Batch size changes expert choices
 
-**Batch-size-associated captured route flips are nonzero on this setup.**
+**In one line:** Changing batch size changed **7.255%** of captured expert choices across words and layers.
+
+- **What I found:** I found different expert sets when I grouped the same frozen inputs into larger batches.
+- **Why it matters:** Serving batch composition can change which experts run.
+- **Caveat:** I measured prefill on one GPU setup, without identifying the operation responsible.
+
+**Type:** preregistered   ·   **Reproduce:** `python -m analysis.census --summary data/census/downloaded/census-6549ef998bce/summary.json --out NEW_SUMMARY.json`
+
+---
+
+## Details
+
+**I observed nonzero batch-size-associated route flips on this setup.**
 These are prefill-only expert-set comparisons on fixed token IDs, not decode
 or op-level attribution. No router scores/margins were captured.
 
@@ -12,7 +24,7 @@ or op-level attribution. No router scores/margins were captured.
 
 R0 is zero, so excess-over-R0 rates and intervals equal the displayed rates.
 H1 passes because the bs32 excess 95% CI excludes zero. The <0.01% upper-bound
-kill check is not met. Zero/all-success bootstrap intervals for R0 or sequence
+preregistered stopping threshold is not met. Zero/all-success bootstrap intervals for R0 or sequence
 fractions are degenerate and do not establish population guarantees.
 
 ## Frozen inputs and configuration
@@ -34,8 +46,8 @@ fractions are degenerate and do not establish population guarantees.
 - Selection seed42, batch seed20261017. One seeded prompt permutation is reused
   across configs: bs1 twice (200 batches each), bs8 (25 batches), bs32 (six
   32-sequence batches + one 8-sequence batch). The bs1 baseline doubles as R0a.
-- All **432 measurement scheduler “Prefill batch” lines** were parsed and independently
-  checked against submitted prompt IDs, sequence counts, frozen input-token
+- I parsed all **432 measurement scheduler “Prefill batch” lines** and independently
+  checked them against submitted prompt IDs, sequence counts, frozen input-token
   sums and zero cached tokens. Only one request batch was outstanding at a time;
   scheduler counts plus that invariant identify its realised membership. Two
   startup/health prefills (6 tokens and 1 token) precede the first successful
@@ -54,11 +66,11 @@ experiments are not pooled here. Only one model revision, GPU and neighbour
 permutation were tested; the result does not identify which numerical operation
 causes a flip or quantify output quality impact.
 
-A separate CPU pass re-read every saved route array, recomputed all flip counts,
+I re-read every saved route array on CPU, recomputed all flip counts,
 verified complete per-config prompt coverage, and checked patch/token hashes.
 The downloaded archive SHA256 matches `verification.json`. Local checks then
 compared raw scheduler lines and every realised batch against the original
-frozen token file. GPU inference was not rerun for this verification.
+frozen token file. I did not rerun GPU inference for this verification.
 
 `summary.json` contains rates/CIs; `metadata.json` is the run metadata with its
 hostname redacted and clearly labelled supplementary source-derived settings;
