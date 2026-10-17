@@ -1,6 +1,7 @@
 # OLMoE block reference
 
-Install with `pip install -e '.[dev,reference,modal]'`. Model exports, prompts and
+Follow the [root Quick start](../README.md#quick-start) to install the pinned
+Torch runtime and project extras. Model exports, prompts and
 per-operation dumps go under ignored `data/`; no weights or prompt text belong in Git.
 
 ```sh
@@ -15,7 +16,7 @@ are pinned; FLORES uses Meta's original public archive with its SHA-256 recorded
 The exporter selects eight per source with a fixed seed, assigns four to calibration
 and four to evaluation, and truncates each input to 64 tokens. Selection, source IDs,
 token IDs and splits are saved before inference. This is the block-reference input
-set, separate from the future serving census.
+set, separate from the completed [serving census](../findings/census-olmoe-prefill/).
 
 The exporter loads `OlmoeModel` (no language-model head), truncated after the deepest
 requested layer that fits the weight budget. Default budget: 8 GiB of bf16 weights;

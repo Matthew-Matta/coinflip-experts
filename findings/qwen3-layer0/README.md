@@ -20,8 +20,10 @@ This is a layer reference check, not a full-model serving experiment.
 
 Qwen has a **rectangular o_proj**. The export records `o_proj_input_size` and
 `port_compatible=False`; the reference reader handles that input width. The
-current C++ square-o_proj port cannot consume it without a separately agreed
-interface/implementation change. No shape is coerced and no C++ parity claimed.
+C++ port at the time of this export could not consume it. That historical
+metadata is retained unchanged. Rectangular o_proj support was subsequently
+added in 43ee582; later parity results are in [qwen3-port](../qwen3-port/).
+No shape was coerced during this export.
 
 ```sh
 HF_HOME=data/hf-cache python -m reference.export_qwen --out NEW_OUTPUT_DIRECTORY

@@ -1,5 +1,6 @@
 """Descriptive layer and expert-swap structure from the frozen prefill arrays."""
 import argparse
+import csv
 import json
 from pathlib import Path
 import numpy as np
@@ -34,10 +35,22 @@ def structure(source: Path,count=200):
                 unit='token-layer top-k set; swap size = experts removed (= experts added)',results=results,input_sha256=inputs)
 
 
+def write_per_layer(result, destination: Path):
+    """Write the published layer table from the same structure counts."""
+    with destination.open('w', newline='') as stream:
+        writer=csv.writer(stream,lineterminator='\n')
+        writer.writerow(['layer','tokens','bs8_flips','bs8_rate','bs32_flips','bs32_rate'])
+        a,b=(result['results'][label] for label in ('bs8','bs32'))
+        for layer in range(16):
+            writer.writerow([layer,a['tokens'],a['per_layer_flips'][layer],a['per_layer_rates'][layer],
+                             b['per_layer_flips'][layer],b['per_layer_rates'][layer]])
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--source',type=Path,required=True);p.add_argument('--out',type=Path,required=True)
     a=p.parse_args();result=structure(a.source);a.out.mkdir(parents=True,exist_ok=True)
     write_json(a.out/'structure.json',result)
+    write_per_layer(result,a.out/'per_layer.csv')
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt

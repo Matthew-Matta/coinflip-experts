@@ -106,5 +106,5 @@ specific numerical operation or an explanation of downstream quality.
 histograms plus input hashes; `per_layer.csv` contains all 16 rates. Reproduce:
 
 ```sh
-OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 VECLIB_MAXIMUM_THREADS=2 python -m analysis.census_structure --source data/census/downloaded/census-6549ef998bce --out findings/census-olmoe-prefill
+OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 VECLIB_MAXIMUM_THREADS=2 python -m analysis.census_structure --source data/census/downloaded/census-6549ef998bce --out NEW_OUTPUT_DIRECTORY
 ```
