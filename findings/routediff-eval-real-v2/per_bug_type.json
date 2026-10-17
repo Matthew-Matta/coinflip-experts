@@ -1,0 +1,90 @@
+{
+  "note": "Per-bug-type effects in the blinded real-v2 evaluation (descriptive; computed after all reports were sealed and scored).",
+  "seals_verified": 84,
+  "by_type": {
+    "benign": {
+      "cases": 32,
+      "route_mismatch_tokens": 0,
+      "tokens": 1328,
+      "median_output_rel_l2": 3.6335438485111597e-07
+    },
+    "combine_accum": {
+      "cases": 4,
+      "route_mismatch_tokens": 0,
+      "tokens": 236,
+      "median_output_rel_l2": 0.0035738866399495015
+    },
+    "combine_order": {
+      "cases": 4,
+      "route_mismatch_tokens": 0,
+      "tokens": 206,
+      "median_output_rel_l2": 2.0645778814857522e-07
+    },
+    "expert_accum": {
+      "cases": 4,
+      "route_mismatch_tokens": 0,
+      "tokens": 133,
+      "median_output_rel_l2": 0.07321079267237895
+    },
+    "expert_permuted": {
+      "cases": 4,
+      "route_mismatch_tokens": 0,
+      "tokens": 205,
+      "median_output_rel_l2": 0.03482543935934985
+    },
+    "gate_out_dtype": {
+      "cases": 4,
+      "route_mismatch_tokens": 4,
+      "tokens": 190,
+      "median_output_rel_l2": 0.01755140074886225
+    },
+    "gate_up_swapped": {
+      "cases": 4,
+      "route_mismatch_tokens": 0,
+      "tokens": 162,
+      "median_output_rel_l2": 0.8553462706395502
+    },
+    "oproj_accum": {
+      "cases": 4,
+      "route_mismatch_tokens": 12,
+      "tokens": 148,
+      "median_output_rel_l2": 0.03568484945076536
+    },
+    "rmsnorm_dtype": {
+      "cases": 4,
+      "route_mismatch_tokens": 0,
+      "tokens": 199,
+      "median_output_rel_l2": 0.007339811492009249
+    },
+    "router_accum": {
+      "cases": 4,
+      "route_mismatch_tokens": 33,
+      "tokens": 204,
+      "median_output_rel_l2": 0.07566742651065067
+    },
+    "softmax_dtype": {
+      "cases": 4,
+      "route_mismatch_tokens": 4,
+      "tokens": 113,
+      "median_output_rel_l2": 0.014264553698391422
+    },
+    "topk_renorm_toggle": {
+      "cases": 4,
+      "route_mismatch_tokens": 0,
+      "tokens": 105,
+      "median_output_rel_l2": 1.610641196588686
+    },
+    "topk_tiebreak_reversed": {
+      "cases": 4,
+      "route_mismatch_tokens": 0,
+      "tokens": 172,
+      "median_output_rel_l2": 2.0061246558151783e-07
+    },
+    "weights_dtype": {
+      "cases": 4,
+      "route_mismatch_tokens": 0,
+      "tokens": 125,
+      "median_output_rel_l2": 0.0015510994183248954
+    }
+  }
+}

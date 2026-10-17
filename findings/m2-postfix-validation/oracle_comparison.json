@@ -1,0 +1,30 @@
+{
+  "note": "Post-fix C++ port and PyTorch, each against the fp64 oracle (descriptive, post hoc).",
+  "moe_run_sha256": "c30b6f2faee45cb23ada7d8237bd5ca544a5bb59c8d1ed2d7fb3dac420c55a1b",
+  "layers": {
+    "layer0": {
+      "expert_down": {
+        "cpp_vs_oracle": 1.0615462636565604e-06,
+        "torch_vs_oracle": 1.0620142364950964e-06,
+        "cpp_vs_torch": 1.1860908897050399e-07
+      },
+      "output": {
+        "cpp_vs_oracle": 1.1849038804475254e-06,
+        "torch_vs_oracle": 1.179890113424159e-06,
+        "cpp_vs_torch": 1.870265553419455e-07
+      }
+    },
+    "layer7": {
+      "expert_down": {
+        "cpp_vs_oracle": 1.2434356885510437e-06,
+        "torch_vs_oracle": 1.243644035648774e-06,
+        "cpp_vs_torch": 1.4336850783971496e-07
+      },
+      "output": {
+        "cpp_vs_oracle": 1.2591545443071509e-06,
+        "torch_vs_oracle": 1.2587105429267837e-06,
+        "cpp_vs_torch": 2.115182692743915e-07
+      }
+    }
+  }
+}
