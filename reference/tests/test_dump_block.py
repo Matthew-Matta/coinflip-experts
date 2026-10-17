@@ -239,3 +239,15 @@ def test_rerun_cli_accepts_out_and_patch(tiny_export,tmp_path,monkeypatch):
     main()
     assert np.array_equal(np.load(dest/'output.npy'),(baseline['output']+1).numpy())
     assert not json.loads((dest/'manifest.json').read_text())['numerics']['mirror_equals_module']
+
+
+def test_known_demo_hook_is_removed_by_patch(tiny_export,tmp_path):
+    from reference.backend_pairs import compute_backend
+    c,a=load_export(tiny_export)
+    clean,_=compute_backend(c,a,torch.bfloat16,'cpu','eager')
+    faulty,_=compute_backend(c,a,torch.bfloat16,'cpu','eager',demo_scale_combine=16.)
+    assert not torch.equal(faulty['output'],clean['output'])
+    patch=tmp_path/'combine.npy';save_array(patch,clean['combine_terms'])
+    ids=tmp_path/'ids.npy';save_array(ids,clean['topk_ids'],integer=True)
+    repaired,_=compute_backend(c,a,torch.bfloat16,'cpu','eager',{'combine_terms':patch},ids,16.)
+    assert all(torch.equal(repaired[name],clean[name]) for name in OPS)

@@ -1,0 +1,14 @@
+{
+  "kind": "Known forward-hook demo, NOT blinded evaluation",
+  "device": "cpu",
+  "threads": 2,
+  "injected_op": "combine_terms",
+  "scale": 16.0,
+  "localized_op": "combine_terms",
+  "patch_restores_all_ops_bit_exact": true,
+  "route_sets_unchanged": true,
+  "tokens": 64,
+  "prompts": 32,
+  "tolerance_sha256": "01fae51b5dc969a62529a3466732189af7cf656fcedf25bef3a073960ffd07a0",
+  "report": "<repo>/data/results/torch-hook-demo-cpu/report/report.md"
+}

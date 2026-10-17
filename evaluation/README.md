@@ -43,3 +43,12 @@ case counts and previously inspected inputs limit generalisation.
 Outputs are reproducible research artifacts, not committed model data:
 `settings.json`, `frozen.json`, `tolerances.json`, `sealed_reports.json`, per-case
 reports, `scores.json`, and `summary.json`. No retuning occurs after evaluation.
+
+
+## Offline mechanics demo
+
+After `pip install -e ".[dev]"` and building `port/build/moe_run`, run `make demo`.
+No Torch or model files are needed. The seeded synthetic example localises a
+router-logit precision mismatch and confirms patch-forward restoration; it
+prints the localised op and report path. This uses strict comparison and is
+not blinded evaluation or evidence about a real model.

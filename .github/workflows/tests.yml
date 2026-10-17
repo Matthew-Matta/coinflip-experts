@@ -5,6 +5,26 @@ on:
 permissions:
   contents: read
 jobs:
+  offline-demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install only base and dev dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Build the C++ demo backend
+        run: |
+          cmake -S port -B port/build
+          cmake --build port/build --target moe_run --parallel 2
+      - name: Run offline demo without the reference or GPU extras
+        run: make demo PYTHON=python
   cpu:
     runs-on: ubuntu-latest
     timeout-minutes: 20

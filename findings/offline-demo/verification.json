@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "torch_installed": false,
+  "private_model_files_present": false,
+  "installed_extras": [
+    "dev"
+  ],
+  "cpp_build_parallelism": 1,
+  "numerical_threads": 2,
+  "localized_op": "router_logits",
+  "restored": true
+}

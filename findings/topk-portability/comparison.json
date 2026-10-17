@@ -1,0 +1,11 @@
+{
+  "ci_run": 38991546221,
+  "artifact_sha256": "cce61607a996e8639c9ff264cdfad67ab1c8b7a4a15fa72855c19e9122eb1f4a",
+  "fixture_sha256": "e96d819c956ba2a82381796d8b33f3899e64a6b11d1cfd3c5abb5b55bccc5cc3",
+  "linux_same_sets_as_macos": 19,
+  "total_rows": 38,
+  "lower_id_rule_matches_linux": 16,
+  "lower_id_rule_matches_macos": 11,
+  "lower_id_rule": "Sort saved macOS probabilities descending, use ascending expert ID for ties",
+  "attribution": "Descriptive platform/build comparison only; C++ standard library cause not established."
+}

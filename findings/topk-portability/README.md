@@ -18,8 +18,18 @@ A match on 38 rows is not a general portability guarantee.
 
 Local macOS arm64, torch 2.14.1: **38/38 sets match** in both probes; all
 recomputed probability rows are bit-exact. Full row results: `macos.json`.
-**Linux result pending the next CI run**; inspect the `topk-linux` artifact and
-step logs. No Linux outcome is claimed from the macOS run.
+**Linux result recorded:** [CI run 38991546221](https://github.com/Matthew-Matta/coinflip-experts/actions/runs/38991546221),
+artifact `topk-linux`, Linux x86_64, torch **2.14.1+cpu**: **19/38** selected
+sets match macOS in both probes. Full artifact: `linux.json`; hashes and counts:
+`comparison.json`.
+
+A stable lower-expert-ID rule matches **16/38 Linux** sets and **11/38 macOS**
+sets, using the saved fixed probabilities. Thus neither tested CPU build behaves
+as that simple tie rule on all rows. Differences already occur when both builds
+receive identical saved probabilities, independently of softmax recomputation.
+This is descriptive evidence of platform/build-dependent tie choices; **no
+attribution to libstdc++ or libc++ is made** without checking the actual builds
+and selection implementation.
 
 ```sh
 python -m analysis.topk_portability --out topk-linux.json

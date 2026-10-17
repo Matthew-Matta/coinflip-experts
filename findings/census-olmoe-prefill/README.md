@@ -82,3 +82,29 @@ python -m analysis.census --summary NEW_RUN/summary.json --out NEW_RUN/analysis.
 
 The optional capture-buffer upstream PR has not been opened. This experiment
 uses the declared capacity workaround, not a new capture-buffer implementation.
+
+## Descriptive structure of the observed differences
+
+![Captured route flips by layer](per_layer_flips.png)
+
+For **bs8 vs bs1**, the layer-0 rate is **2.619%** (1,734/66,207), rising
+non-monotonically to **10.555%** at layer 14 (6,988/66,207), then 9.599% at
+layer 15. The chart also shows bs32 separately; it has a similar observed profile.
+
+Of the 76,852 differing bs8 token-layer sets, **75,208 (97.861%) swap exactly
+one expert**: one expert leaves and one enters the top-8 set. This is not two
+independent flips. Larger replacements account for the remaining 1,644 sets.
+**34,655/66,207 token positions (52.343%)** differ in at least one layer;
+**zero** differ in all 16 layers. These are token-position rates, distinct from
+the earlier 200/200 sequence-level result. For bs32, the corresponding figures
+are 74,696/76,371 one-expert swaps (97.807%), 34,454/66,207 positions with any
+layer flip (52.040%), and zero positions flipping in all layers.
+
+These are descriptive counts on the frozen corpus, not an attribution to a
+specific numerical operation or an explanation of downstream quality.
+`structure.json` includes the full replacement-size and flipped-layer-count
+histograms plus input hashes; `per_layer.csv` contains all 16 rates. Reproduce:
+
+```sh
+OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 VECLIB_MAXIMUM_THREADS=2 python -m analysis.census_structure --source data/census/downloaded/census-6549ef998bce --out findings/census-olmoe-prefill
+```
