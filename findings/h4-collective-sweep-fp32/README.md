@@ -2,7 +2,7 @@
 
 **Emulation** (PREREG section 3), not a measurement of any interconnect. Base numerics `hf_fp32` (PREREG amendment c18d512), compared with the fp64 oracle. Margin-free: H4 has its own preregistered criteria.
 
-- Binary: `port/build/moe_run` sha256 `c30b6f2faee45cb23ada7d8237bd5ca544a5bb59c8d1ed2d7fb3dac420c55a1b` (unchanged since 18:13:58; matches the verifier's record). Started started 10-16 18:53:35 at commit 5dc67ef, PREREG amendment c18d512 committed 18:35:22; wall time 80 min.
+- Binary: `port/build/moe_run` sha256 `c30b6f2faee45cb23ada7d8237bd5ca544a5bb59c8d1ed2d7fb3dac420c55a1b` (unchanged since 18:13:58; matches the verifier's record). Started 10-16 18:53:35 at commit 5dc67ef, PREREG amendment c18d512 committed 18:35:22; wall time 80 min.
 - Provenance git state is captured at save time (`cd74858`, dirty: uncommitted SIMD source edits that did not affect this binary).
 
 ## Verdict (PREREG H4)
@@ -62,4 +62,4 @@ Expert down-projection all-reduce (cannot change this block's routes; flips caus
 - p99 element ULP is in the parquet (`output_p99_ulp_vs_oracle`) but is dominated by near-zero outputs (the fp32 baseline alone is ~800-900 ULP at p99); relative L2 is the interpretable error measure.
 - Single prompt set (32 prompts, 1,348 tokens), two layers, emulated reduction orders; prompt-cluster confidence intervals are now provided in [bootstrap/README.md](bootstrap/README.md), with a modelled accuracy-vs-bytes chart.
 
-Files: `h4_verdict.json`, `h4_collective_sweep.provenance.json` (copies); the per-configuration table `h4_collective_sweep.parquet` is in `data/results/h4-collective-sweep-fp32` (parquet files are gitignored).
+Files: `h4_verdict.json` (copy; `h4_collective_sweep.provenance.json` is next to it locally but `*.provenance.json` is gitignored); the per-configuration table `h4_collective_sweep.parquet` is in `data/results/h4-collective-sweep-fp32` (parquet files are gitignored).

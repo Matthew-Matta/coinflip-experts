@@ -5,7 +5,7 @@
 - **Reference:** Codex's export `data/export/qwen3-30b-a3b-layer0`: HF revision `ad44e777…`, transformers 5.12.1,
   eager experts, 1361 tokens. Torch CPU fp32 and bf16 dumps; mirror == module.
 - **Candidate:** C++ port, `port/build-qwen/moe_run` sha256 `332454139f3a874ad3150279d593038cac049f01cd20a46dd6eb707a21fc22e6`
-  (working tree, uncommitted).
+  (built from the working tree at the time; the same port changes were committed in 43ee582).
 - **fp64 oracle:** the same binary, `oracle` preset.
 
 ## What had to change (read from the source first)
@@ -76,15 +76,30 @@ comparison and patching already existed. Most of the wall time is moe_run on 136
   (1.0% / 1.9%) on OLMoE layers 0 and 7. That is 128 experts and a top-8 cutoff deeper into a flatter distribution.
   The tie-break rule (numerics contract R4) matters roughly 5-9x more for this model.
 - **bf16 `o_proj`:**
-  - bit-exact on 583 / 1361 tokens (99.97% of elements); this was bit-exact on OLMoE's square `o_proj`. So torch's
-    bf16 CPU GEMM for this shape (K = 4096) accumulates in an order the port does not reproduce.
+  - bit-exact on 583 / 1361 tokens (99.97% of elements). OLMoE's square `o_proj` is no different: 512 / 1348 and
+    613 / 1348 tokens bit-exact on layers 0 and 7 (`data/results/m2-postfix-validation/dumps/*-cpp-hf_bf16-postfix`
+    vs `data/dumps/layer{0,7}-torch-bfloat16`). So torch's bf16 CPU GEMM accumulates in an order the port does not
+    reproduce, for both models; it is not specific to this shape.
   - On 128 tokens: pairwise 100/128 tokens (99.99% of elements), strided-16 95, blocked-256 86, sequential 67.
   - Not identified further (time box). These are single bf16 rounding-boundary cases.
 - Output relative L2 vs oracle: torch 1.307e-2, C++ 1.312e-2.
 
 ## Files
+In this folder: `numerics-*.json`, `h_port_fp32.json`, `per_op_fp32.json`, `renorm_order_identification.json`. The
+dump directories named below are in `data/results/qwen3-port/` (local, gitignored).
 - `numerics-*.json`, `cpp-hf_fp32`, `cpp-hf_bf16`, `cpp-oracle`: full 13-op dumps.
 - `h_port_fp32.json`: `routediff.fidelity` output.
 - `per_op_fp32.json`: per-op table.
 - `cpp-fp32-renorm-*-patch_router_probs`, `renorm_order_identification.json`: renorm-order identification (regenerated at 01:08 with the final binary after an accidental delete; same counts).
 - `cpp-hf_fp32-patch_expert_act`: patch-forward check.
+
+## Reproduce
+Build `port/` at 43ee582 or later (`make test-cpp`), then, with the export from `reference/export_qwen.py`:
+```sh
+for n in hf_fp32 hf_bf16 oracle; do
+  port/build/moe_run --export data/export/qwen3-30b-a3b-layer0/layer0 --numerics findings/qwen3-port/numerics-$n.json \
+      --dump data/results/qwen3-port/cpp-$n --threads 4
+done
+python -m routediff.fidelity data/export/qwen3-30b-a3b-layer0/torch-float32 data/results/qwen3-port/cpp-hf_fp32 \
+    --out h_port_fp32.json
+```

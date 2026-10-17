@@ -24,7 +24,9 @@ int main(int argc, char** argv) {
     const int v = std::stoi(argv[i + 1]);
     if (a == "--rows") rows = v; else if (a == "--cols") cols = v; else if (a == "--runs") runs = v;
     else if (a == "--reps") reps = v; else if (a == "--accs") accs = v;
+    else { std::fprintf(stderr, "bench_simd: unknown flag %s\n", a.c_str()); return 2; }
   }
+  if (argc % 2 == 0) { std::fprintf(stderr, "bench_simd: flags take a value\n"); return 2; }
   std::mt19937_64 rng(1);
   std::normal_distribution<float> nd(0.f, 1.f);
   std::vector<float> W(static_cast<size_t>(rows) * cols);
@@ -48,7 +50,7 @@ int main(int argc, char** argv) {
   };
   const auto [ts, all_s] = time_one(scalar);
   const auto [tv, all_v] = time_one(simd);
-  // Same order and 16 accumulators as the SIMD path, written as plain scalar C++ (the compiler may still vectorise
+  // Same order and 4 x accs accumulator lanes as the SIMD path, written as plain scalar C++ (the compiler may still vectorise
   // it). Separates "breaking the single FMA dependency chain" from "explicit NEON".
   std::vector<float> Wf(W), xf(x.begin(), x.end());
   std::vector<double> tp(runs);

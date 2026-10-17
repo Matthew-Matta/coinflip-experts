@@ -7,12 +7,14 @@
 - Reference: torch CPU bf16 eager dumps.
 - Candidates: three C++ `hf_bf16` variants (default; pairwise order; FMA-free).
 - Layers 0 and 7, **calibration split only** (684 tokens per layer, 6 pairs).
-- Binary: `port/build/moe_run` sha256 `c30b6f2f…`, the real-v2 binary.
+- Binary: `port/build/moe_run` sha256 `c30b6f2f…`, the real-v2 binary (built from commit 9dd291d).
 - Output: `data/evaluation/tolerances-bf16-exploratory.json`; sha256 in `sha256.txt`.
 - Judged afterwards on the **evaluation split** (664 tokens per layer): MPS eager bf16, CPU grouped_mm bf16, and the
   three C++ variants (held-out benign check). There is no patch-forward rerun: torch backends cannot be patched.
 
-Reproduce: `bash data/results/bf16-tolerances/run.sh`, then `.venv/bin/python data/results/bf16-tolerances/matched_only.py`.
+Reproduce (needs the local exports and torch dumps under `data/`): build `port/` at 9dd291d into `port/build`, then
+`bash findings/bf16-tolerances/run.sh` (writes dumps and reports to `data/results/bf16-tolerances/`; refuses to
+overwrite the tolerance file), then `.venv/bin/python findings/bf16-tolerances/matched_only.py --out NEW.json`.
 
 ## Tolerances (scaled ULP in each op's logical dtype)
 | op | bf16 (this) | fp32 real-v2 |

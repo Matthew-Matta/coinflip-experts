@@ -27,7 +27,8 @@ namespace {
 
 void usage() {
   std::cerr << "usage: moe_run --export DIR --numerics FILE --dump OUT_DIR [--bug FILE] [--patch OP=FILE ...]\n"
-               "               [--patch-ids FILE] [--tokens a:b] [--threads N]\n";
+               "               [--patch-ids FILE] [--tokens a:b] [--threads N] [--ops a,b,c] [--profile FILE]\n"
+               "       moe_run --list-bugs\n";
 }
 
 std::string cmd_output(const std::string& cmd) {
@@ -41,7 +42,21 @@ std::string cmd_output(const std::string& cmd) {
   return out;
 }
 
-// Numerics presets, then flat overrides. Unknown keys are an error.
+// Boolean and enum values must be spelled exactly; anything else is an error, like an unknown key.
+bool parse_bool(const std::string& key, const Json& v) {
+  const std::string s = v.as_string();
+  if (s == "true") return true;
+  if (s == "false") return false;
+  throw std::invalid_argument("numerics key " + key + " needs true or false, got: " + s);
+}
+
+std::string parse_choice(const std::string& key, const Json& v, const std::string& a, const std::string& b) {
+  const std::string s = v.as_string();
+  if (s != a && s != b) throw std::invalid_argument("numerics key " + key + " needs " + a + " or " + b + ", got: " + s);
+  return s;
+}
+
+// Numerics presets, then flat overrides. Unknown keys or values are an error.
 Numerics load_numerics(const Json& j, std::string* preset_out) {
   Numerics n;
   const std::string preset = j.has("preset") ? j.at("preset").as_string() : "hf_bf16";
@@ -57,10 +72,10 @@ Numerics load_numerics(const Json& j, std::string* preset_out) {
     if (key == p + "_accum") a.acc = parse_dtype(v.as_string());
     else if (key == p + "_order") a.order = parse_order(v.as_string());
     else if (key == p + "_block") a.block = std::stoi(v.as_string());
-    else if (key == p + "_fma") a.fma = v.as_string() == "true";
-    else if (key == p + "_simd") a.simd = v.as_string() == "true";
+    else if (key == p + "_fma") a.fma = parse_bool(key, v);
+    else if (key == p + "_simd") a.simd = parse_bool(key, v);
     else if (key == p + "_simd_accs") a.simd_accs = std::stoi(v.as_string());
-    else if (key == p + "_kahan") a.kahan = v.as_string() == "true";
+    else if (key == p + "_kahan") a.kahan = parse_bool(key, v);
     else return false;
     return true;
   };
@@ -71,14 +86,14 @@ Numerics load_numerics(const Json& j, std::string* preset_out) {
     if (k == "storage") n.storage = parse_dtype(v.as_string());
     else if (k == "rms") n.rms = parse_dtype(v.as_string());
     else if (k == "rms_accum") n.rms_acc = parse_dtype(v.as_string()), rms_acc_set = true;
-    else if (k == "rms_kahan") n.rms_kahan = v.as_string() == "true";
-    else if (k == "combine_kahan") n.combine_kahan = v.as_string() == "true";
+    else if (k == "rms_kahan") n.rms_kahan = parse_bool(k, v);
+    else if (k == "combine_kahan") n.combine_kahan = parse_bool(k, v);
     else if (k == "rms_order") n.rms_order = parse_order(v.as_string());
     else if (k == "rms_block") n.rms_block = std::stoi(v.as_string());
     else if (k == "gate_out") n.gate_out = parse_dtype(v.as_string());
     else if (k == "softmax") n.softmax = parse_dtype(v.as_string());
-    else if (k == "topk_on") n.topk_on_logits = v.as_string() == "logits";
-    else if (k == "tiebreak") n.tiebreak_lower_index = v.as_string() != "higher";
+    else if (k == "topk_on") n.topk_on_logits = parse_choice(k, v, "probs", "logits") == "logits";
+    else if (k == "tiebreak") n.tiebreak_lower_index = parse_choice(k, v, "lower", "higher") == "lower";
     else if (k == "weights") n.weights = parse_dtype(v.as_string());
     else if (k == "renorm_order") n.renorm_order = parse_order(v.as_string());
     else if (k == "renorm_block") n.renorm_block = std::stoi(v.as_string());

@@ -92,27 +92,29 @@ def test_every_bug_type_is_localised_to_its_injected_op(setup):
 
 
 def test_calibrated_tolerances_absorb_benign_differences(setup):
-    tmp, export, ref = setup
-    r = load_run(ref)
+    # fp32 storage: on this small export the bf16 variants round to the same values as the reference (all-zero
+    # tolerances), so the benign order / FMA differences are only visible in fp32.
+    tmp, export, _ = setup
+    r = load_run(run(tmp, "ref_fp32", export, {"preset": "hf_fp32"}))
     benign = [
-        ("seq_nofma", {"preset": "hf_bf16", "expert_fma": "false", "router_fma": "false", "oproj_fma": "false"}),
-        ("strided8", {"preset": "hf_bf16", "expert_order": "strided", "expert_block": 8,
+        ("seq_nofma", {"preset": "hf_fp32", "expert_fma": "false", "router_fma": "false", "oproj_fma": "false"}),
+        ("strided8", {"preset": "hf_fp32", "expert_order": "strided", "expert_block": 8,
                       "router_order": "strided", "router_block": 8, "oproj_order": "strided", "oproj_block": 8}),
-        ("pairwise", {"preset": "hf_bf16", "expert_order": "pairwise", "router_order": "pairwise",
+        ("pairwise", {"preset": "hf_fp32", "expert_order": "pairwise", "router_order": "pairwise",
                       "oproj_order": "pairwise"}),
     ]
     runs = {n: load_run(run(tmp, n, export, num)) for n, num in benign}
     tol = calibrate([(r, runs["seq_nofma"]), (r, runs["strided8"])], margin=1.0)
-    assert all(tol[op] >= 0 for op in ("router_logits", "output"))
-    # The held-out benign pair is mostly within tolerance; a planted fp16 expert accumulator is far outside it.
+    assert all(tol[op] > 0 for op in ("router_logits", "expert_gate", "output"))  # the benign variants do differ
+    # A held-out benign pair stays far below a planted fp16 expert accumulator, which is localised.
     held = compare(r, runs["pairwise"], tol)
-    bug = run(tmp, "cal_bug", export, {"preset": "hf_bf16"},
+    bug = run(tmp, "cal_bug", export, {"preset": "hf_fp32"},
               {"bug_id": "x", "type": "expert_accum", "params": {"dtype": "fp16"}})
     rep = localize(r, load_run(bug), tol, rerun_template(tmp, "cal_bug", export))
     assert rep["localized_op"] == "expert_gate", rep["verdict"]
     worst_benign = max(held["ops"][op]["max_scaled_ulp"] for op in ("expert_gate", "output"))
     worst_bug = rep["comparison"]["ops"]["expert_gate"]["max_scaled_ulp"]
-    assert worst_bug > 4 * worst_benign
+    assert worst_benign > 0 and worst_bug > 4 * worst_benign
 
 
 # ---------------------------------------------------------------------------------------------- --split
@@ -188,3 +190,26 @@ def test_localize_judges_patch_checks_on_the_same_split(setup):
     assert rep["localized_op"] == "router_logits"
     assert rep["comparison"]["split"] == "evaluation"
     assert rep["comparison"]["tokens"] == ev(ref).tokens
+
+
+# ---------------------------------------------------------------------------------------------- fidelity (H-port)
+def test_normalised_margin_uses_kth_and_next_logit():
+    from routediff.fidelity import normalised_margin
+    logits = np.array([[4.0, 1.0, 3.0, 2.0], [1.0, 1.0, 1.0, 1.0]])
+    m = normalised_margin(logits, 2)
+    assert m[0] == pytest.approx(1.0 / np.std(logits[0]))  # 3rd-largest 2.0 vs 2nd-largest 3.0
+    assert m[1] == 0.0  # constant logits: zero margin, no division by zero
+
+
+def test_fidelity_pass_on_identical_runs_and_fail_on_ulp_drift(setup):
+    from routediff.fidelity import ULP_P99, evaluate
+    tmp, export, _ = setup
+    ref = run(tmp, "fid_ref", export, {"preset": "hf_fp32"})
+    same = evaluate(ref, _clone_run(ref, tmp / "fid_same"))
+    assert same["verdict"] == "PASS" and same["failing_ops"] == [] and same["route_mismatch_tokens_all"] == 0
+    drift = _clone_run(ref, tmp / "fid_drift")
+    a = np.load(drift / "expert_down.npy")
+    np.save(drift / "expert_down.npy", (a.astype(np.float64) * (1 + 2.0 ** -19)).astype(np.float32))  # ~16 fp32 ULP
+    res = evaluate(ref, drift)
+    assert res["verdict"] == "FAIL" and res["routes_pass"]
+    assert res["failing_ops"] == ["expert_down"] and res["ops"]["expert_down"]["p99_elem_ulp"] > ULP_P99

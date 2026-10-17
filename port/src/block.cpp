@@ -319,7 +319,10 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
       std::copy_n(idx.begin(), K, ids);
       auto it = patch.find("topk_ids");
       if (it != patch.end())
-        for (int s = 0; s < K; ++s) ids[s] = static_cast<int>(it->second->values[static_cast<size_t>(t) * K + s]);
+        for (int s = 0; s < K; ++s) {
+          ids[s] = static_cast<int>(it->second->values[static_cast<size_t>(t) * K + s]);
+          if (ids[s] < 0 || ids[s] >= E) throw std::invalid_argument("patched topk_ids holds an expert id outside [0, E)");
+        }
     }
     tick(5);
 

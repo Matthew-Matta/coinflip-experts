@@ -65,10 +65,12 @@ NpyArray npy_read(const std::string& path) {
     hlen = static_cast<unsigned char>(raw[8]) | (static_cast<unsigned char>(raw[9]) << 8);
     off = 10;
   } else {
+    if (raw.size() < 12) throw std::runtime_error(path + ": truncated header");
     hlen = 0;
     for (int i = 0; i < 4; ++i) hlen |= static_cast<size_t>(static_cast<unsigned char>(raw[8 + i])) << (8 * i);
     off = 12;
   }
+  if (hlen > raw.size() - off) throw std::runtime_error(path + ": truncated header");
   const std::string h = raw.substr(off, hlen);
   NpyArray a;
   a.descr = header_field(h, "descr");

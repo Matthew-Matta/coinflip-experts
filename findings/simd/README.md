@@ -52,7 +52,7 @@ Canonical run: run 4, binary `bench_simd` sha256 `ebd4374d…`.
     idle one.
 
 ### Earlier runs (kept, labelled)
-- `run1_*`: first pass, accs 4, load average not settled.
+- `run1_*` (local only, not committed): first pass, accs 4, load average not settled.
 - `run2_possibly-contended_*`: accs 4. These overlapped routediff backend-pair compares (files written 20:17-20:20),
   so they were *not* on an idle machine.
 - `run3_quiet_bin-fc600db0_*`: same quiet-machine gate, previous binary.
@@ -60,7 +60,7 @@ Canonical run: run 4, binary `bench_simd` sha256 `ebd4374d…`.
   - accs 8: 0.39x / 0.40x, because the 8-accumulator NEON path then ran through a generic runtime-indexed loop with
     poor code generation. That was fixed with an unrolled 8-accumulator path in the same order (tests unchanged and
     passing), which is run 4 above.
-- `discarded_overhead-confounded_bench_L1-resident-*`: an attempt at an L1-sized matrix (4 rows). Per-call overhead
+- `discarded_overhead-confounded_bench_L1-resident-*` (local only, not committed): an attempt at an L1-sized matrix (4 rows). Per-call overhead
   of `matvec` (activation copy per call) dominates at that size, so it says nothing about the kernel. Not used.
 - For accs 4, runs 1-3 agree with run 4 within ~10%.
 
@@ -101,7 +101,7 @@ Canonical run: run 4, binary `bench_simd` sha256 `ebd4374d…`.
 ## Provenance
 - Current binaries: `port/build-simd/bench_simd` sha256 `ebd4374d9bb4229a55e5751c13a997e30185590ccdfe5dc3c8c24a54b13daccf`,
   `port/build-simd/moe_run` sha256 `ccd7537151d6a308acb9eea741930981a3147f988c16d405877dd038cfc94f86`. Built from the
-  working tree with the uncommitted SIMD, e8m-format and profile changes.
+  working tree before the SIMD, e8m-format and profile changes were committed (fcfa361).
 - The current `moe_run` reproduces the earlier scalar and accs-4 SIMD dumps 13/13 ops bit-identically on both layers.
   With SIMD off, those reproduce the post-fix dumps from `port/build/moe_run` (sha256 `c30b6f2f…`). So differences
   come from the SIMD order alone.

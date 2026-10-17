@@ -2,8 +2,8 @@
 
 For each accumulator of the fp32 port (o_proj, RMSNorm variance sum, router, expert matmuls, combine) and each width
 m = 7..23 explicit mantissa bits (8-bit exponent, "e8m<m>": e8m7 rounds like bf16, e8m23 like fp32), only that one
-accumulator is narrowed (as a sequential sum, the port's default order); everything else stays at the hf_fp32 preset,
-except that every matmul that is not narrowed runs on the NEON fp32 path (4 accumulators), which is ~15x faster and
+accumulator is narrowed (as a sequential sum, the port's default order; RMSNorm keeps its torch_cascade order);
+everything else stays at the hf_fp32 preset, except that every matmul that is not narrowed runs on the NEON fp32 path (4 accumulators), which is ~15x faster and
 inside the calibrated benign envelope (findings/simd). Plus one Kahan row per op (compensated sum in e8m7, sequential
 order). The base run is the same: hf_fp32 with all three matmul groups on NEON. Per configuration and layer:
   - vs the fp64 oracle: route flips (top-k set differs), router-logit relative L2 and max |error|, output relative L2;

@@ -31,4 +31,4 @@ p99 element ULP, fp32, bound 8.
 Through the router and the expert gate/up projections the port is now bit-exact on both layers. Patching PyTorch's `expert_act` into the C++ run makes `expert_down` bit-exact (0 ULP), so the down-projection gap is inherited from a 2-ULP activation difference amplified by near-cancelling sums. The remaining `router_probs` / `topk_weights` (5 ULP) and `expert_act` (2 ULP) differences come from `exp`: PyTorch uses a vectorised approximation (Sleef), the port a correctly rounded one.
 
 ## bf16 (exploratory)
-Route-set mismatches: layer 0 11/1348, layer 7 16/1348, all unexplained (exact ties at the 8th place broken differently). bf16 `router_input` is not yet bit-exact (upstream bf16 matmul differences), not investigated.
+Route-set mismatches: layer 0 11/1348, layer 7 16/1348, all unexplained (exact ties at the 8th place broken differently). bf16 `router_input` is not bit-exact (upstream bf16 matmul differences: `o_proj_out` matches on 512/1348 and 613/1348 tokens); not investigated further.

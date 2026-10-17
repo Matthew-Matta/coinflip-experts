@@ -20,7 +20,8 @@ Router logits and expert sets are identical between the two backends; the differ
 - Layer 7: 25 tie tokens, all with bit-identical bf16 logits in torch CPU, torch MPS and C++. Same chosen set: C++ vs MPS 25/25, torch CPU vs MPS 9/25, torch CPU vs C++ 9/25.
 - C++ (`tiebreak=lower`) and MPS agree on every tie (38/38). Torch CPU differs on 27/38.
 - **Torch CPU's tie behaviour is reproduced exactly** (1348/1348 tokens on both layers, set and order) by emulating `aten/src/ATen/native/cpu/SortingKernel.cpp` topk: (value, index) pairs, value-only comparator, `std::nth_element(k-1)` then `std::sort` of the first k-1 (since k*64 > n), with Apple clang's libc++ (`torch_topk_emulation.cpp`). Ties are therefore decided by the standard library's selection algorithm, not by expert id; no simple id rule exists.
-- Untested hypothesis: Linux builds (libstdc++) may break the same ties differently.
+- Linux builds break the same ties differently: tested later in CI (`findings/topk-portability`), the Linux build of
+  the same torch picks the same set as macOS on 19/38 ties.
 - fp32 probabilities are never bit-identical across the three backends (different `exp`), so ties are identified on the bf16 logits.
 
 ## Inputs
@@ -29,7 +30,7 @@ Router logits and expert sets are identical between the two backends; the differ
 - git: 9dd291d
 
 ## Item 1: routediff on each pair (frozen real-v2 tolerances, evaluation split, no rerun)
-Reference: PyTorch CPU eager in the same dtype. Tolerances `data/evaluation/real-v2/tolerances.json` (sha256 1944f35dfec6c5e3ff108f482cc47c8effb7a20e8c1d820d2d5c92d4cfd886ff). These are PyTorch backends with no patch support, so there is no patch-forward check: flagged ops only, not localisation.
+Reference: PyTorch CPU eager in the same dtype. Tolerances `findings/routediff-eval-real-v2/tolerances.json` (published byte-identical copy of `data/evaluation/real-v2/tolerances.json`) (sha256 1944f35dfec6c5e3ff108f482cc47c8effb7a20e8c1d820d2d5c92d4cfd886ff). These are PyTorch backends with no patch support, so there is no patch-forward check: flagged ops only, not localisation.
 
 | pair | route-set mismatches | unexplained | flagged ops | output rel L2 |
 |---|---|---|---|---|
@@ -44,4 +45,4 @@ Reference: PyTorch CPU eager in the same dtype. Tolerances `data/evaluation/real
 
 - **fp32 (interpretable):** MPS and grouped_mm are within the benign envelope on both layers: nothing flagged, no route mismatches.
 - **bf16, routing:** MPS changes the expert set on 6 (L0) and 4 (L7) evaluation tokens, all unexplained (the tie signature of item 3). `router_probs` is the first flagged op; probabilities are fp32 even in bf16 runs, so the fp32-calibrated tolerance applies there, and they exceed the benign envelope. This is not attributed to MPS's softmax: MPS bf16 already differs from the first op (`o_proj_out`, item 3 inputs), upstream bf16 differences are not flagged only because bf16 ops are measured in bf16 ULP, and there is no patch-forward check on torch backends.
-- **bf16, value ops: not interpretable with these tolerances.** They are counts of ULP calibrated on fp32 pairs; on a bf16 op the same count means bf16 ULP, about 65,000x looser. That is why grouped_mm bf16, whose combine differs measurably (item 2), shows no flags. A bf16 verdict would need tolerances calibrated on bf16 benign pairs, which the preregistered (fp32) design does not include.
+- **bf16, value ops: not interpretable with these tolerances.** They are counts of ULP calibrated on fp32 pairs; on a bf16 op the same count means bf16 ULP, about 65,000x looser. That is why grouped_mm bf16, whose combine differs measurably (item 2), shows no flags. A bf16 verdict needs tolerances calibrated on bf16 benign pairs, which the preregistered (fp32) design does not include; exploratory bf16 tolerances and verdicts are in `findings/bf16-tolerances`.

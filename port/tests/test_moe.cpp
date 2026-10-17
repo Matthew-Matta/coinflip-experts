@@ -4,6 +4,7 @@
 #include <cstring>
 #include <random>
 #include <string>
+#include <unistd.h>
 #include <vector>
 
 #include "block.hpp"
@@ -214,7 +215,7 @@ static void test_bugs_first_show_at_injected_op(const BlockConfig& cfg, const st
 }
 
 static void test_npy_roundtrip_and_sha() {
-  const std::string path = "/tmp/coinflip_test_roundtrip.npy";
+  const std::string path = "/tmp/coinflip_test_roundtrip_" + std::to_string(getpid()) + ".npy";
   const std::vector<double> v{1.5, -2.25, 3.0, 0.0, 1e-3, 7.0};
   npy_write_f32(path, {2, 3}, v.data());
   const NpyArray a = npy_read(path);
@@ -225,6 +226,57 @@ static void test_npy_roundtrip_and_sha() {
   CHECK(sha256_hex("abc") == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", "sha256('abc')");
   const Json j = json_parse(R"({"a": [1, 2.5, true], "b": {"c": "x\"y"}, "d": null})");
   CHECK(j.at("a").arr.size() == 3 && j.at("a").arr[1].num == 2.5 && j.at("b").at("c").str == "x\"y", "json parse");
+  // A header length larger than the file is an error, not an out-of-bounds read.
+  {
+    std::FILE* f = std::fopen(path.c_str(), "wb");
+    const char bad[] = "\x93NUMPY\x01\x00\xff\x7f{'descr'";
+    std::fwrite(bad, 1, sizeof bad - 1, f);
+    std::fclose(f);
+    bool threw = false;
+    try { npy_read(path); } catch (const std::exception&) { threw = true; }
+    CHECK(threw, "npy header longer than the file is rejected");
+  }
+  std::remove(path.c_str());
+}
+
+// Order::TorchCascade: every element counted exactly once (exact in fp64 for integers) at sizes where the cascade
+// levels engage, and a pinned fp32 value so a change to the order cannot pass silently.
+static void test_torch_cascade() {
+  bool exact = true;
+  for (int n : {5, 255, 2048, 2051, 70001}) {
+    std::vector<double> v(n);
+    for (int i = 0; i < n; ++i) v[i] = i;
+    exact &= reduce_sum(v, DType::FP64, Order::TorchCascade, 4) == 0.5 * n * (n - 1.0);
+  }
+  CHECK(exact, "torch_cascade sums every element exactly once");
+  std::mt19937_64 rng(31);
+  std::normal_distribution<double> nd(0.0, 1.0);
+  std::vector<double> v(2048);
+  for (auto& x : v) {
+    const double y = round_to(DType::BF16, nd(rng));
+    x = round_to(DType::FP32, y * y);
+  }
+  const double c = reduce_sum(v, DType::FP32, Order::TorchCascade, 4);
+  CHECK(c == 0x1.00a6aap+11, "torch_cascade fp32 regression value");
+  CHECK(c != reduce_sum(v, DType::FP32, Order::Sequential, 4), "torch_cascade differs from sequential here");
+}
+
+// A patched topk_ids array with an expert id outside [0, E) is an error.
+static void test_patched_ids_are_range_checked() {
+  const auto w = BlockWeights::random(small_cfg(), 21);
+  const int T = 4;
+  std::vector<float> oin, res;
+  inputs(T, w.cfg.hidden, 4, oin, res);
+  RunOptions o;
+  Patch p;
+  p.op = "topk_ids";
+  p.values.assign(static_cast<size_t>(T) * w.cfg.top_k, 0.0);
+  for (int k = 0; k < w.cfg.top_k; ++k) p.values[k] = k;
+  p.values[0] = w.cfg.n_experts;
+  o.patches.push_back(p);
+  bool threw = false;
+  try { run_block(w, oin, res, T, o); } catch (const std::invalid_argument&) { threw = true; }
+  CHECK(threw, "out-of-range patched expert id is rejected");
 }
 
 static void test_simd_matches_documented_order() {
@@ -354,7 +406,7 @@ static void test_renorm() {
   CHECK(worst < 1e-6, "renormalised top-k weights sum to 1");
   RunOptions p = o;
   p.num.renorm_order = Order::Pairwise;
-  CHECK(first_diff(t, run_block(w, oin, res, T, p)) != "o_proj_out", "renorm order only acts after selection");
+  CHECK(first_diff(t, run_block(w, oin, res, T, p)) == "topk_weights", "renorm order first changes topk_weights");
 }
 
 int main() {
@@ -370,6 +422,8 @@ int main() {
   test_bugs_first_show_at_injected_op(small_qwen_cfg(), "qwen-shaped");
   test_renorm();
   test_npy_roundtrip_and_sha();
+  test_torch_cascade();
+  test_patched_ids_are_range_checked();
   test_simd_matches_documented_order();
   test_e8_formats_kahan_and_profile();
   if (failures == 0) std::printf("ALL TESTS PASSED\n");

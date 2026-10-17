@@ -28,4 +28,5 @@ Patching `router_input` with PyTorch's value (`dumps/layer0-cpp-hf_fp32-patch_ro
 ## bf16 (exploratory, not part of H-port)
 11 / 1348 route-set mismatches, all unexplained (exact ties at the 8th place; 13 / 1348 tokens have such a tie). `tiebreak=higher` leaves 2, so PyTorch's tie order is not a simple index rule.
 
-Contents: `dumps/` (APFS clones of the original dumps), `configs/`, `routediff-first-look/`, `hport_layer0_fp32.json`, `provenance.json`. Read-only.
+Contents here: `configs/`, `hport_layer0_fp32.json`, `provenance.json`. The frozen read-only originals, including
+`dumps/` (APFS clones of the original dumps) and `routediff-first-look/`, are in `data/results/m2-initial-layer0/` (local, gitignored).

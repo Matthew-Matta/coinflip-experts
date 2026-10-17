@@ -1,9 +1,9 @@
 // Coin-Flip Experts: floating-point formats, rounding, and reductions with explicit order.
 //
 // Values are carried in double and rounded to the target format after every operation, so a setting emulates that
-// format bit-faithfully (round-to-nearest-even). Rounding is done on the bit pattern and does not depend on the
-// current floating-point rounding mode. fp32 accumulation runs on native float hardware (with or without fused
-// multiply-add), which is both exact and fast.
+// format bit-faithfully (round-to-nearest-even). bf16, fp16 and e8m<m> rounding is done on the bit pattern and does
+// not depend on the current floating-point rounding mode. fp32 rounding and fp32 accumulation use native float
+// hardware (with or without fused multiply-add), which follows the FP environment (round-to-nearest by default).
 #pragma once
 
 #include <string>
@@ -73,7 +73,8 @@ inline double reduce_sum(const std::vector<double>& v, DType acc, Order order, i
 }
 
 // Dot product of a float weight row with an activation vector over [lo, hi). Activations must be representable in
-// the accumulator format when acc == FP32 (they are: activations are stored in the model dtype).
+// the accumulator format when acc == FP32 (they are: activations are stored in the model dtype). Ignores `s.simd`
+// (use dot_simd, or matvec, which honours it).
 double dot(const float* w, const double* x, int lo, int hi, const AccSpec& s);
 
 // Emulated cross-chip all-reduce of a row-parallel matvec: the K dimension is split into n contiguous shards, each
