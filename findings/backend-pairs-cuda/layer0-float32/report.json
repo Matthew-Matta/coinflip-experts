@@ -1,0 +1,171 @@
+{
+  "reference_run": "/weights/numerics-followup-results/84cdd47f1494/cuda-pairs/layer0-float32/cpu",
+  "candidate_run": "/weights/numerics-followup-results/84cdd47f1494/cuda-pairs/layer0-float32/cuda",
+  "tokens": 64,
+  "split": "all",
+  "route_mismatch_tokens": 0,
+  "ops": {
+    "o_proj_out": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 181.0,
+      "p99_elem_ulp": 304.0,
+      "max_elem_ulp": 458752.0,
+      "rel_l2": 7.794420043784153e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 502.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "resid_sum": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 234.0,
+      "p99_elem_ulp": 320.0,
+      "max_elem_ulp": 196608.0,
+      "rel_l2": 5.18331751548764e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 502.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_input": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 147.8125,
+      "p99_elem_ulp": 324.0,
+      "max_elem_ulp": 254450.0,
+      "rel_l2": 6.975529526503154e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 366.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_logits": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 39.0,
+      "p99_elem_ulp": 502.4500000000053,
+      "max_elem_ulp": 137286.0,
+      "rel_l2": 8.408625375069979e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 122.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_probs": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 54.0,
+      "p99_elem_ulp": 44.0,
+      "max_elem_ulp": 85.0,
+      "rel_l2": 1.3072466764734424e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 128.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "topk_ids": {
+      "tokens": 64,
+      "route_mismatch_tokens": 0,
+      "unexplained_tokens": 0,
+      "explained_tokens": 0,
+      "flagged": false
+    },
+    "topk_weights": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 44.0,
+      "p99_elem_ulp": 38.0,
+      "max_elem_ulp": 54.0,
+      "rel_l2": 1.3753684043389952e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 128.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_gate": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 62.0,
+      "p99_elem_ulp": 468.0,
+      "max_elem_ulp": 1367784.0,
+      "rel_l2": 8.905526483881975e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 156.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_up": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 79.0,
+      "p99_elem_ulp": 638.0,
+      "max_elem_ulp": 33783808.0,
+      "rel_l2": 9.731294568481112e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 194.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_act": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 138.0,
+      "p99_elem_ulp": 1097.0,
+      "max_elem_ulp": 33865044.0,
+      "rel_l2": 1.125258234804586e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 439.1875,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_down": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 146.0,
+      "p99_elem_ulp": 911.0,
+      "max_elem_ulp": 48640768.0,
+      "rel_l2": 1.0069103286617596e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 526.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "combine_terms": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 203.0,
+      "p99_elem_ulp": 914.0,
+      "max_elem_ulp": 38244694.0,
+      "rel_l2": 1.5421789035885156e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 432.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "output": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 87.0,
+      "p99_elem_ulp": 976.0,
+      "max_elem_ulp": 818944.0,
+      "rel_l2": 1.2326118385902492e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 339.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    }
+  },
+  "flagged_ops": [],
+  "first_flagged_op": null,
+  "localized_op": null,
+  "sites": [],
+  "stage": null,
+  "patch_checks": [],
+  "verdict": "no op exceeds its tolerance",
+  "tolerances": {
+    "file": "/weights/numerics-followup-input/2fd6af9818f9/tolerances-float32.json",
+    "sha256": "1944f35dfec6c5e3ff108f482cc47c8effb7a20e8c1d820d2d5c92d4cfd886ff"
+  }
+}

@@ -30,6 +30,8 @@ def main():
             value=torch.tensor(np.array(parts[rank]),device=f'cuda:{rank}',dtype=tdtype)
             dist.all_reduce(value,op=dist.ReduceOp.SUM);torch.cuda.synchronize()
             actual=value.float().cpu().numpy()
+            a.out.mkdir(parents=True,exist_ok=True)
+            np.save(a.out/f'{prefix}-rank{rank}.npy',actual,allow_pickle=False)
             expected=np.load(a.input/f"{prefix}-{os.environ['NCCL_ALGO'].lower()}.npy")
             bitwise=bool(np.array_equal(actual.view(np.uint32),expected.view(np.uint32)))
             results.append(dict(target=target,n=world,rank=rank,dtype=dtype,algo=os.environ['NCCL_ALGO'],

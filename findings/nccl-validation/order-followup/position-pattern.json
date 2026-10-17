@@ -1,0 +1,273 @@
+{
+  "label": "Post-hoc descriptive positional fit, not a port change or verified NCCL channel mapping",
+  "checks": [
+    {
+      "n": 4,
+      "algo": "Ring",
+      "target": "oproj",
+      "wire": "fp32",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "actual_sha256": "03f319134d2ab9341a83973f19a2f0d413418dd67aea77a05f0fb06f44424dfc",
+      "elements": 131072,
+      "blocks": 8,
+      "elements_per_block": 16384,
+      "orders": [
+        [
+          1,
+          2,
+          3,
+          0
+        ],
+        [
+          2,
+          3,
+          0,
+          1
+        ],
+        [
+          3,
+          0,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          1,
+          2,
+          3,
+          0
+        ],
+        [
+          2,
+          3,
+          0,
+          1
+        ],
+        [
+          3,
+          0,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      "bit_exact": true
+    },
+    {
+      "n": 4,
+      "algo": "Ring",
+      "target": "oproj",
+      "wire": "bf16",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "actual_sha256": "0e586fb431761e08edd0e4aa2fd9ac8c6f0ba2c861ff1579338927d818dfd1ce",
+      "elements": 131072,
+      "blocks": 8,
+      "elements_per_block": 16384,
+      "orders": [
+        [
+          1,
+          2,
+          3,
+          0
+        ],
+        [
+          2,
+          3,
+          0,
+          1
+        ],
+        [
+          3,
+          0,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          1,
+          2,
+          3,
+          0
+        ],
+        [
+          2,
+          3,
+          0,
+          1
+        ],
+        [
+          3,
+          0,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      "bit_exact": true
+    },
+    {
+      "n": 4,
+      "algo": "Ring",
+      "target": "down",
+      "wire": "fp32",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "actual_sha256": "9690922f401b9b23448db05aa6a2437c18326a8795d6805f14c7f80eb9c0677e",
+      "elements": 1048576,
+      "blocks": 8,
+      "elements_per_block": 131072,
+      "orders": [
+        [
+          1,
+          2,
+          3,
+          0
+        ],
+        [
+          2,
+          3,
+          0,
+          1
+        ],
+        [
+          3,
+          0,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          1,
+          2,
+          3,
+          0
+        ],
+        [
+          2,
+          3,
+          0,
+          1
+        ],
+        [
+          3,
+          0,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      "bit_exact": true
+    },
+    {
+      "n": 4,
+      "algo": "Ring",
+      "target": "down",
+      "wire": "bf16",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "actual_sha256": "8e8a5db27f4d04cb6d49e815eb5a607cfdd98061d0bd340cd06970bf8c2a7844",
+      "elements": 1048576,
+      "blocks": 8,
+      "elements_per_block": 131072,
+      "orders": [
+        [
+          1,
+          2,
+          3,
+          0
+        ],
+        [
+          2,
+          3,
+          0,
+          1
+        ],
+        [
+          3,
+          0,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          2,
+          3
+        ],
+        [
+          1,
+          2,
+          3,
+          0
+        ],
+        [
+          2,
+          3,
+          0,
+          1
+        ],
+        [
+          3,
+          0,
+          1,
+          2
+        ],
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      "bit_exact": true
+    }
+  ]
+}

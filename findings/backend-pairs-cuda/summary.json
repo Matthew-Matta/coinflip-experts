@@ -1,0 +1,110 @@
+{
+  "kind": "Descriptive real CPU/CUDA backend pairs; not blinded evaluation",
+  "tf32": false,
+  "torch_version": "2.13.0+cu130",
+  "cuda_version": "13.0",
+  "gpu": "NVIDIA L4",
+  "rows": [
+    {
+      "layer": 0,
+      "dtype": "float32",
+      "tokens": 64,
+      "mirror_equals_module": true,
+      "null_patch_all_ops_bit_exact": true,
+      "route_mismatch_tokens": 0,
+      "localized_op": null,
+      "verdict": "no op exceeds its tolerance",
+      "patch_checks": [],
+      "tolerance_sha256": "1944f35dfec6c5e3ff108f482cc47c8effb7a20e8c1d820d2d5c92d4cfd886ff",
+      "max_gpu_allocated_bytes": 1644271104,
+      "wall_seconds": 4.6647057300000085
+    },
+    {
+      "layer": 0,
+      "dtype": "bfloat16",
+      "tokens": 64,
+      "mirror_equals_module": true,
+      "null_patch_all_ops_bit_exact": true,
+      "route_mismatch_tokens": 0,
+      "localized_op": "router_probs",
+      "verdict": "localized to router_probs: patching restores the reference (output_tolerance)",
+      "patch_checks": [
+        {
+          "patched": [
+            "router_probs"
+          ],
+          "criterion": "output_tolerance",
+          "restored": true,
+          "routes_restored": true,
+          "output_restored": true,
+          "route_mismatch_after": 1,
+          "output_tokens_over_tolerance_after": 0,
+          "patch_skipped_token_ops": 0,
+          "still_flagged": []
+        }
+      ],
+      "tolerance_sha256": "01fae51b5dc969a62529a3466732189af7cf656fcedf25bef3a073960ffd07a0",
+      "max_gpu_allocated_bytes": 828125696,
+      "wall_seconds": 19.21605038
+    },
+    {
+      "layer": 7,
+      "dtype": "float32",
+      "tokens": 64,
+      "mirror_equals_module": true,
+      "null_patch_all_ops_bit_exact": true,
+      "route_mismatch_tokens": 0,
+      "localized_op": null,
+      "verdict": "no op exceeds its tolerance",
+      "patch_checks": [],
+      "tolerance_sha256": "1944f35dfec6c5e3ff108f482cc47c8effb7a20e8c1d820d2d5c92d4cfd886ff",
+      "max_gpu_allocated_bytes": 1644118528,
+      "wall_seconds": 3.9602218600000185
+    },
+    {
+      "layer": 7,
+      "dtype": "bfloat16",
+      "tokens": 64,
+      "mirror_equals_module": true,
+      "null_patch_all_ops_bit_exact": true,
+      "route_mismatch_tokens": 1,
+      "localized_op": "router_probs",
+      "verdict": "localized to router_probs: patching restores the reference (output_tolerance)",
+      "patch_checks": [
+        {
+          "patched": [
+            "router_probs"
+          ],
+          "criterion": "output_tolerance",
+          "restored": true,
+          "routes_restored": true,
+          "output_restored": true,
+          "route_mismatch_after": 1,
+          "output_tokens_over_tolerance_after": 0,
+          "patch_skipped_token_ops": 0,
+          "still_flagged": []
+        }
+      ],
+      "tolerance_sha256": "01fae51b5dc969a62529a3466732189af7cf656fcedf25bef3a073960ffd07a0",
+      "max_gpu_allocated_bytes": 828046848,
+      "wall_seconds": 17.72084148800002
+    }
+  ],
+  "driver": "610.57.04",
+  "transformers": "5.12.1",
+  "cpu_torch": "2.14.1",
+  "cpu_backend": "Apple M1 Pro CPU, Accelerate",
+  "archive_sha256": "24b481a1a0ec6d2232f7eab3c7b01600ac89be8ba52931126e065b5ee35951f7",
+  "source_sha256": {
+    "reference.backend_pairs": "743e6e001c8f1e5f1e4301a242c35dbff4907de29404a2b4f6713115fdb4df9a",
+    "reference.patch_hooks": "d0fddc71f20ef3f2a29e954ca007b5902f2c22d87cd35fd5a6e9f08330506cde",
+    "reference.nccl_worker": "17c39205f19df4a6f4fc0518ebcaf2cb7c680403fd22baeb2a73b60e44cfe8a2",
+    "reference.cuda_pairs_job": "4b658423fa80852f37ef8f5b53ea9d45fb82a9d07c6477d72960410c7585b3ee",
+    "routediff.localize": "c9b0a14d66b0b22e74fcabb269b7b0bf28d9731867791210eaf457ba1b5b9e7f"
+  },
+  "job_wall_seconds": 150.22831993900002,
+  "execution_resource_estimate_usd": 0.15334705986093364,
+  "cost_caveat": "Execution estimate before archiving; startup/archiving/egress additional, not an audited bill",
+  "route_allowance_fraction": 0.017543859649122806,
+  "caveat": "Descriptive fixed 64-position samples, not blinded evaluation; CPU and CUDA torch builds differ. Both bf16 outputs were within output tolerance before patch; after patch 1/64 route sets still differ on each layer."
+}

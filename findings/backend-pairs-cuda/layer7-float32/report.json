@@ -1,0 +1,171 @@
+{
+  "reference_run": "/weights/numerics-followup-results/84cdd47f1494/cuda-pairs/layer7-float32/cpu",
+  "candidate_run": "/weights/numerics-followup-results/84cdd47f1494/cuda-pairs/layer7-float32/cuda",
+  "tokens": 64,
+  "split": "all",
+  "route_mismatch_tokens": 0,
+  "ops": {
+    "o_proj_out": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 132.0,
+      "p99_elem_ulp": 304.0,
+      "max_elem_ulp": 2392064.0,
+      "rel_l2": 6.46387484823009e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 502.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "resid_sum": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 13.0,
+      "p99_elem_ulp": 48.0,
+      "max_elem_ulp": 262144.0,
+      "rel_l2": 3.0514066948638644e-09,
+      "exact": false,
+      "tolerance_scaled_ulp": 502.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_input": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 15.0,
+      "p99_elem_ulp": 48.0,
+      "max_elem_ulp": 241737.0,
+      "rel_l2": 1.1350771084032719e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 366.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_logits": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 36.0,
+      "p99_elem_ulp": 413.0,
+      "max_elem_ulp": 484404.0,
+      "rel_l2": 9.071068660626788e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 122.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_probs": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 64.0,
+      "p99_elem_ulp": 43.0,
+      "max_elem_ulp": 126.0,
+      "rel_l2": 1.2513204377296822e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 128.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "topk_ids": {
+      "tokens": 64,
+      "route_mismatch_tokens": 0,
+      "unexplained_tokens": 0,
+      "explained_tokens": 0,
+      "flagged": false
+    },
+    "topk_weights": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 64.0,
+      "p99_elem_ulp": 43.0,
+      "max_elem_ulp": 64.0,
+      "rel_l2": 1.4536521993063755e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 128.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_gate": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 86.0,
+      "p99_elem_ulp": 199.0,
+      "max_elem_ulp": 1561088.0,
+      "rel_l2": 8.182201471494237e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 156.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_up": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 86.0,
+      "p99_elem_ulp": 229.0,
+      "max_elem_ulp": 2788096.0,
+      "rel_l2": 8.552961402214388e-07,
+      "exact": false,
+      "tolerance_scaled_ulp": 194.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_act": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 129.0,
+      "p99_elem_ulp": 428.0,
+      "max_elem_ulp": 3951037.0,
+      "rel_l2": 1.1119439912989875e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 439.1875,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_down": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 139.0,
+      "p99_elem_ulp": 958.0,
+      "max_elem_ulp": 68836608.0,
+      "rel_l2": 1.212051662667928e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 526.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "combine_terms": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 193.0,
+      "p99_elem_ulp": 964.0,
+      "max_elem_ulp": 38633779.0,
+      "rel_l2": 1.3157452720632127e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 432.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "output": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 83.5,
+      "p99_elem_ulp": 1050.3199999999488,
+      "max_elem_ulp": 770048.0,
+      "rel_l2": 1.184752414725335e-06,
+      "exact": false,
+      "tolerance_scaled_ulp": 339.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    }
+  },
+  "flagged_ops": [],
+  "first_flagged_op": null,
+  "localized_op": null,
+  "sites": [],
+  "stage": null,
+  "patch_checks": [],
+  "verdict": "no op exceeds its tolerance",
+  "tolerances": {
+    "file": "/weights/numerics-followup-input/2fd6af9818f9/tolerances-float32.json",
+    "sha256": "1944f35dfec6c5e3ff108f482cc47c8effb7a20e8c1d820d2d5c92d4cfd886ff"
+  }
+}

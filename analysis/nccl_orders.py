@@ -42,7 +42,10 @@ def explain(parts,actual,emulation,wire,bins=64):
     if parts.shape[0]!=4 or actual.shape!=parts.shape[1:] or emulation.shape!=actual.shape:
         raise ValueError('need 4 paired partials, NCCL outputs, and emulation tensors')
     if not all(np.isfinite(v).all() for v in (parts,actual,emulation)):raise ValueError('nonfinite input')
-    n=actual.size;position=np.arange(n,dtype=np.int64)*bins//n
+    n=actual.size
+    if n==0:raise ValueError("empty tensor")
+    bins=min(bins,n)
+    position=np.arange(n,dtype=np.int64)*bins//n
     counts=np.bincount(position,minlength=bins);any_match=np.zeros(n,dtype=bool);multiplicity=np.zeros(n,dtype=np.uint8)
     candidates=[]
     for order in permutations(range(4)):
@@ -57,7 +60,7 @@ def explain(parts,actual,emulation,wire,bins=64):
     return dict(elements=n,wire=wire,candidate_count=48,candidates=candidates,
                 any_order_explains=int(any_match.sum()),any_order_share=float(any_match.mean()),
                 matching_order_multiplicity=np.bincount(multiplicity,minlength=49).tolist(),
-                position_bins=bins,position_definition='Equal contiguous bins of C-order flattened tensor; not known NCCL channels',
+                position_bins=bins,position_bin_counts=counts.tolist(),position_definition='Equal contiguous bins of C-order flattened tensor; not known NCCL channels',
                 size_aware_error=size_error(actual,emulation,parts,wire),
                 caveat='Multiple orders can produce the same rounded value. Match shares do not identify the executed NCCL order or channel mapping.')
 

@@ -19,3 +19,15 @@ def test_size_metric_uses_partial_scale_not_cancelled_output():
     result=size_error(np.array([2**-7],dtype=np.float32),np.zeros(1,dtype=np.float32),parts,'bf16')
     assert result['max_relative_to_sum_abs']==2**-9
     assert result['max_size_scaled_wire_ulp']==.25
+
+
+def test_bf16_orders_match_explicit_torch_additions():
+    import torch
+    from itertools import permutations
+    from analysis.nccl_orders import rounded
+    parts=rounded(np.random.default_rng(7).normal(size=(4,17)).astype('f4'),'bf16')
+    tensors=[torch.from_numpy(x.copy()).bfloat16() for x in parts]
+    for order in permutations(range(4)):
+        a,b,c,d=[tensors[i] for i in order]
+        for tree,expected in [('sequential',((a+b)+c)+d),('pairwise',(a+b)+(c+d))]:
+            assert np.array_equal(reduction(parts,order,tree,'bf16').view('u4'),expected.float().numpy().view('u4'))

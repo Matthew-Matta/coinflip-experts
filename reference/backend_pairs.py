@@ -163,7 +163,7 @@ def main():
     p.add_argument('--demo-scale-combine',type=float,help='Known forward-hook fault for an unblinded demo only.')
     p.add_argument('--demo-scale-router',type=float,help='Known pre-routing hook fault; negative scale reverses expert preference.')
     p.add_argument('--dtype',choices=DTYPES,default='float32')
-    p.add_argument('--device',choices=['cpu','mps'],default='cpu')
+    p.add_argument('--device',choices=['cpu','mps','cuda'],default='cpu')
     p.add_argument('--implementation',choices=['eager','grouped_mm'],default='grouped_mm')
     p.add_argument('--threads',type=int,default=2)
     a=p.parse_args();torch.set_num_threads(a.threads)

@@ -1,0 +1,26 @@
+{
+  "archive_sha256": "24b481a1a0ec6d2232f7eab3c7b01600ac89be8ba52931126e065b5ee35951f7",
+  "verified_output_hashes": 252,
+  "checks": [
+    {
+      "case": "layer0-bfloat16",
+      "route_mismatch_tokens": 0,
+      "null_patch_bit_exact_ops": 13
+    },
+    {
+      "case": "layer0-float32",
+      "route_mismatch_tokens": 0,
+      "null_patch_bit_exact_ops": 13
+    },
+    {
+      "case": "layer7-bfloat16",
+      "route_mismatch_tokens": 1,
+      "null_patch_bit_exact_ops": 13
+    },
+    {
+      "case": "layer7-float32",
+      "route_mismatch_tokens": 0,
+      "null_patch_bit_exact_ops": 13
+    }
+  ]
+}

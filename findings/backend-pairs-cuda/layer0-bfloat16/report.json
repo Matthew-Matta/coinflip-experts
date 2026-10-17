@@ -1,0 +1,190 @@
+{
+  "reference_run": "/weights/numerics-followup-results/84cdd47f1494/cuda-pairs/layer0-bfloat16/cpu",
+  "candidate_run": "/weights/numerics-followup-results/84cdd47f1494/cuda-pairs/layer0-bfloat16/cuda",
+  "tokens": 64,
+  "split": "all",
+  "route_mismatch_tokens": 0,
+  "ops": {
+    "o_proj_out": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 1.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 12.0,
+      "rel_l2": 0.00012974895412389665,
+      "exact": false,
+      "tolerance_scaled_ulp": 2.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "resid_sum": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 1.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 128.0,
+      "rel_l2": 9.875027789526228e-05,
+      "exact": false,
+      "tolerance_scaled_ulp": 4.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_input": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 2.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 149.0,
+      "rel_l2": 0.00015080385960893986,
+      "exact": false,
+      "tolerance_scaled_ulp": 6.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_logits": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 1.0,
+      "p99_elem_ulp": 12.0,
+      "max_elem_ulp": 622.0,
+      "rel_l2": 0.0018994065908951544,
+      "exact": false,
+      "tolerance_scaled_ulp": 2.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_probs": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 151658.0,
+      "p99_elem_ulp": 135225.35,
+      "max_elem_ulp": 250522.0,
+      "rel_l2": 0.0028504696765132413,
+      "exact": false,
+      "tolerance_scaled_ulp": 129002.0,
+      "tokens_over_tolerance": 3,
+      "flagged": true
+    },
+    "topk_ids": {
+      "tokens": 64,
+      "route_mismatch_tokens": 0,
+      "unexplained_tokens": 0,
+      "explained_tokens": 0,
+      "flagged": false
+    },
+    "topk_weights": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 3.0,
+      "p99_elem_ulp": 2.0,
+      "max_elem_ulp": 3.0,
+      "rel_l2": 0.003501809139049728,
+      "exact": false,
+      "tolerance_scaled_ulp": 2.0,
+      "tokens_over_tolerance": 1,
+      "flagged": true
+    },
+    "expert_gate": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 1.0,
+      "p99_elem_ulp": 1.0,
+      "max_elem_ulp": 25290.0,
+      "rel_l2": 0.00044823103197706834,
+      "exact": false,
+      "tolerance_scaled_ulp": 2.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_up": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 1.0,
+      "p99_elem_ulp": 1.0,
+      "max_elem_ulp": 2595.0,
+      "rel_l2": 0.0004966711899519843,
+      "exact": false,
+      "tolerance_scaled_ulp": 2.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_act": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 3.0,
+      "p99_elem_ulp": 2.0,
+      "max_elem_ulp": 19355.0,
+      "rel_l2": 0.0005152035084890541,
+      "exact": false,
+      "tolerance_scaled_ulp": 6.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_down": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 2.0,
+      "p99_elem_ulp": 5.0,
+      "max_elem_ulp": 66700.0,
+      "rel_l2": 0.0008053769946484389,
+      "exact": false,
+      "tolerance_scaled_ulp": 9.4375,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "combine_terms": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 5.0,
+      "p99_elem_ulp": 5.0,
+      "max_elem_ulp": 62595.0,
+      "rel_l2": 0.003501427802498958,
+      "exact": false,
+      "tolerance_scaled_ulp": 9.1875,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "output": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 7.0,
+      "p99_elem_ulp": 17.0,
+      "max_elem_ulp": 4.9846049841934345e+35,
+      "rel_l2": 0.0032311829788221292,
+      "exact": false,
+      "tolerance_scaled_ulp": 482.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    }
+  },
+  "flagged_ops": [
+    "router_probs",
+    "topk_weights"
+  ],
+  "first_flagged_op": "router_probs",
+  "localized_op": "router_probs",
+  "sites": [
+    "router_probs"
+  ],
+  "stage": "selection",
+  "patch_checks": [
+    {
+      "patched": [
+        "router_probs"
+      ],
+      "criterion": "output_tolerance",
+      "restored": true,
+      "routes_restored": true,
+      "output_restored": true,
+      "route_mismatch_after": 1,
+      "output_tokens_over_tolerance_after": 0,
+      "patch_skipped_token_ops": 0,
+      "still_flagged": []
+    }
+  ],
+  "verdict": "localized to router_probs: patching restores the reference (output_tolerance)",
+  "tolerances": {
+    "file": "/weights/numerics-followup-input/2fd6af9818f9/tolerances-bfloat16.json",
+    "sha256": "01fae51b5dc969a62529a3466732189af7cf656fcedf25bef3a073960ffd07a0"
+  }
+}

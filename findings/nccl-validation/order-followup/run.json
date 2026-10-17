@@ -1,0 +1,37 @@
+{
+  "status": "PASS",
+  "gpu": "NVIDIA L4",
+  "torch_version": "2.13.0+cu130",
+  "cuda_version": "13.0",
+  "nccl_version": [
+    2,
+    29,
+    7
+  ],
+  "nvidia_smi": "Sat Oct 17 21:14:40 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 610.57.04              KMD Version: 610.57.04     CUDA UMD Version: 13.3     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA L4                      On  |   00000000:00:04.0 Off |                    0 |\n| N/A   57C    P8             17W /   72W |       5MiB /  23034MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n|   1  NVIDIA L4                      On  |   00000000:00:05.0 Off |                    0 |\n| N/A   63C    P8             15W /   72W |       5MiB /  23034MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n|   2  NVIDIA L4                      On  |   00000000:00:06.0 Off |                    0 |\n| N/A   63C    P8             14W /   72W |       5MiB /  23034MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n|   3  NVIDIA L4                      On  |   00000000:00:07.0 Off |                    0 |\n| N/A   45C    P8             16W /   72W |       4MiB /  23034MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|  No running processes found                                                             |\n+-----------------------------------------------------------------------------------------+\n",
+  "wall_seconds": 150.22831993900002,
+  "source_sha256": {
+    "reference.backend_pairs": "743e6e001c8f1e5f1e4301a242c35dbff4907de29404a2b4f6713115fdb4df9a",
+    "reference.patch_hooks": "d0fddc71f20ef3f2a29e954ca007b5902f2c22d87cd35fd5a6e9f08330506cde",
+    "reference.nccl_worker": "17c39205f19df4a6f4fc0518ebcaf2cb7c680403fd22baeb2a73b60e44cfe8a2",
+    "reference.cuda_pairs_job": "4b658423fa80852f37ef8f5b53ea9d45fb82a9d07c6477d72960410c7585b3ee",
+    "routediff.localize": "c9b0a14d66b0b22e74fcabb269b7b0bf28d9731867791210eaf457ba1b5b9e7f"
+  },
+  "timeout_seconds": 900,
+  "execution_resource_estimate_usd": 0.15334705986093364,
+  "archive_sha256": "24b481a1a0ec6d2232f7eab3c7b01600ac89be8ba52931126e065b5ee35951f7",
+  "transport": {
+    "n2-Tree.log": [
+      "SHM/direct/direct"
+    ],
+    "n2-Ring.log": [
+      "SHM/direct/direct"
+    ],
+    "n4-Ring.log": [
+      "SHM/direct/direct"
+    ],
+    "n4-Tree.log": [
+      "SHM/direct/direct"
+    ]
+  }
+}

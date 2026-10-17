@@ -1,0 +1,526 @@
+{
+  "label": "4xL4 on Modal, SHM transport",
+  "order_summary": [
+    {
+      "algo": "Ring",
+      "target": "oproj",
+      "wire": "fp32",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "best_order": [
+        2,
+        3,
+        0,
+        1
+      ],
+      "best_tree": "sequential",
+      "best_share": 0.68621826171875,
+      "best_bin_min": 0.51904296875,
+      "best_bin_max": 1.0,
+      "any_order_share": 1.0
+    },
+    {
+      "algo": "Ring",
+      "target": "oproj",
+      "wire": "bf16",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "best_order": [
+        1,
+        2,
+        3,
+        0
+      ],
+      "best_tree": "sequential",
+      "best_share": 0.6733932495117188,
+      "best_bin_min": 0.51123046875,
+      "best_bin_max": 1.0,
+      "any_order_share": 1.0
+    },
+    {
+      "algo": "Ring",
+      "target": "down",
+      "wire": "fp32",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "best_order": [
+        1,
+        2,
+        3,
+        0
+      ],
+      "best_tree": "sequential",
+      "best_share": 0.6879644393920898,
+      "best_bin_min": 0.56134033203125,
+      "best_bin_max": 1.0,
+      "any_order_share": 1.0
+    },
+    {
+      "algo": "Ring",
+      "target": "down",
+      "wire": "bf16",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "best_order": [
+        1,
+        2,
+        3,
+        0
+      ],
+      "best_tree": "sequential",
+      "best_share": 0.6883039474487305,
+      "best_bin_min": 0.56451416015625,
+      "best_bin_max": 1.0,
+      "any_order_share": 1.0
+    },
+    {
+      "algo": "Tree",
+      "target": "oproj",
+      "wire": "fp32",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "best_order": [
+        2,
+        3,
+        1,
+        0
+      ],
+      "best_tree": "sequential",
+      "best_share": 1.0,
+      "best_bin_min": 1.0,
+      "best_bin_max": 1.0,
+      "any_order_share": 1.0
+    },
+    {
+      "algo": "Tree",
+      "target": "oproj",
+      "wire": "bf16",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "best_order": [
+        2,
+        3,
+        1,
+        0
+      ],
+      "best_tree": "sequential",
+      "best_share": 1.0,
+      "best_bin_min": 1.0,
+      "best_bin_max": 1.0,
+      "any_order_share": 1.0
+    },
+    {
+      "algo": "Tree",
+      "target": "down",
+      "wire": "fp32",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "best_order": [
+        2,
+        3,
+        1,
+        0
+      ],
+      "best_tree": "sequential",
+      "best_share": 1.0,
+      "best_bin_min": 1.0,
+      "best_bin_max": 1.0,
+      "any_order_share": 1.0
+    },
+    {
+      "algo": "Tree",
+      "target": "down",
+      "wire": "bf16",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "best_order": [
+        2,
+        3,
+        1,
+        0
+      ],
+      "best_tree": "sequential",
+      "best_share": 1.0,
+      "best_bin_min": 1.0,
+      "best_bin_max": 1.0,
+      "any_order_share": 1.0
+    }
+  ],
+  "errors": [
+    {
+      "n": 2,
+      "algo": "Ring",
+      "target": "oproj",
+      "wire": "fp32",
+      "ranks": [
+        0,
+        1
+      ],
+      "actual_sha256": "a85d0dc2aebc59941aaf3d8da6444da8f44fa19de157a9a5f2004ccc563fbd82",
+      "elements": 131072,
+      "mismatched_elements": 0,
+      "bit_exact": true,
+      "max_reference_ulp": 0.0,
+      "max_relative_to_sum_abs": 0.0,
+      "max_size_scaled_wire_ulp": 0.0,
+      "p99_size_scaled_wire_ulp": 0.0,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 2,
+      "algo": "Ring",
+      "target": "oproj",
+      "wire": "bf16",
+      "ranks": [
+        0,
+        1
+      ],
+      "actual_sha256": "1a7fab0c2b13fc218eec433a175eec617b97e3f8c39eb375d7260fc6c5e10dfb",
+      "elements": 131072,
+      "mismatched_elements": 0,
+      "bit_exact": true,
+      "max_reference_ulp": 0.0,
+      "max_relative_to_sum_abs": 0.0,
+      "max_size_scaled_wire_ulp": 0.0,
+      "p99_size_scaled_wire_ulp": 0.0,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 2,
+      "algo": "Ring",
+      "target": "down",
+      "wire": "fp32",
+      "ranks": [
+        0,
+        1
+      ],
+      "actual_sha256": "12d76ecab2aae6cbf0c18a4ef4df83976fef94233266aca8a264252711951468",
+      "elements": 1048576,
+      "mismatched_elements": 0,
+      "bit_exact": true,
+      "max_reference_ulp": 0.0,
+      "max_relative_to_sum_abs": 0.0,
+      "max_size_scaled_wire_ulp": 0.0,
+      "p99_size_scaled_wire_ulp": 0.0,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 2,
+      "algo": "Ring",
+      "target": "down",
+      "wire": "bf16",
+      "ranks": [
+        0,
+        1
+      ],
+      "actual_sha256": "6771f507c0eb0a325aac93f948f4fd71c5089bb66f63e3737eb801a620f56df0",
+      "elements": 1048576,
+      "mismatched_elements": 0,
+      "bit_exact": true,
+      "max_reference_ulp": 0.0,
+      "max_relative_to_sum_abs": 0.0,
+      "max_size_scaled_wire_ulp": 0.0,
+      "p99_size_scaled_wire_ulp": 0.0,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 2,
+      "algo": "Tree",
+      "target": "oproj",
+      "wire": "fp32",
+      "ranks": [
+        0,
+        1
+      ],
+      "actual_sha256": "a85d0dc2aebc59941aaf3d8da6444da8f44fa19de157a9a5f2004ccc563fbd82",
+      "elements": 131072,
+      "mismatched_elements": 0,
+      "bit_exact": true,
+      "max_reference_ulp": 0.0,
+      "max_relative_to_sum_abs": 0.0,
+      "max_size_scaled_wire_ulp": 0.0,
+      "p99_size_scaled_wire_ulp": 0.0,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 2,
+      "algo": "Tree",
+      "target": "oproj",
+      "wire": "bf16",
+      "ranks": [
+        0,
+        1
+      ],
+      "actual_sha256": "1a7fab0c2b13fc218eec433a175eec617b97e3f8c39eb375d7260fc6c5e10dfb",
+      "elements": 131072,
+      "mismatched_elements": 0,
+      "bit_exact": true,
+      "max_reference_ulp": 0.0,
+      "max_relative_to_sum_abs": 0.0,
+      "max_size_scaled_wire_ulp": 0.0,
+      "p99_size_scaled_wire_ulp": 0.0,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 2,
+      "algo": "Tree",
+      "target": "down",
+      "wire": "fp32",
+      "ranks": [
+        0,
+        1
+      ],
+      "actual_sha256": "12d76ecab2aae6cbf0c18a4ef4df83976fef94233266aca8a264252711951468",
+      "elements": 1048576,
+      "mismatched_elements": 0,
+      "bit_exact": true,
+      "max_reference_ulp": 0.0,
+      "max_relative_to_sum_abs": 0.0,
+      "max_size_scaled_wire_ulp": 0.0,
+      "p99_size_scaled_wire_ulp": 0.0,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 2,
+      "algo": "Tree",
+      "target": "down",
+      "wire": "bf16",
+      "ranks": [
+        0,
+        1
+      ],
+      "actual_sha256": "6771f507c0eb0a325aac93f948f4fd71c5089bb66f63e3737eb801a620f56df0",
+      "elements": 1048576,
+      "mismatched_elements": 0,
+      "bit_exact": true,
+      "max_reference_ulp": 0.0,
+      "max_relative_to_sum_abs": 0.0,
+      "max_size_scaled_wire_ulp": 0.0,
+      "p99_size_scaled_wire_ulp": 0.0,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 4,
+      "algo": "Ring",
+      "target": "oproj",
+      "wire": "fp32",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "actual_sha256": "03f319134d2ab9341a83973f19a2f0d413418dd67aea77a05f0fb06f44424dfc",
+      "elements": 131072,
+      "mismatched_elements": 41399,
+      "bit_exact": false,
+      "max_reference_ulp": 12288.0,
+      "max_relative_to_sum_abs": 2.210152227895261e-07,
+      "max_size_scaled_wire_ulp": 1.8540100660140009,
+      "p99_size_scaled_wire_ulp": 0.8305312706327143,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 4,
+      "algo": "Ring",
+      "target": "oproj",
+      "wire": "bf16",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "actual_sha256": "0e586fb431761e08edd0e4aa2fd9ac8c6f0ba2c861ff1579338927d818dfd1ce",
+      "elements": 131072,
+      "mismatched_elements": 43738,
+      "bit_exact": false,
+      "max_reference_ulp": 3.32306998946229e+35,
+      "max_relative_to_sum_abs": 0.01255871567509229,
+      "max_size_scaled_wire_ulp": 1.607515606411813,
+      "p99_size_scaled_wire_ulp": 0.8251410153102336,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 4,
+      "algo": "Ring",
+      "target": "down",
+      "wire": "fp32",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "actual_sha256": "9690922f401b9b23448db05aa6a2437c18326a8795d6805f14c7f80eb9c0677e",
+      "elements": 1048576,
+      "mismatched_elements": 328970,
+      "bit_exact": false,
+      "max_reference_ulp": 1048576.0,
+      "max_relative_to_sum_abs": 2.2490875258626617e-07,
+      "max_size_scaled_wire_ulp": 1.886671361215173,
+      "p99_size_scaled_wire_ulp": 0.8726387826895065,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 4,
+      "algo": "Ring",
+      "target": "down",
+      "wire": "bf16",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "actual_sha256": "8e8a5db27f4d04cb6d49e815eb5a607cfdd98061d0bd340cd06970bf8c2a7844",
+      "elements": 1048576,
+      "mismatched_elements": 327421,
+      "bit_exact": false,
+      "max_reference_ulp": 2.658455991569832e+36,
+      "max_relative_to_sum_abs": 0.015208447817498626,
+      "max_size_scaled_wire_ulp": 1.9466813206398241,
+      "p99_size_scaled_wire_ulp": 0.8702857782663083,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 4,
+      "algo": "Tree",
+      "target": "oproj",
+      "wire": "fp32",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "actual_sha256": "5131f1d696e934d9ee28a55b74f6aca9f4130c850db1077148f3322bea911aa3",
+      "elements": 131072,
+      "mismatched_elements": 40060,
+      "bit_exact": false,
+      "max_reference_ulp": 6144.0,
+      "max_relative_to_sum_abs": 1.7870280754480238e-07,
+      "max_size_scaled_wire_ulp": 1.4990678009927896,
+      "p99_size_scaled_wire_ulp": 0.7991564029176863,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 4,
+      "algo": "Tree",
+      "target": "oproj",
+      "wire": "bf16",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "actual_sha256": "229175961bb9a6f30538bf9fb21edc5791b22f626e4b74e362122fac12aaf67b",
+      "elements": 131072,
+      "mismatched_elements": 41666,
+      "bit_exact": false,
+      "max_reference_ulp": 3.32306998946229e+35,
+      "max_relative_to_sum_abs": 0.010474631751227497,
+      "max_size_scaled_wire_ulp": 1.3407528641571196,
+      "p99_size_scaled_wire_ulp": 0.8047750163979894,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 4,
+      "algo": "Tree",
+      "target": "down",
+      "wire": "fp32",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "actual_sha256": "e30c628720f9d03f4dc5e30b7cea4d01e4429cbe7af433f7cd0f66f840c97c2a",
+      "elements": 1048576,
+      "mismatched_elements": 306549,
+      "bit_exact": false,
+      "max_reference_ulp": 1048576.0,
+      "max_relative_to_sum_abs": 1.7853356989031345e-07,
+      "max_size_scaled_wire_ulp": 1.4976481326504425,
+      "p99_size_scaled_wire_ulp": 0.841579983085427,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    },
+    {
+      "n": 4,
+      "algo": "Tree",
+      "target": "down",
+      "wire": "bf16",
+      "ranks": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "actual_sha256": "13f5417464e51996ed4e03f364289a82c130cb0e637fcc48a8d10266678dc445",
+      "elements": 1048576,
+      "mismatched_elements": 306765,
+      "bit_exact": false,
+      "max_reference_ulp": 1.329227995784916e+36,
+      "max_relative_to_sum_abs": 0.012583562721195438,
+      "max_size_scaled_wire_ulp": 1.610696028313016,
+      "p99_size_scaled_wire_ulp": 0.8407224958949097,
+      "definition": "abs(nccl-emulation) / sum(abs(partials)) / eps_wire; eps_fp32=2^-23, eps_bf16=2^-7"
+    }
+  ],
+  "analysis_source_sha256": {
+    "nccl_followup.py": "5f770f8e1bc38bb9ee4b392eccb12b5fa19943e3b4ac86a31a2b56659a56bac4",
+    "nccl_orders.py": "2f64019172c741ea3ed4ebe04d17691850d0406092ed0215907cba96c17b6f90"
+  },
+  "source_summary_sha256": "050ae8ce898e0a6d07cdd00698126d12b745914b60e3eb6346f7b30649a56ca4",
+  "source_metadata": {
+    "gpu": "NVIDIA L4",
+    "torch_version": "2.13.0+cu130",
+    "cuda_version": "13.0",
+    "nccl_version": [
+      2,
+      29,
+      7
+    ],
+    "wall_seconds": 150.22831993900002,
+    "source_sha256": {
+      "reference.backend_pairs": "743e6e001c8f1e5f1e4301a242c35dbff4907de29404a2b4f6713115fdb4df9a",
+      "reference.patch_hooks": "d0fddc71f20ef3f2a29e954ca007b5902f2c22d87cd35fd5a6e9f08330506cde",
+      "reference.nccl_worker": "17c39205f19df4a6f4fc0518ebcaf2cb7c680403fd22baeb2a73b60e44cfe8a2",
+      "reference.cuda_pairs_job": "4b658423fa80852f37ef8f5b53ea9d45fb82a9d07c6477d72960410c7585b3ee",
+      "routediff.localize": "c9b0a14d66b0b22e74fcabb269b7b0bf28d9731867791210eaf457ba1b5b9e7f"
+    }
+  }
+}
