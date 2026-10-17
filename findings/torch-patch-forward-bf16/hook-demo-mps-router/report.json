@@ -1,0 +1,191 @@
+{
+  "reference_run": "<repo>/data/results/torch-hook-demo-mps-router-postlayout/clean",
+  "candidate_run": "<repo>/data/results/torch-hook-demo-mps-router-postlayout/faulty",
+  "tokens": 64,
+  "split": "all",
+  "route_mismatch_tokens": 64,
+  "ops": {
+    "o_proj_out": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 2.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "resid_sum": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 4.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_input": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": true,
+      "tolerance_scaled_ulp": 6.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "router_logits": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 510.0,
+      "p99_elem_ulp": 508.0,
+      "max_elem_ulp": 510.0,
+      "rel_l2": 2.0,
+      "exact": false,
+      "tolerance_scaled_ulp": 2.0,
+      "tokens_over_tolerance": 64,
+      "flagged": true
+    },
+    "router_probs": {
+      "dtype": "fp32",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 380792168.85546875,
+      "p99_elem_ulp": 5153025237.950006,
+      "max_elem_ulp": 194965590454.0,
+      "rel_l2": 1.8865403071319697,
+      "exact": false,
+      "tolerance_scaled_ulp": 129002.0,
+      "tokens_over_tolerance": 64,
+      "flagged": true
+    },
+    "topk_ids": {
+      "tokens": 64,
+      "route_mismatch_tokens": 64,
+      "unexplained_tokens": 0,
+      "explained_tokens": 64,
+      "flagged": false
+    },
+    "topk_weights": {
+      "dtype": "bf16",
+      "compared_tokens": 0,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": false,
+      "tolerance_scaled_ulp": 2.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_gate": {
+      "dtype": "bf16",
+      "compared_tokens": 0,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": false,
+      "tolerance_scaled_ulp": 2.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_up": {
+      "dtype": "bf16",
+      "compared_tokens": 0,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": false,
+      "tolerance_scaled_ulp": 2.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_act": {
+      "dtype": "bf16",
+      "compared_tokens": 0,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": false,
+      "tolerance_scaled_ulp": 6.0,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "expert_down": {
+      "dtype": "bf16",
+      "compared_tokens": 0,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": false,
+      "tolerance_scaled_ulp": 9.4375,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "combine_terms": {
+      "dtype": "bf16",
+      "compared_tokens": 0,
+      "max_scaled_ulp": 0.0,
+      "p99_elem_ulp": 0.0,
+      "max_elem_ulp": 0.0,
+      "rel_l2": 0.0,
+      "exact": false,
+      "tolerance_scaled_ulp": 9.1875,
+      "tokens_over_tolerance": 0,
+      "flagged": false
+    },
+    "output": {
+      "dtype": "bf16",
+      "compared_tokens": 64,
+      "max_scaled_ulp": 10981.25,
+      "p99_elem_ulp": 37964.0,
+      "max_elem_ulp": 8.507059173023462e+38,
+      "rel_l2": 3.883310465998676,
+      "exact": false,
+      "tolerance_scaled_ulp": 482.0,
+      "tokens_over_tolerance": 33,
+      "flagged": true
+    }
+  },
+  "flagged_ops": [
+    "router_logits",
+    "router_probs",
+    "output"
+  ],
+  "first_flagged_op": "router_logits",
+  "localized_op": "router_logits",
+  "sites": [
+    "router_logits"
+  ],
+  "stage": "selection",
+  "patch_checks": [
+    {
+      "patched": [
+        "router_logits"
+      ],
+      "criterion": "route_sets",
+      "restored": true,
+      "routes_restored": true,
+      "output_restored": true,
+      "route_mismatch_after": 0,
+      "output_tokens_over_tolerance_after": 0,
+      "patch_skipped_token_ops": 0,
+      "still_flagged": []
+    }
+  ],
+  "verdict": "localized to router_logits: patching restores the reference (route_sets)",
+  "tolerances": {
+    "file": "findings/bf16-tolerances/tolerances-bf16-exploratory.json",
+    "sha256": "01fae51b5dc969a62529a3466732189af7cf656fcedf25bef3a073960ffd07a0"
+  }
+}

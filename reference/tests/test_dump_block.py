@@ -285,3 +285,14 @@ def test_actual_eager_trace_matches_reference(tiny_export):
     module,_=make_modules(c,arrays,torch.bfloat16)
     actual,_=trace_eager(module,baseline['router_input'],baseline)
     assert describe(baseline,actual)['first_differing_op'] is None
+
+
+def test_pre_routing_demo_changes_routes_and_patch_repairs(tiny_export,tmp_path):
+    from reference.backend_pairs import compute_backend
+    c,a=load_export(tiny_export)
+    clean,_=compute_backend(c,a,torch.bfloat16,'cpu','eager')
+    faulty,_=compute_backend(c,a,torch.bfloat16,'cpu','eager',demo_scale_router=-1.)
+    assert not torch.equal(torch.sort(faulty['topk_ids']).values,torch.sort(clean['topk_ids']).values)
+    patch=tmp_path/'logits.npy';save_array(patch,clean['router_logits'])
+    repaired,_=compute_backend(c,a,torch.bfloat16,'cpu','eager',{'router_logits':patch},demo_scale_router=-1.)
+    assert all(torch.equal(clean[op],repaired[op]) for op in OPS)

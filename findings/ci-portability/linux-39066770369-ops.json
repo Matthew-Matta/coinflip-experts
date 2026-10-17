@@ -1,0 +1,220 @@
+[
+  {
+    "layout": "legacy-contiguous-threads1",
+    "first_differing_op": "expert_act",
+    "ops": {
+      "o_proj_out": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "resid_sum": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "router_input": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "router_logits": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "router_probs": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "topk_ids": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "topk_weights": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "expert_gate": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "expert_up": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "expert_act": {
+        "bit_exact": false,
+        "different_elements": 3,
+        "max_absolute": 9.313225746154785e-10
+      },
+      "expert_down": {
+        "bit_exact": false,
+        "different_elements": 11,
+        "max_absolute": 4.656612873077393e-10
+      },
+      "combine_terms": {
+        "bit_exact": false,
+        "different_elements": 11,
+        "max_absolute": 1.1641532182693481e-10
+      },
+      "output": {
+        "bit_exact": false,
+        "different_elements": 8,
+        "max_absolute": 2.3283064365386963e-10
+      }
+    },
+    "expert_calls": [
+      {
+        "expert": 0,
+        "rows": 3,
+        "gate_stride": [
+          16,
+          1
+        ],
+        "gate_contiguous": false
+      },
+      {
+        "expert": 1,
+        "rows": 3,
+        "gate_stride": [
+          16,
+          1
+        ],
+        "gate_contiguous": false
+      },
+      {
+        "expert": 2,
+        "rows": 2,
+        "gate_stride": [
+          16,
+          1
+        ],
+        "gate_contiguous": false
+      },
+      {
+        "expert": 3,
+        "rows": 2,
+        "gate_stride": [
+          16,
+          1
+        ],
+        "gate_contiguous": false
+      }
+    ]
+  },
+  {
+    "layout": "legacy-contiguous-threads2",
+    "first_differing_op": "expert_act",
+    "ops": {
+      "o_proj_out": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "resid_sum": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "router_input": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "router_logits": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "router_probs": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "topk_ids": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "topk_weights": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "expert_gate": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "expert_up": {
+        "bit_exact": true,
+        "different_elements": 0,
+        "max_absolute": 0.0
+      },
+      "expert_act": {
+        "bit_exact": false,
+        "different_elements": 3,
+        "max_absolute": 9.313225746154785e-10
+      },
+      "expert_down": {
+        "bit_exact": false,
+        "different_elements": 11,
+        "max_absolute": 4.656612873077393e-10
+      },
+      "combine_terms": {
+        "bit_exact": false,
+        "different_elements": 11,
+        "max_absolute": 1.1641532182693481e-10
+      },
+      "output": {
+        "bit_exact": false,
+        "different_elements": 8,
+        "max_absolute": 2.3283064365386963e-10
+      }
+    },
+    "expert_calls": [
+      {
+        "expert": 0,
+        "rows": 3,
+        "gate_stride": [
+          16,
+          1
+        ],
+        "gate_contiguous": false
+      },
+      {
+        "expert": 1,
+        "rows": 3,
+        "gate_stride": [
+          16,
+          1
+        ],
+        "gate_contiguous": false
+      },
+      {
+        "expert": 2,
+        "rows": 2,
+        "gate_stride": [
+          16,
+          1
+        ],
+        "gate_contiguous": false
+      },
+      {
+        "expert": 3,
+        "rows": 2,
+        "gate_stride": [
+          16,
+          1
+        ],
+        "gate_contiguous": false
+      }
+    ]
+  }
+]

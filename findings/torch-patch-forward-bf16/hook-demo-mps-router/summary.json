@@ -1,0 +1,15 @@
+{
+  "kind": "Known forward-hook demo, NOT blinded evaluation",
+  "device": "mps",
+  "threads": 2,
+  "injected_op": "router_logits",
+  "scale": -1.0,
+  "localized_op": "router_logits",
+  "patch_restores_all_ops_bit_exact": true,
+  "route_sets_unchanged": false,
+  "route_mismatch_tokens": 64,
+  "tokens": 64,
+  "prompts": 32,
+  "tolerance_sha256": "01fae51b5dc969a62529a3466732189af7cf656fcedf25bef3a073960ffd07a0",
+  "report": "<repo>/data/results/torch-hook-demo-mps-router-postlayout/report/report.md"
+}

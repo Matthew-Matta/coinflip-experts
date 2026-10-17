@@ -22,14 +22,14 @@ from reference.format import OPS, expected_shapes, load_export, save_array, sha2
 
 
 @torch.inference_mode()
-def compute_backend(c, arrays, dtype, device, implementation, patches=None, patch_ids=None, demo_scale_combine=None, _legacy_expert_layout=False):
+def compute_backend(c, arrays, dtype, device, implementation, patches=None, patch_ids=None, demo_scale_combine=None, demo_scale_router=None, _legacy_expert_layout=False):
     from reference.patch_hooks import PatchHooks
     if device == 'mps':
         if os.environ.get('PYTORCH_ENABLE_MPS_FALLBACK') == '1':
             raise RuntimeError('MPS CPU fallback is enabled; refusing to mislabel fallback execution')
         if not torch.backends.mps.is_available():raise RuntimeError('MPS unavailable in this process')
     module, norm = make_modules(c, arrays, dtype, implementation=implementation, device=device)
-    tap=PatchHooks(patches,patch_ids,demo_scale_combine)
+    tap=PatchHooks(patches,patch_ids,demo_scale_combine,demo_scale_router)
     tensor=lambda name: torch.from_numpy(arrays[name]).to(device=device,dtype=dtype)
     ops={}
     def record(name,value,ids=None):
@@ -91,7 +91,7 @@ def compute_backend(c, arrays, dtype, device, implementation, patches=None, patc
         terms=record('combine_terms',slot(grouped(down)*weights.reshape(-1)[perm,None]),ids)
         out=terms.sum(dim=1)
     record('output',out)
-    if not patches and demo_scale_combine is None:
+    if not patches and demo_scale_combine is None and demo_scale_router is None:
         if implementation=='eager':
             from reference.mirror_diagnostics import check_eager
             check_eager(module,x,ops)
@@ -104,7 +104,7 @@ def compute_backend(c, arrays, dtype, device, implementation, patches=None, patc
     return ops,dispatch
 
 
-def dump_backend(export: Path, destination: Path, dtype_name='float32', device='cpu', implementation='grouped_mm', patches=None, patch_ids=None, demo_scale_combine=None):
+def dump_backend(export: Path, destination: Path, dtype_name='float32', device='cpu', implementation='grouped_mm', patches=None, patch_ids=None, demo_scale_combine=None, demo_scale_router=None):
     require_version()
     if destination.exists() and any(destination.iterdir()):
         raise FileExistsError(destination)
@@ -112,7 +112,7 @@ def dump_backend(export: Path, destination: Path, dtype_name='float32', device='
     start=time.perf_counter()
     try:
         c,arrays=load_export(export)
-        ops,dispatch=compute_backend(c,arrays,DTYPES[dtype_name],device,implementation,patches,patch_ids,demo_scale_combine)
+        ops,dispatch=compute_backend(c,arrays,DTYPES[dtype_name],device,implementation,patches,patch_ids,demo_scale_combine,demo_scale_router)
         if device=='mps': torch.mps.synchronize()
         elapsed=time.perf_counter()-start
         entries=[]
@@ -132,8 +132,9 @@ def dump_backend(export: Path, destination: Path, dtype_name='float32', device='
         manifest=dict(run_id=destination.name,backend=f'torch-{device}',
                       export=dict(path=str(export),config_sha256=sha256(export/'config.json')),
                       numerics=dict(dtype=dtype_name,experts_implementation=implementation,grouped_dispatch=dispatch,
-                                    mirror_equals_module=not bool(patches) and demo_scale_combine is None,cpu_fallback_enabled=False,
-                                    demo_fault=None if demo_scale_combine is None else dict(op='combine_terms',scale=demo_scale_combine,blinded=False),
+                                    mirror_equals_module=not bool(patches) and demo_scale_combine is None and demo_scale_router is None,cpu_fallback_enabled=False,
+                                    demo_fault=(dict(op='router_logits',scale=demo_scale_router,blinded=False) if demo_scale_router is not None else
+                                                None if demo_scale_combine is None else dict(op='combine_terms',scale=demo_scale_combine,blinded=False)),
                                     instrumentation='forward-hook taps on the validated numerical mirror',
                                     patches={name:dict(path=str(path),sha256=sha256(Path(path))) for name,path in (patches or {}).items()},
                                     torch_num_threads=torch.get_num_threads(),
@@ -143,7 +144,7 @@ def dump_backend(export: Path, destination: Path, dtype_name='float32', device='
                       wall_seconds=elapsed,provenance=collect(dict(device=device,implementation=implementation)))
         write_json(destination/'manifest.json',manifest)
         write_json(destination/'status.json',dict(status='PASS',wall_seconds=elapsed))
-        validation = 'hooked mirror (patched/demo)' if patches or demo_scale_combine is not None else 'mirror == module'
+        validation = 'hooked mirror (patched/demo)' if patches or demo_scale_combine is not None or demo_scale_router is not None else 'mirror == module'
         print(f'PASS {device}/{implementation}/{dtype_name}: {validation}; {len(arrays["token_ids"])} tokens; {elapsed:.2f}s; {dispatch}',flush=True)
         return manifest
     except Exception as exc:
@@ -160,12 +161,13 @@ def main():
     p.add_argument('--patch',action='append',default=[])
     p.add_argument('--patch-ids',type=Path)
     p.add_argument('--demo-scale-combine',type=float,help='Known forward-hook fault for an unblinded demo only.')
+    p.add_argument('--demo-scale-router',type=float,help='Known pre-routing hook fault; negative scale reverses expert preference.')
     p.add_argument('--dtype',choices=DTYPES,default='float32')
     p.add_argument('--device',choices=['cpu','mps'],default='cpu')
     p.add_argument('--implementation',choices=['eager','grouped_mm'],default='grouped_mm')
     p.add_argument('--threads',type=int,default=2)
     a=p.parse_args();torch.set_num_threads(a.threads)
     patches=dict(item.split('=',1) for item in a.patch)
-    dump_backend(a.export,a.dump,a.dtype,a.device,a.implementation,patches,a.patch_ids,a.demo_scale_combine)
+    dump_backend(a.export,a.dump,a.dtype,a.device,a.implementation,patches,a.patch_ids,a.demo_scale_combine,a.demo_scale_router)
 
 if __name__=='__main__':main()

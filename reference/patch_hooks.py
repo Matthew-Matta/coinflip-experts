@@ -8,7 +8,7 @@ SLOT_OPS={'topk_weights','expert_gate','expert_up','expert_act','expert_down','c
 
 
 class PatchHooks:
-    def __init__(self, patches=None, patch_ids=None, demo_scale_combine=None):
+    def __init__(self, patches=None, patch_ids=None, demo_scale_combine=None, demo_scale_router=None):
         self.taps=torch.nn.ModuleDict({name:torch.nn.Identity() for name in OPS})
         self.patches=patches or {};self.ids=None;self.skipped=0;self.handles=[]
         self.source_ids=np.load(patch_ids,allow_pickle=False) if patch_ids is not None else None
@@ -18,6 +18,11 @@ class PatchHooks:
             # The known demo fault runs before replacement, so a patch can repair it.
             self.handles.append(self.taps['combine_terms'].register_forward_hook(
                 lambda _module, _args, output: output * demo_scale_combine))
+        if demo_scale_router is not None:
+            if not np.isfinite(demo_scale_router) or demo_scale_router == 0:
+                raise ValueError('demo router scale must be finite and nonzero')
+            self.handles.append(self.taps['router_logits'].register_forward_hook(
+                lambda _module, _args, output: output * demo_scale_router))
         for name,path in self.patches.items():
             if name not in OPS:raise ValueError(f'unknown patch op {name}')
             values=np.load(Path(path),allow_pickle=False)
