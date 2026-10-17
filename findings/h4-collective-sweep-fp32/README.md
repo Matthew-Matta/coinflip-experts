@@ -60,6 +60,6 @@ Expert down-projection all-reduce (cannot change this block's routes; flips caus
 - bf16 on the wire: route flips and output error grow with chip count; ring order grows faster than tree order (ring accumulates sequentially across chips, tree pairwise).
 - Layer 0 is more sensitive than layer 7 (49 vs 8 flipped tokens at 64 chips, ring).
 - p99 element ULP is in the parquet (`output_p99_ulp_vs_oracle`) but is dominated by near-zero outputs (the fp32 baseline alone is ~800-900 ULP at p99); relative L2 is the interpretable error measure.
-- Single prompt set (32 prompts, 1,348 tokens), two layers, emulated reduction orders; no confidence intervals are attached to these counts.
+- Single prompt set (32 prompts, 1,348 tokens), two layers, emulated reduction orders; prompt-cluster confidence intervals are now provided in [bootstrap/README.md](bootstrap/README.md), with a modelled accuracy-vs-bytes chart.
 
 Files: `h4_verdict.json`, `h4_collective_sweep.provenance.json` (copies); the per-configuration table `h4_collective_sweep.parquet` is in `data/results/h4-collective-sweep-fp32` (parquet files are gitignored).
