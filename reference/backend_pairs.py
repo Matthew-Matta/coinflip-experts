@@ -22,7 +22,7 @@ from reference.format import OPS, expected_shapes, load_export, save_array, sha2
 
 
 @torch.inference_mode()
-def compute_backend(c, arrays, dtype, device, implementation, patches=None, patch_ids=None, demo_scale_combine=None):
+def compute_backend(c, arrays, dtype, device, implementation, patches=None, patch_ids=None, demo_scale_combine=None, _legacy_expert_layout=False):
     from reference.patch_hooks import PatchHooks
     if device == 'mps':
         if os.environ.get('PYTORCH_ENABLE_MPS_FALLBACK') == '1':
@@ -57,7 +57,13 @@ def compute_backend(c, arrays, dtype, device, implementation, patches=None, patc
         gate=record('expert_gate',gate,ids);up=record('expert_up',up,ids)
         # Elementwise math is applied in each original expert's row layout.
         act=torch.empty_like(gate)
-        for e,slots,tokens in hits:act[tokens,slots]=module.experts.act_fn(gate[tokens,slots])*up[tokens,slots]
+        for e,slots,tokens in hits:
+            g,u=gate[tokens,slots],up[tokens,slots]
+            if not _legacy_expert_layout:
+                # Preserve the chunk(2) strides of Transformers' fused projection.
+                # A contiguous gate copy can select a different SIMD SiLU kernel.
+                g,u=torch.cat((g,u),dim=-1).chunk(2,dim=-1)
+            act[tokens,slots]=module.experts.act_fn(g)*u
         act=record('expert_act',act,ids)
         down=torch.empty((t,k,h),dtype=dtype,device=device)
         for e,slots,tokens in hits:down[tokens,slots]=F.linear(act[tokens,slots],module.experts.down_proj[e])
@@ -86,9 +92,13 @@ def compute_backend(c, arrays, dtype, device, implementation, patches=None, patc
         out=terms.sum(dim=1)
     record('output',out)
     if not patches and demo_scale_combine is None:
-        actual=module(x.unsqueeze(0)).squeeze(0)
-        if not torch.equal(ops['output'],actual):
-            raise RuntimeError(f'{implementation} mirror != actual Transformers module')
+        if implementation=='eager':
+            from reference.mirror_diagnostics import check_eager
+            check_eager(module,x,ops)
+        else:
+            actual=module(x.unsqueeze(0)).squeeze(0)
+            if not torch.equal(ops['output'],actual):
+                raise RuntimeError(f'{implementation} mirror != actual Transformers module')
     for name,shape in expected_shapes(c,t).items():
         if tuple(ops[name].shape)!=shape or not torch.isfinite(ops[name]).all():raise RuntimeError(f'invalid op: {name}')
     return ops,dispatch

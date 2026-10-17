@@ -251,3 +251,37 @@ def test_known_demo_hook_is_removed_by_patch(tiny_export,tmp_path):
     ids=tmp_path/'ids.npy';save_array(ids,clean['topk_ids'],integer=True)
     repaired,_=compute_backend(c,a,torch.bfloat16,'cpu','eager',{'combine_terms':patch},ids,16.)
     assert all(torch.equal(repaired[name],clean[name]) for name in OPS)
+
+
+def test_stride_sensitive_activation_is_traced_and_fixed(tiny_export,tmp_path,monkeypatch):
+    """Controlled dispatch simulation, not evidence about a particular x86 CPU."""
+    from transformers.activations import SiLUActivation
+    from reference.backend_pairs import compute_backend
+    from reference.mirror_diagnostics import MirrorMismatch
+    original=SiLUActivation.forward
+    def stride_sensitive(self,value):
+        result=original(self,value)
+        return result+0.01 if value.stride(0)==value.shape[-1] else result
+    monkeypatch.setattr(SiLUActivation,'forward',stride_sensitive)
+    monkeypatch.setenv('COINFLIP_MIRROR_DIAGNOSTICS',str(tmp_path/'diagnostics'))
+    c,arrays=load_export(tiny_export)
+    with pytest.raises(MirrorMismatch,match='first op=expert_act'):
+        compute_backend(c,arrays,torch.float32,'cpu','eager',_legacy_expert_layout=True)
+    report=next((tmp_path/'diagnostics').glob('*/diagnostic.json'))
+    result=json.loads(report.read_text())
+    assert result['first_differing_op']=='expert_act'
+    assert result['ops']['expert_gate']['bit_exact']
+    assert (report.parent/'module/expert_act.npy').is_file()
+    assert (report.parent/'mirror/expert_act.npy').is_file()
+    # The corrected mirror remains strict and passes the same simulated dispatch.
+    compute_backend(c,arrays,torch.float32,'cpu','eager')
+
+
+def test_actual_eager_trace_matches_reference(tiny_export):
+    from reference.mirror_diagnostics import trace_eager,describe
+    c,arrays=load_export(tiny_export)
+    c['norm_topk_prob']=True
+    baseline=compute_ops(c,arrays,torch.bfloat16)
+    module,_=make_modules(c,arrays,torch.bfloat16)
+    actual,_=trace_eager(module,baseline['router_input'],baseline)
+    assert describe(baseline,actual)['first_differing_op'] is None

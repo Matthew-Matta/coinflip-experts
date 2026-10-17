@@ -42,13 +42,30 @@ jobs:
       - name: Require the pinned reference runtime
         run: |
           python -c "import torch, transformers; assert transformers.__version__ == '5.12.1'; print(torch.__version__)"
+      - name: CPU and Torch build diagnostics
+        run: |
+          lscpu
+          python -c "import torch; print(torch.__config__.show()); print('threads', torch.get_num_threads(), 'interop', torch.get_num_interop_threads()); print('capability', torch.backends.cpu.get_cpu_capability())"
+      - name: Describe eager mirror layout portability
+        env:
+          OMP_NUM_THREADS: '2'
+          OPENBLAS_NUM_THREADS: '2'
+          MKL_NUM_THREADS: '2'
+        run: python -m reference.ci_portability --out ci-portability
       - name: Build and test C++
         run: |
           cmake -S port -B port/build
           cmake --build port/build --parallel 2
           ctest --test-dir port/build --output-on-failure
       - name: Require real reference tests (no missing-Torch skip)
+        env:
+          COINFLIP_MIRROR_DIAGNOSTICS: ci-portability/test-failures
         run: python -m pytest -q reference/tests
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ci-portability
+          path: ci-portability
       - name: Describe Linux top-k choices on macOS bf16 tie rows
         run: python -m analysis.topk_portability --out topk-linux.json
       - uses: actions/upload-artifact@v4
