@@ -1,0 +1,6 @@
+{"label": "DRAM-bound", "weight_MiB": 256.0, "rows": 32768, "cols": 2048, "runs": 20, "reps_per_run": 3, "simd_accs": 8, "simd_native": true,
+ "scalar_median_s": 1.345769e-01, "simd_median_s": 5.909958e-03, "speedup_median": 22.771,
+ "scalar_gflops": 1.00, "simd_gflops": 22.71, "scalar_weight_GBps": 1.99, "simd_weight_GBps": 45.42,
+ "scalar_min_max_s": [1.256478e-01, 3.692047e-01], "simd_min_max_s": [5.730222e-03, 6.120097e-03],
+ "portable_same_order_median_s": 1.080418e-02, "speedup_simd_vs_portable": 1.828, "speedup_portable_vs_scalar": 12.456,
+ "threads": 1}

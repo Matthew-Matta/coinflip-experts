@@ -1,0 +1,6 @@
+{"label": "L2-resident", "weight_MiB": 8.0, "rows": 1024, "cols": 2048, "runs": 20, "reps_per_run": 50, "simd_accs": 8, "simd_native": true,
+ "scalar_median_s": 3.902467e-03, "simd_median_s": 8.196508e-04, "speedup_median": 4.761,
+ "scalar_gflops": 1.07, "simd_gflops": 5.12, "scalar_weight_GBps": 2.15, "simd_weight_GBps": 10.23,
+ "scalar_min_max_s": [3.883753e-03, 3.938268e-03], "simd_min_max_s": [8.120942e-04, 8.378225e-04],
+ "portable_same_order_median_s": 3.219242e-04, "speedup_simd_vs_portable": 0.393, "speedup_portable_vs_scalar": 12.122,
+ "threads": 1}

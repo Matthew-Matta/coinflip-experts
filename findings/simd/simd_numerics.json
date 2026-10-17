@@ -1,0 +1,36 @@
+{
+  "layer0": {
+    "tokens": 1348,
+    "flips_scalar_vs_oracle": 0,
+    "flips_simd_vs_oracle": 0,
+    "flips_simd_vs_scalar": 0,
+    "output_rel_l2_scalar_vs_oracle": 1.1849038804475254e-06,
+    "output_rel_l2_simd_vs_oracle": 2.7557611702643254e-07,
+    "output_rel_l2_simd_vs_scalar": 1.209361648325246e-06,
+    "output_bit_identical_tokens_simd_vs_scalar": 0,
+    "flips_simd_accs8_vs_oracle": 0,
+    "flips_simd_accs8_vs_scalar": 0,
+    "flips_simd_accs8_vs_simd_accs4": 0,
+    "output_rel_l2_simd_accs8_vs_oracle": 2.4662209207362817e-07,
+    "output_rel_l2_simd_accs8_vs_scalar": 1.2187635494743432e-06,
+    "output_rel_l2_simd_accs8_vs_simd_accs4": 2.981728688395811e-07,
+    "output_bit_identical_tokens_accs8_vs_accs4": 0
+  },
+  "layer7": {
+    "tokens": 1348,
+    "flips_scalar_vs_oracle": 0,
+    "flips_simd_vs_oracle": 0,
+    "flips_simd_vs_scalar": 0,
+    "output_rel_l2_scalar_vs_oracle": 1.2591545443071509e-06,
+    "output_rel_l2_simd_vs_oracle": 3.4189020941762103e-07,
+    "output_rel_l2_simd_vs_scalar": 1.2931143781831489e-06,
+    "output_bit_identical_tokens_simd_vs_scalar": 0,
+    "flips_simd_accs8_vs_oracle": 0,
+    "flips_simd_accs8_vs_scalar": 0,
+    "flips_simd_accs8_vs_simd_accs4": 0,
+    "output_rel_l2_simd_accs8_vs_oracle": 2.940813901665906e-07,
+    "output_rel_l2_simd_accs8_vs_scalar": 1.2778337997976854e-06,
+    "output_rel_l2_simd_accs8_vs_simd_accs4": 3.596400359600978e-07,
+    "output_bit_identical_tokens_accs8_vs_accs4": 0
+  }
+}

@@ -1,0 +1,1 @@
+{"preset": "hf_fp32", "oproj_simd": true, "router_simd": true, "expert_simd": true, "oproj_simd_accs": 4, "router_simd_accs": 4, "expert_simd_accs": 4}

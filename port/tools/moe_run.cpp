@@ -4,6 +4,7 @@
 //           [--bug bug.json] [--patch OP=path.npy ...] [--patch-ids topk_ids.npy] [--tokens a:b] [--threads N]
 //   moe_run --list-bugs      (bug registry as JSON: type, injected_op, description)
 //   --ops a,b,c writes only the listed ops (manifest lists only those); default writes all 13.
+//   --profile FILE writes wall seconds per block stage (summed over tokens and threads) as JSON.
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
@@ -57,14 +58,21 @@ Numerics load_numerics(const Json& j, std::string* preset_out) {
     else if (key == p + "_order") a.order = parse_order(v.as_string());
     else if (key == p + "_block") a.block = std::stoi(v.as_string());
     else if (key == p + "_fma") a.fma = v.as_string() == "true";
+    else if (key == p + "_simd") a.simd = v.as_string() == "true";
+    else if (key == p + "_simd_accs") a.simd_accs = std::stoi(v.as_string());
+    else if (key == p + "_kahan") a.kahan = v.as_string() == "true";
     else return false;
     return true;
   };
+  bool rms_acc_set = false;
   for (const auto& [k, v] : j.obj) {
     if (k == "preset" || k == "comment") continue;
     if (acc(n.oproj, "oproj", k, v) || acc(n.router, "router", k, v) || acc(n.expert, "expert", k, v)) continue;
     if (k == "storage") n.storage = parse_dtype(v.as_string());
     else if (k == "rms") n.rms = parse_dtype(v.as_string());
+    else if (k == "rms_accum") n.rms_acc = parse_dtype(v.as_string()), rms_acc_set = true;
+    else if (k == "rms_kahan") n.rms_kahan = v.as_string() == "true";
+    else if (k == "combine_kahan") n.combine_kahan = v.as_string() == "true";
     else if (k == "rms_order") n.rms_order = parse_order(v.as_string());
     else if (k == "rms_block") n.rms_block = std::stoi(v.as_string());
     else if (k == "gate_out") n.gate_out = parse_dtype(v.as_string());
@@ -80,13 +88,16 @@ Numerics load_numerics(const Json& j, std::string* preset_out) {
     else if (k == "collective_on") n.collective_on = parse_collective_on(v.as_string());
     else throw std::invalid_argument("unknown numerics key: " + k);
   }
+  if (!rms_acc_set) n.rms_acc = n.rms;  // "rms" alone sets the whole RMSNorm precision, as before rms_accum existed
   return n;
 }
 
 std::string describe(const AccSpec& a) {
   std::ostringstream s;
   s << "{\"accum\": \"" << to_string(a.acc) << "\", \"order\": \"" << to_string(a.order) << "\", \"block\": " << a.block
-    << ", \"fma\": " << (a.fma ? "true" : "false") << "}";
+    << ", \"fma\": " << (a.fma ? "true" : "false") << ", \"simd\": " << (a.simd ? "true" : "false")
+    << ", \"simd_accs\": " << a.simd_accs << ", \"simd_native\": " << (simd_is_native() ? "true" : "false")
+    << ", \"kahan\": " << (a.kahan ? "true" : "false") << "}";
   return s.str();
 }
 
@@ -94,11 +105,13 @@ std::string numerics_json(const Numerics& n, const std::string& preset) {
   const char* on[] = {"none", "oproj", "down", "both"};
   std::ostringstream s;
   s << "{\"preset\": \"" << preset << "\", \"storage\": \"" << to_string(n.storage) << "\", \"oproj\": " << describe(n.oproj)
-    << ", \"rms\": \"" << to_string(n.rms) << "\", \"rms_order\": \"" << to_string(n.rms_order) << "\", \"rms_block\": " << n.rms_block << ", \"router\": " << describe(n.router) << ", \"gate_out\": \""
+    << ", \"rms\": \"" << to_string(n.rms) << "\", \"rms_accum\": \"" << to_string(n.rms_acc)
+    << "\", \"rms_kahan\": " << (n.rms_kahan ? "true" : "false") << ", \"rms_order\": \"" << to_string(n.rms_order) << "\", \"rms_block\": " << n.rms_block << ", \"router\": " << describe(n.router) << ", \"gate_out\": \""
     << to_string(n.gate_out) << "\", \"softmax\": \"" << to_string(n.softmax) << "\", \"topk_on\": \""
     << (n.topk_on_logits ? "logits" : "probs") << "\", \"tiebreak\": \"" << (n.tiebreak_lower_index ? "lower" : "higher")
     << "\", \"weights\": \"" << to_string(n.weights) << "\", \"expert\": " << describe(n.expert) << ", \"combine_accum\": \""
-    << to_string(n.combine_acc) << "\", \"combine_order\": \"" << to_string(n.combine_order) << "\", \"collective\": {\"n\": "
+    << to_string(n.combine_acc) << "\", \"combine_kahan\": " << (n.combine_kahan ? "true" : "false")
+    << ", \"combine_order\": \"" << to_string(n.combine_order) << "\", \"collective\": {\"n\": "
     << n.collective.n << ", \"topology\": \"" << to_string(n.collective.topo) << "\", \"wire\": \"" << to_string(n.collective.wire)
     << "\", \"on\": \"" << on[static_cast<int>(n.collective_on)] << "\"}}";
   return s.str();
@@ -112,7 +125,7 @@ std::vector<float> slice_rows(const std::vector<float>& v, int width, int a, int
 
 int main(int argc, char** argv) {
   try {
-    std::string export_dir, numerics_path, dump_dir, bug_path, patch_ids_path, token_range, ops_arg;
+    std::string export_dir, numerics_path, dump_dir, bug_path, patch_ids_path, token_range, ops_arg, profile_path;
     std::vector<std::pair<std::string, std::string>> patch_args;
     int threads = 0;
     for (int i = 1; i < argc; ++i) {
@@ -129,6 +142,7 @@ int main(int argc, char** argv) {
       else if (a == "--tokens") token_range = next();
       else if (a == "--threads") threads = std::stoi(next());
       else if (a == "--ops") ops_arg = next();
+      else if (a == "--profile") profile_path = next();
       else if (a == "--patch") {
         const std::string v = next();
         const auto eq = v.find('=');
@@ -217,8 +231,22 @@ int main(int argc, char** argv) {
       opt.patches.push_back(std::move(pt));
     }
 
+    Profile prof;
+    if (!profile_path.empty()) opt.profile = &prof;
+    const auto t_block = std::chrono::steady_clock::now();
     const Trace tr = run_block(w, oin, res, T, opt);
+    const double block_secs = std::chrono::duration<double>(std::chrono::steady_clock::now() - t_block).count();
     const double secs = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+    if (!profile_path.empty()) {
+      std::ofstream pf(profile_path);
+      pf << "{\"tokens\": " << T << ", \"threads\": "
+         << (threads > 0 ? threads : static_cast<int>(std::thread::hardware_concurrency()))
+         << ", \"block_wall_seconds\": " << block_secs << ", \"numerics\": " << numerics_json(opt.num, preset)
+         << ", \"stage_seconds\": {";
+      for (size_t k = 0; k < prof.size(); ++k)
+        pf << (k ? ", " : "") << "\"" << profile_stages()[k] << "\": " << prof[k];
+      pf << "}}\n";
+    }
 
     fs::create_directories(dump_dir);
     std::ostringstream ops;

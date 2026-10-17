@@ -2,7 +2,9 @@
 
 #include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <cmath>
+#include <mutex>
 #include <numeric>
 #include <random>
 #include <stdexcept>
@@ -37,7 +39,7 @@ CollectiveOn parse_collective_on(const std::string& s) {
 Numerics Numerics::oracle() {
   Numerics n;
   const AccSpec exact{DType::FP64, Order::Sequential, 32, true};
-  n.storage = n.rms = n.gate_out = n.softmax = n.weights = n.combine_acc = DType::FP64;
+  n.storage = n.rms = n.rms_acc = n.gate_out = n.softmax = n.weights = n.combine_acc = DType::FP64;
   n.rms_order = Order::Sequential;
   n.oproj = n.router = n.expert = exact;
   return n;
@@ -48,6 +50,13 @@ const std::vector<std::string>& op_order() {
       "o_proj_out", "resid_sum",   "router_input", "router_logits", "router_probs",  "topk_ids",  "topk_weights",
       "expert_gate", "expert_up", "expert_act",   "expert_down",   "combine_terms", "output"};
   return ops;
+}
+
+const std::vector<std::string>& profile_stages() {
+  static const std::vector<std::string> st = {"o_proj", "resid_add", "rmsnorm", "router", "softmax", "topk",
+                                              "topk_weights", "expert_gate_up", "expert_act", "expert_down",
+                                              "combine_terms", "combine"};
+  return st;
 }
 
 const std::vector<BugInfo>& bug_registry() {
@@ -121,7 +130,7 @@ Effective apply_bug(const BlockConfig& cfg, const Numerics& base, const Bug* bug
   const std::string& t = bug->type;
   Numerics& n = e.num;
   if (t == "oproj_accum") n.oproj.acc = parse_dtype(param(*bug, "dtype"));
-  else if (t == "rmsnorm_dtype") n.rms = parse_dtype(param(*bug, "dtype"));
+  else if (t == "rmsnorm_dtype") n.rms = n.rms_acc = parse_dtype(param(*bug, "dtype"));
   else if (t == "router_accum") n.router.acc = parse_dtype(param(*bug, "dtype"));
   else if (t == "gate_out_dtype") n.gate_out = parse_dtype(param(*bug, "dtype"));
   else if (t == "softmax_dtype") n.softmax = parse_dtype(param(*bug, "dtype"));
@@ -205,8 +214,18 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
                      : op == "topk_weights" ? num.weights : S;
   }
   std::atomic<int> skipped{0};
+  std::mutex prof_mu;
+  if (opt.profile) opt.profile->assign(profile_stages().size(), 0.0);
 
-  auto token = [&](int t) {
+  auto token = [&](int t, Profile* prof) {
+    using clk = std::chrono::steady_clock;
+    auto t_last = clk::now();
+    auto tick = [&](int stage) {  // charge the time since the previous tick to `stage`
+      if (!prof) return;
+      const auto now = clk::now();
+      (*prof)[stage] += std::chrono::duration<double>(now - t_last).count();
+      t_last = now;
+    };
     auto row = [&](const std::string& op) { return tr.f.at(op).data() + static_cast<size_t>(t) * per_token(shapes.at(op)); };
     auto dense_patch = [&](const std::string& op, double* v) {
       auto it = patch.find(op);
@@ -239,9 +258,11 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
     double* oo = row("o_proj_out");
     matvec(w.o_proj.data(), H, H, oin.data(), oo, num.oproj, S, coll_oproj ? num.collective : Collective{});
     dense_patch("o_proj_out", oo);
+    tick(0);
     double* rs = row("resid_sum");
     for (int i = 0; i < H; ++i) rs[i] = round_to(S, res[i] + oo[i]);
     dense_patch("resid_sum", rs);
+    tick(1);
 
     // 3. RMSNorm: internal precision num.rms, cast to storage, then weight multiply in storage (HF :58-63).
     double* ri = row("router_input");
@@ -252,7 +273,8 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
         xr[i] = round_to(R, rs[i]);
         sq[i] = round_to(R, xr[i] * xr[i]);
       }
-      const double ss = reduce_sum(sq, R, num.rms_order, num.rms_block);
+      const double ss = num.rms_kahan ? kahan_sum(sq.data(), H, num.rms_acc)
+                                      : reduce_sum(sq, num.rms_acc, num.rms_order, num.rms_block);
       const double var = round_to(R, ss / H);
       // torch.rsqrt on CPU computes 1 / sqrt(x) with two roundings, not a correctly rounded reciprocal sqrt.
       // eps is a Python float added to a float32 tensor, so torch rounds it to the tensor's dtype first.
@@ -260,11 +282,13 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
       for (int i = 0; i < H; ++i) ri[i] = round_to(S, w.norm[i] * round_to(S, round_to(R, xr[i] * inv)));
     }
     dense_patch("router_input", ri);
+    tick(2);
 
     // 4. Router logits: accumulate with num.router, store as num.gate_out.
     double* lg = row("router_logits");
     matvec(w.router.data(), E, H, ri, lg, num.router, num.gate_out);
     dense_patch("router_logits", lg);
+    tick(3);
 
     // 5. Softmax in num.softmax (max-subtracted).
     double* pr = row("router_probs");
@@ -280,6 +304,7 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
       for (int e = 0; e < E; ++e) pr[e] = round_to(P, pr[e] / z);
     }
     dense_patch("router_probs", pr);
+    tick(4);
 
     // 6. Top-k, sorted by descending key; exact ties by expert id.
     int* ids = tr.ids.at("topk_ids").data() + static_cast<size_t>(t) * K;
@@ -296,6 +321,7 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
       if (it != patch.end())
         for (int s = 0; s < K; ++s) ids[s] = static_cast<int>(it->second->values[static_cast<size_t>(t) * K + s]);
     }
+    tick(5);
 
     // 7. Routing weights: probabilities of the chosen experts (renormalised if configured), then cast.
     double* tw = row("topk_weights");
@@ -311,6 +337,7 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
       }
     }
     slot_patch("topk_weights", tw, ids, 1);
+    tick(6);
 
     // 8-11. SwiGLU experts per slot (HF :330-334).
     double* g = row("expert_gate");
@@ -327,23 +354,27 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
     }
     slot_patch("expert_gate", g, ids, I);
     slot_patch("expert_up", u, ids, I);
+    tick(7);
     for (int i = 0; i < K * I; ++i) {
       const double silu = round_to(S, round_to(silu_prec, g[i] / (1.0 + std::exp(-g[i]))));
       a[i] = round_to(S, silu * u[i]);
     }
     slot_patch("expert_act", a, ids, I);
+    tick(8);
     for (int s = 0; s < K; ++s) {
       const int ew = eff.expert_map[ids[s]];
       matvec(w.down.data() + static_cast<size_t>(ew) * H * I, H, I, a + static_cast<size_t>(s) * I,
              d + static_cast<size_t>(s) * H, num.expert, S, coll_down ? num.collective : Collective{});
     }
     slot_patch("expert_down", d, ids, H);
+    tick(9);
 
     // 12. Combine terms (HF :335) and 13. combine (HF :336: index_add_ into a model-dtype buffer).
     double* ct = row("combine_terms");
     for (int s = 0; s < K; ++s)
       for (int h = 0; h < H; ++h) ct[static_cast<size_t>(s) * H + h] = round_to(S, d[static_cast<size_t>(s) * H + h] * tw[s]);
     slot_patch("combine_terms", ct, ids, H);
+    tick(10);
 
     std::vector<int> order(K);
     std::iota(order.begin(), order.end(), 0);
@@ -352,12 +383,19 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
         return num.combine_order == CombineOrder::ExpertAsc ? ids[x] < ids[y] : ids[x] > ids[y];
       });
     double* out = row("output");
+    std::vector<double> col(K);
     for (int h = 0; h < H; ++h) {
       double acc = 0.0;
-      for (int s : order) acc = round_to(num.combine_acc, acc + ct[static_cast<size_t>(s) * H + h]);
+      if (num.combine_kahan) {
+        for (int j = 0; j < K; ++j) col[j] = ct[static_cast<size_t>(order[j]) * H + h];
+        acc = kahan_sum(col.data(), K, num.combine_acc);
+      } else {
+        for (int s : order) acc = round_to(num.combine_acc, acc + ct[static_cast<size_t>(s) * H + h]);
+      }
       out[h] = round_to(S, acc);
     }
     dense_patch("output", out);
+    tick(11);
   };
 
   int nthreads = opt.threads > 0 ? opt.threads : static_cast<int>(std::thread::hardware_concurrency());
@@ -368,12 +406,17 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
   std::atomic<bool> failed{false};
   for (int k = 0; k < nthreads; ++k)
     pool.emplace_back([&] {
+      Profile local(opt.profile ? profile_stages().size() : 0, 0.0);
       for (int t; !failed && (t = next++) < T;) {
         try {
-          token(t);
+          token(t, opt.profile ? &local : nullptr);
         } catch (...) {
           if (!failed.exchange(true)) err = std::current_exception();
         }
+      }
+      if (opt.profile) {
+        std::lock_guard<std::mutex> lk(prof_mu);
+        for (size_t k = 0; k < local.size(); ++k) (*opt.profile)[k] += local[k];
       }
     });
   for (auto& th : pool) th.join();

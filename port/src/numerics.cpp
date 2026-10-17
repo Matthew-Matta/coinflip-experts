@@ -6,10 +6,44 @@
 #include <cstring>
 #include <limits>
 #include <stdexcept>
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
+#include <arm_neon.h>
+#define COINFLIP_NEON 1
+#endif
 
 namespace coinflip {
 
+namespace {
+constexpr int kE8Base = 100;  // DType values kE8Base + mant encode e8m<mant>
+}
+
+DType e8_format(int mant) {
+  if (mant < 1 || mant > 51) throw std::invalid_argument("e8 format needs 1..51 mantissa bits");
+  return static_cast<DType>(kE8Base + mant);
+}
+
+bool is_e8_format(DType d) { return static_cast<int>(d) > kE8Base && static_cast<int>(d) <= kE8Base + 51; }
+
+int mantissa_bits(DType d) {
+  if (is_e8_format(d)) return static_cast<int>(d) - kE8Base;
+  switch (d) {
+    case DType::FP64: return 52;
+    case DType::FP32: return 23;
+    case DType::BF16: return 7;
+    case DType::FP16: return 10;
+  }
+  throw std::logic_error("bad dtype");
+}
+
 const char* to_string(DType d) {
+  if (is_e8_format(d)) {
+    static const std::vector<std::string> names = [] {
+      std::vector<std::string> v(52);
+      for (int m = 1; m <= 51; ++m) v[m] = "e8m" + std::to_string(m);
+      return v;
+    }();
+    return names[mantissa_bits(d)].c_str();
+  }
   switch (d) {
     case DType::FP64: return "fp64";
     case DType::FP32: return "fp32";
@@ -37,6 +71,8 @@ DType parse_dtype(const std::string& s) {
   if (s == "fp32") return DType::FP32;
   if (s == "bf16") return DType::BF16;
   if (s == "fp16") return DType::FP16;
+  if (s.size() > 3 && s.compare(0, 3, "e8m") == 0 && s.find_first_not_of("0123456789", 3) == std::string::npos)
+    return e8_format(std::stoi(s.substr(3)));
   throw std::invalid_argument("unknown dtype: " + s);
 }
 
@@ -64,6 +100,7 @@ struct Format {
 };
 
 Format format_of(DType d) {
+  if (is_e8_format(d)) return {mantissa_bits(d), -126, 127};
   switch (d) {
     case DType::BF16: return {7, -126, 127};
     case DType::FP16: return {10, -14, 15};
@@ -114,6 +151,12 @@ double round_to_slow(DType d, double v) {
 }
 
 double round_to(DType d, double v) {
+  if (is_e8_format(d)) {
+    const Format f = format_of(d);
+    const double a = std::fabs(v);
+    if (a >= std::ldexp(1.0, f.emin) && a < std::ldexp(1.0, f.emax)) return round_bits(v, f.mant);
+    return round_to_slow(d, v);
+  }
   switch (d) {
     case DType::FP64: return v;
     case DType::FP32: return static_cast<double>(static_cast<float>(v));  // IEEE conversion is RNE
@@ -271,6 +314,17 @@ double dot_generic(const float* w, const double* x, int lo, int hi, const AccSpe
     const double p = static_cast<double>(w[i]) * x[i];
     return s.fma ? p : round_to(acc, p);
   };
+  if (s.kahan) {
+    if (s.order != Order::Sequential) throw std::invalid_argument("kahan needs sequential order");
+    double a = 0.0, c = 0.0;
+    for (int i = lo; i < hi; ++i) {
+      const double y = round_to(acc, prod(i) - c);
+      const double t = round_to(acc, a + y);
+      c = round_to(acc, round_to(acc, t - a) - y);
+      a = t;
+    }
+    return a;
+  }
   switch (s.order) {
     case Order::Sequential: {
       double a = 0.0;
@@ -307,12 +361,99 @@ double dot_generic(const float* w, const double* x, int lo, int hi, const AccSpe
 
 }  // namespace
 
+bool simd_is_native() {
+#ifdef COINFLIP_NEON
+  return true;
+#else
+  return false;
+#endif
+}
+
+namespace {
+
+// Portable loop with exactly the NEON order (see AccSpec::simd).
+float dot_simd_portable(const float* w, const float* x, int n, int accs) {
+  float lane[8][4] = {};
+  const int step = 4 * accs;
+  int i = 0;
+  for (; i + step <= n; i += step)
+    for (int a = 0; a < accs; ++a)
+      for (int l = 0; l < 4; ++l) lane[a][l] = std::fmaf(w[i + 4 * a + l], x[i + 4 * a + l], lane[a][l]);
+  for (; i + 4 <= n; i += 4)
+    for (int l = 0; l < 4; ++l) lane[0][l] = std::fmaf(w[i + l], x[i + l], lane[0][l]);
+  for (int width = 1; width < accs; width *= 2)  // balanced tree over accumulators
+    for (int a = 0; a + width < accs; a += 2 * width)
+      for (int l = 0; l < 4; ++l) lane[a][l] = lane[a][l] + lane[a + width][l];
+  float s = (lane[0][0] + lane[0][1]) + (lane[0][2] + lane[0][3]);
+  for (; i < n; ++i) s = std::fmaf(w[i], x[i], s);
+  return s;
+}
+
+#ifdef COINFLIP_NEON
+float dot_simd_neon(const float* w, const float* x, int n, int accs) {
+  float32x4_t v[8];
+  for (auto& vv : v) vv = vdupq_n_f32(0.f);
+  const int step = 4 * accs;
+  int i = 0;
+  if (accs == 4) {
+    for (; i + 16 <= n; i += 16) {
+      v[0] = vfmaq_f32(v[0], vld1q_f32(w + i), vld1q_f32(x + i));
+      v[1] = vfmaq_f32(v[1], vld1q_f32(w + i + 4), vld1q_f32(x + i + 4));
+      v[2] = vfmaq_f32(v[2], vld1q_f32(w + i + 8), vld1q_f32(x + i + 8));
+      v[3] = vfmaq_f32(v[3], vld1q_f32(w + i + 12), vld1q_f32(x + i + 12));
+    }
+  } else if (accs == 8) {
+    for (; i + 32 <= n; i += 32) {
+      v[0] = vfmaq_f32(v[0], vld1q_f32(w + i), vld1q_f32(x + i));
+      v[1] = vfmaq_f32(v[1], vld1q_f32(w + i + 4), vld1q_f32(x + i + 4));
+      v[2] = vfmaq_f32(v[2], vld1q_f32(w + i + 8), vld1q_f32(x + i + 8));
+      v[3] = vfmaq_f32(v[3], vld1q_f32(w + i + 12), vld1q_f32(x + i + 12));
+      v[4] = vfmaq_f32(v[4], vld1q_f32(w + i + 16), vld1q_f32(x + i + 16));
+      v[5] = vfmaq_f32(v[5], vld1q_f32(w + i + 20), vld1q_f32(x + i + 20));
+      v[6] = vfmaq_f32(v[6], vld1q_f32(w + i + 24), vld1q_f32(x + i + 24));
+      v[7] = vfmaq_f32(v[7], vld1q_f32(w + i + 28), vld1q_f32(x + i + 28));
+    }
+  } else {
+    for (; i + step <= n; i += step)
+      for (int a = 0; a < accs; ++a) v[a] = vfmaq_f32(v[a], vld1q_f32(w + i + 4 * a), vld1q_f32(x + i + 4 * a));
+  }
+  for (; i + 4 <= n; i += 4) v[0] = vfmaq_f32(v[0], vld1q_f32(w + i), vld1q_f32(x + i));
+  for (int width = 1; width < accs; width *= 2)
+    for (int a = 0; a + width < accs; a += 2 * width) v[a] = vaddq_f32(v[a], v[a + width]);
+  float s = vaddvq_f32(v[0]);  // FADDP: (l0 + l1) + (l2 + l3)
+  for (; i < n; ++i) s = std::fmaf(w[i], x[i], s);
+  return s;
+}
+#endif
+
+}  // namespace
+
+float dot_simd(const float* w, const float* x, int n, int accs, bool force_portable) {
+  if (accs != 1 && accs != 2 && accs != 4 && accs != 8) throw std::invalid_argument("simd_accs must be 1, 2, 4 or 8");
+#ifdef COINFLIP_NEON
+  if (!force_portable) return dot_simd_neon(w, x, n, accs);
+#endif
+  (void)force_portable;
+  return dot_simd_portable(w, x, n, accs);
+}
+
 double reduce_sum(const double* v, int n, DType acc, Order order, int block) {
   return sum_range(v, 0, n, acc, order, block);
 }
 
+double kahan_sum(const double* v, int n, DType acc) {
+  double a = 0.0, c = 0.0;
+  for (int i = 0; i < n; ++i) {
+    const double y = round_to(acc, v[i] - c);
+    const double t = round_to(acc, a + y);
+    c = round_to(acc, round_to(acc, t - a) - y);
+    a = t;
+  }
+  return a;
+}
+
 double dot(const float* w, const double* x, int lo, int hi, const AccSpec& s) {
-  if (s.acc == DType::FP32) {
+  if (s.acc == DType::FP32 && !s.kahan) {
     std::vector<float> xf(x + lo, x + hi);
     return dot_f32(w + lo, xf.data(), 0, hi - lo, s);
   }
@@ -323,9 +464,12 @@ void matvec(const float* W, int rows, int cols, const double* x, double* y, cons
             const Collective& c) {
   if (c.n < 1) throw std::invalid_argument("collective n must be >= 1");
   std::vector<float> xf;
-  if (s.acc == DType::FP32) xf.assign(x, x + cols);
+  const bool native = s.acc == DType::FP32 && !s.kahan;
+  if (native) xf.assign(x, x + cols);
+  if (s.simd && !native) throw std::invalid_argument("simd requires a plain fp32 accumulator");
   auto partial = [&](const float* row, int lo, int hi) -> double {
-    if (s.acc == DType::FP32) return dot_f32(row, xf.data(), lo, hi, s);
+    if (s.simd) return dot_simd(row + lo, xf.data() + lo, hi - lo, s.simd_accs);
+    if (native) return dot_f32(row, xf.data(), lo, hi, s);
     return dot_generic(row, x, lo, hi, s);
   };
   const int shard = (cols + c.n - 1) / c.n;

@@ -48,6 +48,8 @@ struct Numerics {
   DType storage = DType::BF16;         // model dtype: activations, matmul outputs, elementwise results
   AccSpec oproj{DType::FP32, Order::Sequential, 32, true};
   DType rms = DType::FP32;             // RMSNorm internal precision (HF upcasts to fp32)
+  DType rms_acc = DType::FP32;         // accumulator of the variance sum (moe_run: defaults to `rms`)
+  bool rms_kahan = false;              // variance sum as a sequential Kahan sum in rms_acc
   Order rms_order = Order::TorchCascade;  // order of the variance sum (torch CPU: 4-lane cascade, see numerics.hpp)
   int rms_block = 4;
   AccSpec router{DType::FP32, Order::Sequential, 32, true};
@@ -58,6 +60,7 @@ struct Numerics {
   DType weights = DType::BF16;         // routing weights cast before combine (HF: .to(router_logits.dtype))
   AccSpec expert{DType::FP32, Order::Sequential, 32, true};
   DType combine_acc = DType::BF16;     // HF: index_add_ into a model-dtype buffer
+  bool combine_kahan = false;          // combine as a Kahan sum in combine_acc (same order)
   CombineOrder combine_order = CombineOrder::ExpertAsc;  // HF: loop over hit experts in ascending id
   Collective collective{};             // emulated tensor-parallel all-reduce
   CollectiveOn collective_on = CollectiveOn::None;
@@ -100,11 +103,16 @@ struct Patch {
   std::vector<int> ref_ids;    // [T, K], required for slot-aligned ops and topk_weights
 };
 
+// Wall time per stage of run_block, summed over tokens (and threads). Index = position in profile_stages().
+using Profile = std::vector<double>;
+const std::vector<std::string>& profile_stages();
+
 struct RunOptions {
   Numerics num;
   const Bug* bug = nullptr;
   std::vector<Patch> patches;
   int threads = 0;  // 0 = hardware concurrency
+  Profile* profile = nullptr;  // if set, filled with seconds per stage
 };
 
 // Run the block on tokens [0, T) with inputs o_proj_in [T, H] and residual [T, H].

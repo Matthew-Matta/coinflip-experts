@@ -11,7 +11,14 @@
 
 namespace coinflip {
 
-enum class DType { FP64, FP32, BF16, FP16 };
+enum class DType : int { FP64, FP32, BF16, FP16 };
+
+// Parametric formats with fp32's 8-bit exponent and `mant` explicit mantissa bits (1..51), written "e8m<mant>" (used
+// by the accumulator-width sweep). They always take the emulated path (double, rounded after every operation), so
+// e8m23 rounds exactly like fp32 and e8m7 exactly like bf16.
+DType e8_format(int mant);
+bool is_e8_format(DType d);
+int mantissa_bits(DType d);
 
 // Reduction order of a sum or dot product.
 //   Sequential: ((x0 + x1) + x2) + ...
@@ -27,7 +34,7 @@ enum class Order { Sequential, Pairwise, Blocked, Strided, TorchCascade };
 
 const char* to_string(DType d);
 const char* to_string(Order o);
-DType parse_dtype(const std::string& s);  // "fp64" "fp32" "bf16" "fp16"
+DType parse_dtype(const std::string& s);  // "fp64" "fp32" "bf16" "fp16" "e8m<mant>"
 Order parse_order(const std::string& s);  // "seq" "pairwise" "blocked" "strided" "torch_cascade"
 
 // Round to the nearest representable value of `d` (RNE; overflow -> inf; gradual underflow).
@@ -43,9 +50,24 @@ struct AccSpec {
   Order order = Order::Sequential;
   int block = 32;
   bool fma = true;  // fused multiply-add per step (Sequential, Blocked, Strided); Pairwise always rounds products
+  // fp32 SIMD path (NEON on AArch64, an order-identical portable loop elsewhere). Overrides `order` and `fma`:
+  // `simd_accs` (1, 2, 4 or 8) 4-lane accumulators with FMA; accumulator a lane l takes elements i*4*accs + 4*a + l;
+  // leftover whole vectors go to accumulator 0, then accumulators are summed as a balanced tree ((a0+a1)+(a2+a3)), the 4 lanes as
+  // (l0+l1)+(l2+l3) (AArch64 FADDP), and a scalar tail is added last with FMA.
+  bool simd = false;
+  int simd_accs = 4;
+  // Kahan (compensated) summation in the accumulator format, sequential order only; always on the emulated path.
+  bool kahan = false;
 };
 
+// fp32 SIMD dot product in the order documented on AccSpec::simd. `force_portable` runs the portable loop even where
+// NEON is available (used by tests to prove the two agree bit for bit).
+float dot_simd(const float* w, const float* x, int n, int accs, bool force_portable = false);
+bool simd_is_native();
+
 double reduce_sum(const double* v, int n, DType acc, Order order, int block);
+// Sequential Kahan sum, every operation rounded to `acc`.
+double kahan_sum(const double* v, int n, DType acc);
 inline double reduce_sum(const std::vector<double>& v, DType acc, Order order, int block) {
   return reduce_sum(v.data(), static_cast<int>(v.size()), acc, order, block);
 }

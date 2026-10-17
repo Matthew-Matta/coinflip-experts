@@ -1,0 +1,7 @@
+time 10-17 00:17:41
+load_before 6.35 7.35 7.73
+total_cpu_before 204
+total_cpu_after 120
+project_jobs 0
+bench_sha256 ebd4374d9bb4229a55e5751c13a997e30185590ccdfe5dc3c8c24a54b13daccf
+top_processes (see data/results/simd/, local only): desktop apps (browser, terminal, window server)

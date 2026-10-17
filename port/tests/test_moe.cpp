@@ -1,6 +1,7 @@
 // Self-contained tests (no framework). Exit code != 0 on failure.
 #include <cmath>
 #include <cstdio>
+#include <cstring>
 #include <random>
 #include <string>
 #include <vector>
@@ -215,6 +216,115 @@ static void test_npy_roundtrip_and_sha() {
   CHECK(j.at("a").arr.size() == 3 && j.at("a").arr[1].num == 2.5 && j.at("b").at("c").str == "x\"y", "json parse");
 }
 
+static void test_simd_matches_documented_order() {
+  std::mt19937_64 rng(17);
+  std::normal_distribution<float> nd(0.f, 1.f);
+  int bad = 0, differs_from_seq = 0;
+  for (int n : {0, 3, 4, 15, 16, 17, 64, 1000, 1024, 2048, 2051}) {
+    std::vector<float> w(n), x(n);
+    std::vector<double> xd(n);
+    for (int i = 0; i < n; ++i) { w[i] = nd(rng); x[i] = nd(rng); xd[i] = x[i]; }
+    for (int accs : {1, 2, 4, 8}) {
+      const float native = dot_simd(w.data(), x.data(), n, accs);
+      const float portable = dot_simd(w.data(), x.data(), n, accs, /*force_portable=*/true);
+      if (std::memcmp(&native, &portable, sizeof native) != 0) ++bad;
+      if (n >= 64 && native != static_cast<float>(dot(w.data(), xd.data(), 0, n, {DType::FP32, Order::Sequential, 32, true})))
+        ++differs_from_seq;
+    }
+  }
+  CHECK(bad == 0, "SIMD (native) == portable loop in the documented order, bit for bit, incl. tails");
+  CHECK(differs_from_seq > 0, "SIMD order genuinely differs from sequential FMA on some inputs");
+  // 1 accumulator with no tail is exactly Order::Strided with 4 lanes and FMA.
+  std::vector<float> w(1024), x(1024);
+  std::vector<double> xd(1024);
+  for (int i = 0; i < 1024; ++i) { w[i] = nd(rng); x[i] = nd(rng); xd[i] = x[i]; }
+  CHECK(dot_simd(w.data(), x.data(), 1024, 1) ==
+            static_cast<float>(dot(w.data(), xd.data(), 0, 1024, {DType::FP32, Order::Strided, 4, true})),
+        "SIMD with one accumulator == Order::Strided(4) with FMA");
+  // matvec with simd uses the same dot product.
+  std::vector<double> y(1);
+  AccSpec s{DType::FP32, Order::Sequential, 32, true};
+  s.simd = true;
+  matvec(w.data(), 1, 1024, xd.data(), y.data(), s, DType::FP64);
+  CHECK(y[0] == static_cast<double>(dot_simd(w.data(), x.data(), 1024, 4)), "matvec(simd) == dot_simd");
+  std::printf("  simd: native NEON %s\n", simd_is_native() ? "yes" : "no (portable loop)");
+}
+
+static void test_e8_formats_kahan_and_profile() {
+  std::mt19937_64 rng(23);
+  std::uniform_real_distribution<double> mant(1.0, 2.0);
+  std::uniform_int_distribution<int> ex(-140, 127);
+  int bad7 = 0, bad23 = 0;
+  for (int i = 0; i < 200000; ++i) {
+    const double v = (i & 1 ? -1 : 1) * std::ldexp(mant(rng), ex(rng));
+    if (round_to(e8_format(7), v) != round_to(DType::BF16, v)) ++bad7;
+    if (round_to(e8_format(23), v) != round_to(DType::FP32, v)) ++bad23;
+  }
+  CHECK(bad7 == 0 && bad23 == 0, "e8m7 rounds like bf16 and e8m23 like fp32 (incl. subnormals and overflow)");
+  CHECK(parse_dtype("e8m10") == e8_format(10) && std::string(to_string(e8_format(10))) == "e8m10" &&
+            mantissa_bits(e8_format(10)) == 10 && !is_e8_format(DType::FP32),
+        "e8m<m> parse / name / mantissa bits");
+
+  // A whole fp32 block with every accumulator in e8m23 (emulated path) is bit-identical to the native fp32 block.
+  const auto w = BlockWeights::random(small_cfg(), 7);
+  const int T = 32;
+  std::vector<float> oin, res;
+  inputs(T, w.cfg.hidden, 11, oin, res);
+  RunOptions base;
+  base.num.storage = base.num.gate_out = base.num.weights = base.num.combine_acc = DType::FP32;
+  RunOptions e23 = base;
+  e23.num.oproj.acc = e23.num.router.acc = e23.num.expert.acc = e23.num.rms_acc = e23.num.combine_acc = e8_format(23);
+  const Trace tb = run_block(w, oin, res, T, base), te = run_block(w, oin, res, T, e23);
+  CHECK(first_diff(tb, te).empty(), "fp32 block with e8m23 accumulators == native fp32 block, bit for bit");
+  const struct { const char* name; const char* first_op; } knobs[] = {
+      {"oproj", "o_proj_out"}, {"rms", "router_input"}, {"router", "router_logits"}, {"expert", "expert_gate"},
+      {"combine", "output"}};
+  for (const auto& k : knobs) {
+    RunOptions r = base;
+    const DType m10 = e8_format(10);
+    const std::string n = k.name;
+    if (n == "oproj") r.num.oproj.acc = m10;
+    if (n == "rms") r.num.rms_acc = m10;
+    if (n == "router") r.num.router.acc = m10;
+    if (n == "expert") r.num.expert.acc = m10;
+    if (n == "combine") r.num.combine_acc = m10;
+    CHECK(first_diff(tb, run_block(w, oin, res, T, r)) == k.first_op, ("e8m10 " + n + " first shows at its op").c_str());
+  }
+
+  // Kahan in a narrow accumulator recovers most of the precision a plain sequential sum loses.
+  std::normal_distribution<double> nd(0.0, 1.0);
+  const int n = 4096;
+  std::vector<float> wv(n);
+  std::vector<double> xv(n);
+  double exact = 0;
+  for (int i = 0; i < n; ++i) {
+    wv[i] = static_cast<float>(round_to(DType::BF16, nd(rng)));
+    xv[i] = round_to(DType::BF16, nd(rng));
+    exact += static_cast<double>(wv[i]) * xv[i];
+  }
+  AccSpec plain{e8_format(10), Order::Sequential, 32, true}, comp = plain;
+  comp.kahan = true;
+  const double ep = std::fabs(dot(wv.data(), xv.data(), 0, n, plain) - exact);
+  const double ek = std::fabs(dot(wv.data(), xv.data(), 0, n, comp) - exact);
+  CHECK(ek * 8 < ep, "Kahan e8m10 dot is far closer to exact than plain e8m10");
+  std::vector<double> ones(1000, 1.0 / 3.0);
+  CHECK(std::fabs(kahan_sum(ones.data(), 1000, DType::BF16) - 1000.0 / 3.0) <
+            std::fabs(reduce_sum(ones, DType::BF16, Order::Sequential, 32) - 1000.0 / 3.0),
+        "Kahan bf16 sum beats sequential bf16");
+
+  // Profile: one entry per stage, non-negative, and it does not change the result.
+  Profile prof;
+  RunOptions p = base;
+  p.profile = &prof;
+  p.threads = 1;
+  const Trace tp = run_block(w, oin, res, T, p);
+  double tot = 0;
+  bool nonneg = true;
+  for (double v : prof) { tot += v; nonneg = nonneg && v >= 0; }
+  CHECK(prof.size() == profile_stages().size() && nonneg && tot > 0, "profile has every stage, all >= 0");
+  CHECK(first_diff(tb, tp).empty(), "profiling does not change results");
+}
+
 int main() {
   test_rounding_known_values();
   test_fast_rounding_matches_slow();
@@ -225,6 +335,8 @@ int main() {
   test_null_patch();
   test_bugs_first_show_at_injected_op();
   test_npy_roundtrip_and_sha();
+  test_simd_matches_documented_order();
+  test_e8_formats_kahan_and_profile();
   if (failures == 0) std::printf("ALL TESTS PASSED\n");
   return failures == 0 ? 0 : 1;
 }

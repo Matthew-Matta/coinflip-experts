@@ -17,6 +17,9 @@ target_link_libraries(coinflip_port PUBLIC Threads::Threads)
 add_executable(moe_run tools/moe_run.cpp)
 target_link_libraries(moe_run PRIVATE coinflip_port)
 
+add_executable(bench_simd tools/bench_simd.cpp)
+target_link_libraries(bench_simd PRIVATE coinflip_port)
+
 add_executable(test_moe tests/test_moe.cpp)
 target_link_libraries(test_moe PRIVATE coinflip_port)
 
