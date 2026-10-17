@@ -34,6 +34,9 @@ def calibrate(pairs: list[tuple[Run, Run]], margin: float = 1.0) -> dict:
     unexplained = mismatch = 0.0
     for ref, cand in pairs:
         for op, v in per_token_scaled(ref, cand).items():
+            if np.isinf(v).any():
+                raise ValueError(f"benign pair {ref.path.name} vs {cand.path.name}: non-finite values at {op}; "
+                                 "a pair with NaN/Inf differences cannot define a tolerance")
             if np.isfinite(v).any():
                 worst[op] = max(worst[op], float(np.nanmax(v)))
         r = route_stats(ref, cand)

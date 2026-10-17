@@ -16,9 +16,17 @@
 #include <sstream>
 #include <stdexcept>
 #include <thread>
+#if defined(__APPLE__)
+#include <mach-o/dyld.h>
+#endif
 
 #include "block.hpp"
 #include "io.hpp"
+
+namespace coinflip {
+const char* build_git_sha();    // generated at build time (cmake/build_info.cmake)
+const char* build_git_dirty();  // "true" | "false" | "unknown" (port/ sources only)
+}  // namespace coinflip
 
 using namespace coinflip;
 namespace fs = std::filesystem;
@@ -29,6 +37,20 @@ void usage() {
   std::cerr << "usage: moe_run --export DIR --numerics FILE --dump OUT_DIR [--bug FILE] [--patch OP=FILE ...]\n"
                "               [--patch-ids FILE] [--tokens a:b] [--threads N] [--ops a,b,c] [--profile FILE]\n"
                "       moe_run --list-bugs\n";
+}
+
+// Path of this executable, for hashing the binary into the manifest.
+std::string self_path(const char* argv0) {
+#if defined(__APPLE__)
+  char buf[4096];
+  uint32_t size = sizeof buf;
+  if (_NSGetExecutablePath(buf, &size) == 0) return fs::canonical(buf).string();
+#elif defined(__linux__)
+  std::error_code ec;
+  const auto p = fs::read_symlink("/proc/self/exe", ec);
+  if (!ec) return p.string();
+#endif
+  return fs::canonical(argv0).string();
 }
 
 std::string cmd_output(const std::string& cmd) {
@@ -303,8 +325,10 @@ int main(int argc, char** argv) {
     char ts[32];
     const std::time_t now = std::time(nullptr);
     std::strftime(ts, sizeof ts, "%Y-%m-%dT%H:%M:%SZ", std::gmtime(&now));
+    // build_*: the port/ sources this binary was compiled from; cwd_*: the repository the run was started in.
     const std::string git_sha = cmd_output("git rev-parse HEAD 2>/dev/null");
     const std::string git_dirty = cmd_output("git status --porcelain 2>/dev/null | head -1");
+    const std::string binary_sha = sha256_file(self_path(argv[0]));
 
     std::ofstream m(dump_dir + "/manifest.json");
     m << "{\n  \"run_id\": \"" << json_escape(fs::path(dump_dir).filename().string()) << "\",\n"
@@ -317,8 +341,10 @@ int main(int argc, char** argv) {
       << "  \"patches\": [" << patches.str() << "],\n"
       << "  \"patch_skipped_token_ops\": " << tr.patch_skipped_tokens << ",\n"
       << "  \"ops\": [\n    " << ops.str() << "\n  ],\n"
-      << "  \"provenance\": {\"timestamp_utc\": \"" << ts << "\", \"git_sha\": \"" << json_escape(git_sha)
-      << "\", \"git_dirty\": " << (git_dirty.empty() ? "false" : "true") << ", \"compiler\": \""
+      << "  \"provenance\": {\"timestamp_utc\": \"" << ts << "\", \"build_git_sha\": \"" << build_git_sha()
+      << "\", \"build_git_dirty\": \"" << build_git_dirty() << "\", \"binary_sha256\": \"" << binary_sha
+      << "\", \"cwd_git_sha\": \"" << json_escape(git_sha)
+      << "\", \"cwd_git_dirty\": " << (git_dirty.empty() ? "false" : "true") << ", \"compiler\": \""
       << json_escape(__VERSION__) << "\", \"threads\": "
       << (threads > 0 ? threads : static_cast<int>(std::thread::hardware_concurrency()))
       << ", \"wall_seconds\": " << secs << "}\n}\n";

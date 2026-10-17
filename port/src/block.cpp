@@ -306,7 +306,8 @@ Trace run_block(const BlockWeights& w, const std::vector<float>& o_proj_in, cons
     dense_patch("router_probs", pr);
     tick(4);
 
-    // 6. Top-k, sorted by descending key; exact ties by expert id.
+    // 6. Top-k, sorted by descending key; exact ties by expert id. Keys are assumed finite: with NaN the comparator
+    //    is not a strict weak order and the selection is undefined (PyTorch ranks NaN highest). Known limitation.
     int* ids = tr.ids.at("topk_ids").data() + static_cast<size_t>(t) * K;
     {
       const double* key = num.topk_on_logits ? lg : pr;

@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstring>
 #include <random>
+#include <stdexcept>
 #include <string>
 #include <unistd.h>
 #include <vector>

@@ -36,10 +36,12 @@ def evaluate(ref_dir: str | Path, cand_dir: str | Path) -> dict:
     k = ref["topk_ids"].shape[1]
     margin = normalised_margin(ref["router_logits"], k)
     same = same_route_sets(ref["topk_ids"], cand["topk_ids"])
-    above = margin > MARGIN
+    above = ~(margin <= MARGIN)  # a non-finite margin (NaN logits) is checked, never skipped
     res = compare(ref, cand)
     ops = {op: {"p99_elem_ulp": res["ops"][op]["p99_elem_ulp"], "max_elem_ulp": res["ops"][op]["max_elem_ulp"],
-                "dtype": res["ops"][op]["dtype"], "pass": res["ops"][op]["p99_elem_ulp"] <= ULP_P99}
+                "dtype": res["ops"][op]["dtype"],
+                # a NaN / one-sided Inf anywhere fails the op even if it is under 1% of elements
+                "pass": bool(res["ops"][op]["p99_elem_ulp"] <= ULP_P99 and np.isfinite(res["ops"][op]["max_elem_ulp"]))}
            for op in OPS if op != "topk_ids"}
     routes_pass = bool(same[above].all())
     return {

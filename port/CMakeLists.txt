@@ -14,7 +14,14 @@ add_library(coinflip_port src/numerics.cpp src/block.cpp src/io.cpp)
 target_include_directories(coinflip_port PUBLIC include)
 target_link_libraries(coinflip_port PUBLIC Threads::Threads)
 
-add_executable(moe_run tools/moe_run.cpp)
+# Commit and dirty state of port/ at build time, recorded in every moe_run manifest (regenerated at each build).
+set(BUILD_INFO ${CMAKE_CURRENT_BINARY_DIR}/build_info.cpp)
+add_custom_target(build_info
+  COMMAND ${CMAKE_COMMAND} -DSRC=${CMAKE_CURRENT_SOURCE_DIR} -DOUT=${BUILD_INFO} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/build_info.cmake
+  BYPRODUCTS ${BUILD_INFO})
+
+add_executable(moe_run tools/moe_run.cpp ${BUILD_INFO})
+add_dependencies(moe_run build_info)
 target_link_libraries(moe_run PRIVATE coinflip_port)
 
 add_executable(bench_simd tools/bench_simd.cpp)

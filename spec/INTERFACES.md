@@ -5,7 +5,9 @@ changes need the maintainer's sign-off and a note in the changelog at the bottom
 
 All arrays are NumPy `.npy` (little-endian, C order). Floating-point arrays are stored as `<f4` (float32) whose values
 are exactly representable in the array's *logical dtype* (bf16 / fp16 / fp32), so widening is lossless; integer arrays are
-`<i4`. Every directory carries a JSON file with provenance from `coinflip/provenance.py`.
+`<i4`. Exception: the C++ `oracle` preset declares `fp64` but its dumps are also `<f4`, i.e. the oracle narrowed to
+fp32 (<= 2^-24 relative per element); "vs fp64 oracle" errors in findings are measured against that narrowed oracle.
+Every directory carries a JSON file with provenance from `coinflip/provenance.py`.
 
 Notation: T = tokens, H = hidden size (2048), I = expert intermediate size (1024), E = experts (64), K = top-k (8).
 
@@ -36,7 +38,10 @@ One directory per run: `data/dumps/<run_id>/` with `manifest.json` and one `.npy
 `manifest.json`: `run_id`, `backend` (e.g. `torch-cpu`, `torch-mps`, `cpp`), `export` (path + config sha256),
 `numerics` (backend settings, e.g. the C++ numerics JSON or torch dtype + experts implementation), `bug` (null, or the
 bug spec's sha256 only, never its contents), `tokens` (T), `ops` (list below, in order, each with `file`, `shape`,
-`logical_dtype`, `stage`), `provenance`.
+`logical_dtype`, `stage`), `provenance`. `moe_run` provenance (from 2026-10-17): `build_git_sha` / `build_git_dirty`
+(the port/ sources the binary was compiled from; dirty = uncommitted changes under port/; "unknown" outside git),
+`binary_sha256` (the executable itself), `cwd_git_sha` / `cwd_git_dirty` (the repository the run was started in;
+earlier manifests call these `git_sha` / `git_dirty` and record only this).
 
 | # | op | shape | logical dtype (reference) | stage |
 |---|---|---|---|---|
@@ -55,7 +60,10 @@ bug spec's sha256 only, never its contents), `tokens` (T), `ops` (list below, in
 | 13 | `output` | [T, H] | model dtype | post-selection |
 
 Rules: `topk_ids` are compared as sets per token. Slot-aligned expert ops are only compared on tokens whose top-k sets
-match (on other tokens the difference is already explained by a selection op).
+match (on other tokens the difference is already explained by a selection op). At a compared position, NaN in either
+run or an infinity in only one counts as an infinite difference (always flagged); equal infinities match.
+Known limitation: the C++ top-k assumes finite probabilities; with NaN keys its ordering is undefined (PyTorch ranks
+NaN highest). No dump in this repository contains NaN or Inf.
 
 ## 3. Running a backend with a bug or a patch (producer: `port/`; callers: `routediff/`, `evaluation/`)
 ```
@@ -65,7 +73,12 @@ port/build/moe_run --export DIR --numerics numerics.json --dump OUT_DIR \
 - `numerics.json`: `preset` (`hf_bf16` default, `hf_fp32`, `oracle`) followed by flat overrides: `storage`, `rms`,
   `gate_out`, `softmax`, `weights`, `combine_accum` (dtypes `fp64|fp32|bf16|fp16`); `{oproj,router,expert}_{accum,order,
   block,fma}` (orders `seq|pairwise|blocked|strided`); `topk_on` (`probs|logits`); `tiebreak` (`lower|higher`);
-  `combine_order` (`expert_asc|expert_desc|slot`); `collective_{n,topology,wire,on}` (`ring|tree`; `none|oproj|down|both`).
+  `combine_order` (`expert_asc|expert_desc|slot`); `collective_{n,topology,wire,on}` (`ring|tree`; `none|oproj|down|both`);
+  `rms_order`, `rms_block` (variance-sum order of RMSNorm; default `torch_cascade` with 4 lanes);
+  `renorm_order`, `renorm_block` (top-k renormalisation sum when `norm_topk_prob`; default `torch_cascade`, 4).
+  Orders also accept `torch_cascade` (PyTorch CPU SumKernel.cpp cascade; `block` = vector lanes). Booleans must be
+  `true`/`false`, `topk_on` `probs`/`logits`, `tiebreak` `lower`/`higher`; anything else is an error. A `comment` key is
+  ignored.
   Additive keys (2026-10-17): `{oproj,router,expert}_{simd,simd_accs,kahan}`; `rms_accum` (variance-sum accumulator,
   defaults to `rms`), `rms_kahan`, `combine_kahan`; dtypes may also be `e8m<m>` (8-bit exponent, m mantissa bits,
   1-51). Unknown keys are an error. The resolved settings are echoed into the manifest.
@@ -96,7 +109,7 @@ tolerance, route-set mismatches split into explained / unexplained), `flagged_op
 step: ops patched so far, criterion used, restored, routes back, output back, ops still flagged), `verdict`,
 `tolerances` (file + sha256). Plus `report.md` for people.
 
-CLI: `python -m routediff calibrate REF CAND [REF CAND ...] --out tol.json [--split calibration]` and
+CLI: `python -m routediff calibrate REF CAND [REF CAND ...] --out tol.json [--margin M] [--split calibration]` and
 `python -m routediff compare REF CAND --out DIR [--tolerances tol.json] [--rerun 'CMD ... {patch} ... {out}']
 [--split evaluation]`. `--split` keeps only the tokens that `<manifest.export.path>/inputs/token_meta.json` assigns to
 that split (sliced by `token_range`), for every comparison including patch-check reruns; runs from different exports
@@ -104,9 +117,12 @@ that split (sliced by `token_range`), for every comparison including patch-check
 
 ## Changelog
 - 2026-10-15: initial version.
-- 2026-10-16: `--split` for routediff calibrate/compare; export and split consistency checks.
-- 2026-10-17 (additive, awaiting sign-off): moe_run numerics keys for SIMD, Kahan, `rms_accum`, `renorm_{order,block}`
-  and `e8m<m>` dtypes; `--ops`, `--profile`; moe_run reads the optional export config key `o_proj_input_size`
-  (rectangular o_proj, e.g. Qwen3-30B-A3B: weights [H, Hin], `inputs/o_proj_in.npy` [T, Hin]; absent = square).
 - 2026-10-15: rerun-command contract, `--list-bugs`, report fields for cumulative patching (`sites`, `patch_checks`).
 - 2026-10-15: `moe_run` flags finalised (`--patch-ids`, `--threads`), numerics JSON keys listed, bug registry pointer.
+- 2026-10-16: `--split` for routediff calibrate/compare; export and split consistency checks.
+- 2026-10-17 (additive): moe_run numerics keys for SIMD, Kahan, `rms_accum`, `renorm_{order,block}`
+  and `e8m<m>` dtypes; `--ops`, `--profile`; moe_run reads the optional export config key `o_proj_input_size`
+  (rectangular o_proj, e.g. Qwen3-30B-A3B: weights [H, Hin], `inputs/o_proj_in.npy` [T, Hin]; absent = square).
+- 2026-10-17 (final review, signed off): documented `rms_order`/`rms_block`, `torch_cascade`, strict value parsing,
+  `comment`, `calibrate --margin`; oracle dumps are fp32; non-finite comparison rule and top-k NaN limitation;
+  `moe_run` manifest provenance `build_git_*`, `binary_sha256`, `cwd_git_*`.

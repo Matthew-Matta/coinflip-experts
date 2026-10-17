@@ -213,3 +213,68 @@ def test_fidelity_pass_on_identical_runs_and_fail_on_ulp_drift(setup):
     res = evaluate(ref, drift)
     assert res["verdict"] == "FAIL" and res["routes_pass"]
     assert res["failing_ops"] == ["expert_down"] and res["ops"]["expert_down"]["p99_elem_ulp"] > ULP_P99
+    from routediff.fidelity import main
+    assert main([str(ref), str(drift), "--out", str(tmp / "fid_drift.json")]) == 0  # the CLI writes valid JSON
+    assert json.loads((tmp / "fid_drift.json").read_text())["verdict"] == "FAIL"
+
+
+# ---------------------------------------------------------------------------------------------- non-finite values
+def _with_value(src: Path, dst: Path, op: str, value: float, token: int = 3) -> Path:
+    if dst.exists():
+        shutil.rmtree(dst)
+    _clone_run(src, dst)
+    a = np.load(dst / f"{op}.npy")
+    a.reshape(a.shape[0], -1)[token, 0] = value
+    np.save(dst / f"{op}.npy", a)
+    return dst
+
+
+@pytest.fixture(scope="module")
+def fp32_ref(setup):
+    tmp, export, _ = setup
+    return run(tmp, "nonfinite_ref", export, {"preset": "hf_fp32"})
+
+
+@pytest.mark.parametrize("op", ["router_logits", "expert_down", "output"])
+@pytest.mark.parametrize("side", ["candidate", "reference"])
+def test_nan_in_either_run_is_flagged_never_exact(setup, fp32_ref, op, side):
+    tmp, _, _ = setup
+    nan = _with_value(fp32_ref, tmp / f"nan_{side}_{op}", op, np.nan)
+    ref, cand = (fp32_ref, nan) if side == "candidate" else (nan, fp32_ref)
+    res = compare(load_run(ref), load_run(cand))
+    s = res["ops"][op]
+    assert op in res["flagged_ops"] and not s["exact"] and s["max_scaled_ulp"] == np.inf
+    assert s["compared_tokens"] == res["tokens"]  # NaN never removes a token from the comparison
+    assert s["p99_elem_ulp"] < np.inf and s["max_elem_ulp"] == np.inf  # one bad element out of many
+
+
+def test_infinities_equal_on_both_sides_match_one_sided_is_flagged(setup, fp32_ref):
+    tmp, _, _ = setup
+    both = _with_value(fp32_ref, tmp / "inf_ref", "output", np.inf)
+    same = _with_value(fp32_ref, tmp / "inf_cand", "output", np.inf)
+    assert compare(load_run(both), load_run(same))["flagged_ops"] == []
+    assert compare(load_run(fp32_ref), load_run(same))["flagged_ops"] == ["output"]
+
+
+def test_calibration_refuses_non_finite_benign_pairs(setup, fp32_ref):
+    tmp, _, _ = setup
+    nan = _with_value(fp32_ref, tmp / "nan_cal", "output", np.nan)
+    with pytest.raises(ValueError, match="non-finite"):
+        calibrate([(load_run(fp32_ref), load_run(nan))])
+
+
+def test_fidelity_fails_on_nan(setup, fp32_ref):
+    from routediff.fidelity import evaluate
+    tmp, _, _ = setup
+    nan = _with_value(fp32_ref, tmp / "nan_fid", "expert_down", np.nan)
+    res = evaluate(fp32_ref, nan)
+    assert res["verdict"] == "FAIL" and res["failing_ops"] == ["expert_down"]  # one element: p99 alone would pass
+    nan_logits = _with_value(fp32_ref, tmp / "nan_fid_ref", "router_logits", np.nan)
+    assert evaluate(nan_logits, fp32_ref)["tokens_above_margin"] == load_run(fp32_ref).tokens  # NaN margin is checked
+
+
+def test_route_mismatch_on_nan_probabilities_is_unexplained():
+    from routediff.compare import _valid_topk
+    probs = np.array([0.4, 0.3, np.nan, 0.1])
+    assert _valid_topk(probs, np.array([0, 1]))
+    assert not _valid_topk(np.array([0.4, 0.3, 0.2, 0.1]), np.array([0, 3]))
