@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coin-Flip Experts</title>
+<meta name="description" content="When near-tied MoE router scores make rounding decide which experts run: measurements, a porting debugger, and practical checks for model ports.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/writeup.css">
+<script>
+  try { var t = localStorage.getItem('cfe-theme'); if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<header class="site-header">
+  <a class="title" href="./">Coin-Flip Experts</a>
+  <nav class="header-links" aria-label="Links">
+    <a href="https://github.com/Matthew-Matta/coinflip-experts">GitHub</a>
+    <a href="https://github.com/Matthew-Matta/coinflip-experts/blob/main/RESULTS.md">Results</a>
+    <a href="https://github.com/Matthew-Matta/coinflip-experts/blob/main/spec/NUMERICS_CONTRACT.md">Numerics contract</a>
+    <button class="theme-toggle" type="button" aria-label="Switch between light and dark">◐</button>
+  </nav>
+</header>
+<main id="main">
+  <article class="post">
+    <header class="post-head">
+      <h1>When rounding picks the expert</h1>
+      <p class="byline">Matthew Matta</p>
+      <p class="hook">Serving the same prompts in a batch of 8 instead of 1 changed which experts ran for <strong>7.25%</strong> of tokens in an average layer.</p>
+      <p class="summary">OLMoE, a Mixture-of-Experts model, sends each token to 8 of its 64 experts. When the 8th and 9th are almost tied, tiny rounding differences decide which one runs. I measured how often that happens during prefill in a real serving engine, built a tool that traces a routing change to the operation behind it, and turned the results into practical requirements for matching a reference model.</p>
+    </header>
+
+    <aside class="tryit" id="try-tie" aria-labelledby="try-tie-title">
+      <h3 id="try-tie-title">Try it: which expert wins a tie?</h3>
+      <div data-fig="tie"><p class="fig-fallback">This example needs JavaScript and site/data/scenarios.json.</p></div>
+    </aside>
+
+    <h2 id="coin-flip">1. The coin flip</h2>
+    <p>In an MoE model like OLMoE-1B-7B, a small router scores all 64 experts for each token and keeps the top 8. That is a hard cut. Expert #8 runs and expert #9 does not, no matter how close their scores are.</p>
+    <p>Usually the gap is large, but some tokens sit right on the line. For those, the winner depends on things that normally never matter: the order numbers are added in, how many bits the hardware keeps, how a sort breaks ties. Change the chip and you can change the expert.</p>
+    <figure class="fig" id="fig-router">
+      <div class="fig-body" data-fig="router"><p class="fig-fallback">Figure needs JavaScript and site/data/scenarios.json.</p></div>
+      <figcaption><strong>Figure 1.</strong> One real token's 64 router scores (layer 0, fp32). Expert 20 comes 8th and runs; expert 23 comes 9th and does not. Their scores differ only in the sixth decimal place: 0.0242630 vs 0.0242627.</figcaption>
+    </figure>
+
+    <h2 id="serving">2. It happens in real serving</h2>
+    <p>I ran OLMoE in SGLang, a widely used serving engine, on one NVIDIA L4 GPU. I sent the same 200 prompts at batch sizes 1, 8 and 32 and recorded which experts every token used in each of the 16 layers during prefill.<sup class="fn"><a href="#fn-census" id="ref-census">1</a></sup></p>
+    <p>Running the same setup twice changed nothing. Going from batch 1 to batch 8 changed the experts for <strong>7.25%</strong> of tokens in an average layer (95% CI 7.03–7.48%). Batch 32 gave 7.21%. In 97.9% of those changes exactly one expert was swapped, which is what near-ties flipping looks like.<sup class="fn"><a href="#fn-prereg" id="ref-prereg">2</a></sup></p>
+    <figure class="fig" id="fig-census">
+      <div class="fig-body" data-fig="census"><p class="fig-fallback">Figure needs JavaScript and site/data/census.json.</p></div>
+      <figcaption><strong>Figure 2.</strong> Share of tokens whose experts change between batch 8 and batch 1, by layer: 2.6% in layer 0, up to 10.6% in later layers.</figcaption>
+    </figure>
+
+    <h2 id="cause">3. Tracing the cause</h2>
+    <p>When a ported model's expert choices change, the hard part is finding which operation did it. I built <strong>routediff</strong> to do that in three steps:</p>
+    <ol>
+      <li><strong>Learn normal noise.</strong> Run harmless variants, like adding numbers in a different order, and record how much each operation's output moves. Twice that is the allowed difference.</li>
+      <li><strong>Find the suspect.</strong> Save every intermediate result from both versions. The first operation over its allowed difference is the suspect.</li>
+      <li><strong>Test the repair.</strong> Paste the reference's result into that operation and rerun. If the expert choices or the output come back, that operation is where the fix belongs.<sup class="fn"><a href="#fn-repair" id="ref-repair">3</a></sup></li>
+    </ol>
+    <p>I tested it on my own C++ version of OLMoE's MoE layer, with bugs planted by a script I couldn't see. routediff found and pinpointed <strong>44 of 44</strong> planted bugs, with <strong>0 false alarms in 32</strong> clean runs.<sup class="fn"><a href="#fn-eval" id="ref-eval">4</a></sup> Figure 3 shows one of them.</p>
+    <figure class="fig" id="fig-routediff">
+      <div class="fig-body" data-fig="routediff"><p class="fig-fallback">Figure needs JavaScript and site/data/scenarios.json.</p></div>
+      <figcaption><strong>Figure 3.</strong> One of the hidden bugs: the router adds up its scores with too few bits. Checking one token step by step, everything matches until the router scores. Pasting in the correct router scores brings the right experts back.</figcaption>
+    </figure>
+    <p>The most useful catch was my own bug. My first C++ version added up one normalisation step in a different order from PyTorch. routediff's normal mode correctly called it harmless, since no expert choices changed; its strict mode pointed straight at the step I had found by hand. The port picks the same experts as PyTorch and is just as accurate against a high-precision reference, but it failed the stricter element-by-element test I set in advance, and I report that.<sup class="fn"><a href="#fn-port" id="ref-port">5</a></sup></p>
+    <p>Porting a second model was quick. With the same tools I brought a Qwen3-30B-A3B MoE layer to C++ in about 15 minutes, and it picks the same experts as PyTorch on all 1,361 test tokens. routediff now runs on four backends: my C++ port, PyTorch on CPU, Apple's GPU and an NVIDIA L4. I also wrote an ARM NEON (SIMD) path for the port. It is 2.6–2.9× faster than plain C++ doing the same additions in the same order, and its adding order changed no expert choices.<sup class="fn"><a href="#fn-port2" id="ref-port2">6</a></sup></p>
+
+    <h2 id="chip">4. What a port must get right</h2>
+    <p>To pick the same experts as the reference model, a port on new hardware needs:</p>
+    <ul>
+      <li><strong>Enough bits when adding up.</strong> The router's running sum needed at least <strong>18</strong> bits of precision and the projection feeding it <strong>19</strong>. fp32 has 23; rounding the router's sum to bf16's 7 flipped 13% of routes. routediff raises the alarm from 21 bits down, before routing breaks (Figure 4).<sup class="fn"><a href="#fn-explor" id="ref-explor">7</a></sup></li>
+      <li><strong>fp32 for the cross-chip sum feeding the router.</strong> When I emulated splitting the layer across chips, fp32 changed no routes at any chip count and bf16 did.<sup class="fn"><a href="#fn-emul" id="ref-emul">8</a></sup> Against real NVIDIA NCCL the emulation matched exactly on 2 GPUs. On 4 it didn't, so I worked out adding orders that reproduce all 1.2M of NCCL's output values exactly: tree adds GPUs 2 → 3 → 1 → 0, and ring uses 8 blocks with a rotating start.<sup class="fn"><a href="#fn-nccl" id="ref-nccl">9</a></sup></li>
+      <li><strong>A written tie rule.</strong> As the box at the top shows, platforms break exact ties differently. The chip or kernel spec should say which expert wins.</li>
+    </ul>
+    <figure class="fig" id="fig-bits">
+      <div class="fig-body" data-fig="bits"><p class="fig-fallback">Figure needs JavaScript and site/data/accumulator.json.</p></div>
+      <figcaption><strong>Figure 4.</strong> Tokens whose experts change (out of 1,348 per layer) as the router's running sum keeps fewer bits, compared with a high-precision (fp64) reference. Shaded: where routediff raises the alarm on both layers. Drag the slider to read off any width.</figcaption>
+    </figure>
+    <p>The full list, one measurement per line, is in the <a href="https://github.com/Matthew-Matta/coinflip-experts/blob/main/spec/NUMERICS_CONTRACT.md">numerics contract</a>.</p>
+
+    <h2 id="limits">5. Limits and related work</h2>
+    <ul>
+      <li>One model in depth (OLMoE-1B-7B, layers 0 and 7) plus one Qwen3-30B-A3B layer, and no attention in my C++ layer.</li>
+      <li>The planted bugs are large. The test shows the method works, not how small a bug it can catch.</li>
+      <li>The serving measurement is prefill only, on one GPU type and one model, and doesn't say which operation caused each flip.</li>
+      <li>I didn't measure whether these route changes affect generated answers or task quality.</li>
+      <li>The larger collective sweep is emulation, with separate real checks at 2 and 4 GPUs; this is not a production runtime or a multi-node benchmark.</li>
+    </ul>
+    <p class="related-intro">This builds on others' work:</p>
+    <ul class="related">
+      <li><a href="https://arxiv.org/abs/2607.28097">arXiv 2607.28097</a> showed adding order and precision change MoE routes and proposed a numerical compatibility contract; mine adds measured thresholds.</li>
+      <li><a href="https://arxiv.org/abs/2608.11212">arXiv 2608.11212</a> studies OLMoE route flips under simulated 4-bit KV-cache quantization.</li>
+      <li>R3 (<a href="https://arxiv.org/abs/2510.11370">arXiv 2510.11370</a>) and Miles (<a href="https://arxiv.org/abs/2609.08368">arXiv 2609.08368</a>) replay the serving engine's expert choices in RL training.</li>
+      <li>Fireworks AI's blog post (2026-09-30) describes near-ties flipping experts in production RL.</li>
+      <li>Thinking Machines' batch-invariant kernels and SGLang's deterministic mode remove batch dependence; msprobe, Polygraphy and DeepView find the first tensor that differs between backends.</li>
+    </ul>
+
+    <h2 id="takeaway">Why it matters</h2>
+    <p>Which experts run is a yes-or-no output, and it can change even when every number looks almost right. So a port should be checked on expert choices, not just on errors, and the hardware should keep enough bits in the router's sums and follow a written tie rule. routediff and the numerics contract turn those checks into something you can run.</p>
+    <p>Try <code>make demo</code> in the repository: it plants a fault, finds it and repairs it on a CPU, with no model download. Setup is in the <a href="https://github.com/Matthew-Matta/coinflip-experts#quick-start">Quick start</a>.</p>
+    <p>Code, data and every result: <a href="https://github.com/Matthew-Matta/coinflip-experts">github.com/Matthew-Matta/coinflip-experts</a>, with details in <a href="https://github.com/Matthew-Matta/coinflip-experts/blob/main/RESULTS.md">RESULTS.md</a>.</p>
+
+    <section class="footnotes" aria-label="Notes">
+      <h2 id="notes">Notes</h2>
+      <ol>
+        <li id="fn-census">Prefill only, not decode: both configurations prefill identical token ids, so this does not measure decoding with a KV cache. I didn't capture router scores, so this doesn't say which operation flipped each route. SGLang 0.5.21 needed a one-line backport of upstream fix #40980 to capture routes. <a href="https://github.com/Matthew-Matta/coinflip-experts/tree/main/findings/census-olmoe-prefill">findings/census-olmoe-prefill</a> <a href="#ref-census" aria-label="Back to text">↩</a></li>
+        <li id="fn-prereg"><span class="tag prereg">preregistered</span> Hypotheses and thresholds were committed in PREREG.md before the data existed. The CI is a 95% prompt-cluster bootstrap interval. <a href="#ref-prereg" aria-label="Back to text">↩</a></li>
+        <li id="fn-repair">A successful patch shows where a repair works, not necessarily where the defect started: an earlier error can be masked if a later operation is overwritten. routediff accepts a repair under one of two criteria: route differences return within the allowance measured on benign pairs (route-set criterion), or the output returns within its allowed difference (output criterion). <a href="#ref-repair" aria-label="Back to text">↩</a></li>
+        <li id="fn-eval"><span class="tag prereg">preregistered</span> Bugs were picked and injected by a separate agent; routediff's code never saw the bug specs. 44 of 44 counts the planted bugs that had a measurable effect. 11 were confirmed by the route-set criterion and 33 by the output criterion. Near its sensitivity floor, the later width sweep sometimes pointed downstream of the injected fault. <a href="https://github.com/Matthew-Matta/coinflip-experts/tree/main/findings/routediff-eval-real-v2">findings/routediff-eval-real-v2</a> <a href="#ref-eval" aria-label="Back to text">↩</a></li>
+        <li id="fn-port">The preregistered test was an 8-ULP limit on the 99th-percentile element error, not bit-exactness; the port misses it at the expert down projection, where near-cancelling sums inflate element error. <a href="https://github.com/Matthew-Matta/coinflip-experts/tree/main/findings/case-study-rmsnorm">findings/case-study-rmsnorm</a>, <a href="https://github.com/Matthew-Matta/coinflip-experts/tree/main/findings/m2-postfix-validation">findings/m2-postfix-validation</a> <a href="#ref-port" aria-label="Back to text">↩</a></li>
+        <li id="fn-port2"><span class="tag explor">exploratory</span> Qwen3 layer 0 in fp32; the port needed a different projection shape and renormalisation order. SIMD (descriptive): timed on an Apple M1 Pro against a scalar loop with the same summation order, on the OLMoE inputs. <a href="https://github.com/Matthew-Matta/coinflip-experts/tree/main/findings/qwen3-port">findings/qwen3-port</a>, <a href="https://github.com/Matthew-Matta/coinflip-experts/tree/main/findings/simd">findings/simd</a> <a href="#ref-port2" aria-label="Back to text">↩</a></li>
+        <li id="fn-explor"><span class="tag explor">exploratory</span> One accumulator narrowed at a time, flips counted against an fp64 oracle on layers 0 and 7 (1,348 tokens each). Widths count mantissa bits with an 8-bit exponent. This narrows the accumulator itself, which is different from bf16 inputs with fp32 accumulation. These are thresholds observed on these inputs, not guarantees for others. <a href="https://github.com/Matthew-Matta/coinflip-experts/tree/main/findings/accumulator-width">findings/accumulator-width</a> <a href="#ref-explor" aria-label="Back to text">↩</a></li>
+        <li id="fn-emul"><span class="tag emul">emulation</span> The collective sweep is emulated in C++ with a stated summation order; its predicted communication costs are not measured interconnect timings. <a href="https://github.com/Matthew-Matta/coinflip-experts/tree/main/findings/h4-collective-sweep-fp32">findings/h4-collective-sweep-fp32</a> <a href="#ref-emul" aria-label="Back to text">↩</a></li>
+        <li id="fn-nccl"><span class="tag explor">post hoc</span> Descriptive fit on 4× L4 on Modal over shared memory. Different orders can give identical outputs, so this shows orders consistent with NCCL's results, not NCCL's executed instructions or channel mapping; the interconnect topology was not verified. <a href="https://github.com/Matthew-Matta/coinflip-experts/tree/main/findings/nccl-validation/order-followup">findings/nccl-validation/order-followup</a> <a href="#ref-nccl" aria-label="Back to text">↩</a></li>
+      </ol>
+    </section>
+  </article>
+</main>
+<footer class="site-footer">
+  <p>Every number on this page is listed with its source in <a href="https://github.com/Matthew-Matta/coinflip-experts/blob/main/site/NUMBERS.md">site/NUMBERS.md</a>. No analytics.</p>
+</footer>
+</body>
+</html>
